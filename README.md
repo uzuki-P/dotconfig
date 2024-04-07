@@ -1,7 +1,7 @@
 # Setup
 
 ```
-git clone git@github.com:uzuki-P/dotconfig.git ~/dotconfig
+git clone https://github.com/uzuki-P/dotconfig ~/dotconfig
 ```
 
 # Install Dependencies
