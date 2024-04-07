@@ -1,0 +1,127 @@
+# Path to your oh-my-zsh installation.
+export ZSH="$HOME/.oh-my-zsh"
+
+# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
+ZSH_THEME="amuse-custom"
+
+# Uncomment the following line to use case-sensitive completion.
+# CASE_SENSITIVE="true"
+
+# Uncomment the following line to use hyphen-insensitive completion.
+# Case-sensitive completion must be off. _ and - will be interchangeable.
+# HYPHEN_INSENSITIVE="true"
+
+# Auto-update behavior
+zstyle ':omz:update' mode reminder  # just remind me to update when it's time
+
+# Uncomment the following line if pasting URLs and other text is messed up.
+# DISABLE_MAGIC_FUNCTIONS="true"
+
+# Uncomment the following line to disable colors in ls.
+# DISABLE_LS_COLORS="true"
+
+# Uncomment the following line to disable auto-setting terminal title.
+# DISABLE_AUTO_TITLE="true"
+
+# Uncomment the following line to enable command auto-correction.
+# ENABLE_CORRECTION="true"
+
+# Uncomment the following line to display red dots whilst waiting for completion.
+# You can also set it to another string to have that shown instead of the default red dots.
+# e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
+# Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
+#COMPLETION_WAITING_DOTS="true"
+
+# Uncomment the following line if you want to disable marking untracked files
+# under VCS as dirty. This makes repository status check for large repositories
+# much, much faster.
+# DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+# Uncomment the following line if you want to change the command execution time
+# stamp shown in the history command output.
+# You can set one of the optional three formats:
+# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
+# or set a custom format using the strftime function format specifications,
+# see 'man strftime' for details.
+# HIST_STAMPS="mm/dd/yyyy"
+
+plugins=(
+  asdf
+  git-prompt
+  ssh-agent
+)
+
+source $ZSH/oh-my-zsh.sh
+
+# User configuration
+
+export MANPATH="/usr/local/man:$MANPATH"
+
+# You may need to manually set your language environment
+# export LANG=en_US.UTF-8
+
+# Compilation flags
+# export ARCHFLAGS="-arch x86_64"
+
+ANDROID_HOME=$HOME/sdk/android
+JAVA_HOME=$HOME/.sdkman/candidates/java/current/bin/java
+
+# Set JAVA_HOME using asdf-vm
+. $HOME/.asdf/plugins/java/set-java-home.zsh
+
+# Set cargo from rustup
+. "$HOME/.cargo/env"
+
+# Path
+export PATH=$PATH:$HOME/sdk/flutter/bin
+export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools
+export PATH=$PATH:$HOME/bin
+export PATH=$PATH:$HOME/.cargo/env
+export PATH=$PATH:/home/linuxbrew/.linuxbrew/bin
+export PATH=$PATH:$HOME/go/bin
+export PATH=$PATH:$HOME/.config/composer/vendor/bin
+
+# directory colors
+eval `dircolors ~/dircolors.256dark`
+
+export VISUAL=vim
+export EDITOR="$VISUAL"
+
+# sudosu for zsh
+alias sudosu='sudo -E -s'
+
+# sort dot file first when ll
+alias la='LC_COLLATE=C ls -AhlF'
+alias ll='LC_COLLATE=C ls -lh'
+
+# aliases for agnoster theme
+export DEFAULT_USER="$(whoami)"
+prompt_context () { }
+
+# force tmux using true color
+#alias tmux='TERM=screen-256color tmux -2'
+alias tm='tmux new -As main'
+
+# scrcpy with custom config
+alias scrcpy-default='scrcpy --video-bit-rate=10000000 --turn-screen-off --show-touches --stay-awake --window-borderless --window-x=1800 --window-y=0 --window-width=390 --window-height=700 --no-audio &'
+
+# git convenience
+alias gss='git status --short'
+alias gc='git commit'
+alias gaa='git add -A'
+alias gpr='git pull --rebase'
+alias gfap='git fetch -ap'
+alias gp='git push'
+alias gdiff='git diff --color-words'
+alias glog='git log --graph --oneline --all --decorate'
+alias glogo='glog `git reflog | cut -c1-7`'
+
+# set cd as zoxide
+eval "$(zoxide init --cmd cd zsh)"
+
+# atuin config. https://docs.atuin.sh/guide/installation/#shell-plugin
+eval "$(atuin init zsh)"
+
+# ranger. Move to working directory when close.
+alias ranger='ranger --choosedir=$HOME/.rangerdir; LASTDIR=`cat $HOME/.rangerdir`; cd "$LASTDIR"'
+

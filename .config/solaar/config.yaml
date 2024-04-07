@@ -1,0 +1,22 @@
+- 1.1.11
+- _NAME: MX Master 3S
+  _absent: [hi-res-scroll, lowres-scroll-mode, onboard_profiles, report_rate, report_rate_extended, pointer_speed, speed-change, backlight, backlight_level,
+    backlight_duration_hands_out, backlight_duration_hands_in, backlight_duration_powered, backlight-timed, led_control, led_zone_, fn-swap, persistent-remappable-keys,
+    disable-keyboard-keys, crown-smooth, divert-crown, divert-gkeys, m-key-leds, mr-key-led, multiplatform, gesture2-gestures, gesture2-divert, gesture2-params,
+    sidetone, equalizer, adc_power_management]
+  _battery: 0x1004
+  _modelId: B03400000000
+  _sensitive: {divert-keys: false, hires-scroll-mode: ignore, hires-smooth-invert: ignore, hires-smooth-resolution: ignore, reprogrammable-keys: false,
+    thumb-scroll-invert: false, thumb-scroll-mode: false}
+  _unitId: '76372796'
+  change-host: null
+  divert-keys: {0x52: 0x0, 0x53: 0x0, 0x56: 0x0, 0xc3: 0x0, 0xc4: 0x0}
+  dpi: 0x3e8
+  hires-scroll-mode: false
+  hires-smooth-invert: false
+  hires-smooth-resolution: true
+  reprogrammable-keys: {0x50: 0x50, 0x51: 0x51, 0x52: 0x52, 0x53: 0x53, 0x56: 0x52, 0xc3: 0xc3, 0xc4: 0xc4}
+  scroll-ratchet: 0x2
+  smart-shift: 0xa
+  thumb-scroll-invert: false
+  thumb-scroll-mode: true

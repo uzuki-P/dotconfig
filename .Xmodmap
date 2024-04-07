@@ -1,0 +1,5 @@
+! for mapping call button on T14 Gen 1
+keycode 164 = XF86AudioNext NoSymbol XF86AudioNext
+keycode 224 = XF86AudioStop XF86Eject XF86AudioStop XF86Eject
+keycode 226 = XF86AudioPrev NoSymbol XF86AudioPrev
+keycode 231 = XF86AudioPlay XF86AudioPause XF86AudioPlay XF86AudioPause
