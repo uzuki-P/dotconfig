@@ -8,9 +8,11 @@
   _modelId: B03400000000
   _sensitive: {divert-keys: false, hires-scroll-mode: ignore, hires-smooth-invert: ignore, hires-smooth-resolution: ignore, reprogrammable-keys: false,
     thumb-scroll-invert: false, thumb-scroll-mode: false}
+  _serial: '76372796'
   _unitId: '76372796'
+  _wpid: B034
   change-host: null
-  divert-keys: {0x52: 0x0, 0x53: 0x0, 0x56: 0x0, 0xc3: 0x0, 0xc4: 0x0}
+  divert-keys: {0x52: 0x0, 0x53: 0x2, 0x56: 0x0, 0xc3: 0x0, 0xc4: 0x0}
   dpi: 0x3e8
   hires-scroll-mode: false
   hires-smooth-invert: false

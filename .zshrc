@@ -102,9 +102,6 @@ prompt_context () { }
 #alias tmux='TERM=screen-256color tmux -2'
 alias tm='tmux new -As main'
 
-# scrcpy with custom config
-alias scrcpy-default='scrcpy --video-bit-rate=10000000 --turn-screen-off --show-touches --stay-awake --window-borderless --window-x=1800 --window-y=0 --window-width=390 --window-height=700 --no-audio &'
-
 # git convenience
 alias gss='git status --short'
 alias gc='git commit'
