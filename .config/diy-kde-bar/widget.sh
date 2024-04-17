@@ -8,8 +8,8 @@ do
   TEMP=$(sensors | grep "^[ ]*CPU" | awk '{print substr($2,2)}')
   
   DATA=""
-  DATA+="| A | $MEM | 'RAM Usage' | |"
-  DATA+="| B | $TEMP | 'CPU Temp' | |"
+  DATA+="| A | $MEM | RAM Usage | |"
+  DATA+="| B | $TEMP | CPU Temp | |"
 
   qdbus org.kde.plasma.doityourselfbar /id_$ID \
     org.kde.plasma.doityourselfbar.pass "$DATA"
