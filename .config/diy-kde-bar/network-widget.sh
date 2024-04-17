@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-iface="wlp3s0"
-dt="1"
-unit="KB"
-
 function default_interface {
     ip route | awk '/^default via/ {print $5; exit}'
 }
+
+iface=$(default_interface)
+dt="1"
+unit="KB"
 
 function check_proc_net_dev {
     if [ ! -f "/proc/net/dev" ]; then
