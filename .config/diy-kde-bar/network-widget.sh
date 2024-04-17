@@ -62,7 +62,7 @@ BEGIN{old_received='"$init_received"';old_sent='"$init_sent"'}
   old_sent=sent;
   if(rx >= 0 && wx >= 0){
     format=sprintf("%.2f/%.2f %s/s\n", rx, wx, unit);
-    system("qdbus org.kde.plasma.doityourselfbar /id_"ids" org.kde.plasma.doityourselfbar.pass \"| C | NET "format" | | |\"");
+    system("qdbus org.kde.plasma.doityourselfbar /id_"ids" org.kde.plasma.doityourselfbar.pass \"| C | "format" | Network | |\"");
 
     fflush(stdout);
   }
