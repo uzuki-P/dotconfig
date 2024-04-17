@@ -9,9 +9,9 @@ do
   DISK=$(df -h -P "$HOME" | awk '/\/.*/ { print $5 }')
   
   DATA=""
+  DATA+="| A | $DISK | Home Storage Used | |"
   DATA+="| A | $MEM | RAM Usage | |"
   DATA+="| A | $TEMP | CPU Temp | |"
-  DATA+="| A | $DISK | Home Storage Used | |"
 
   qdbus org.kde.plasma.doityourselfbar /id_$ID \
     org.kde.plasma.doityourselfbar.pass "$DATA"
