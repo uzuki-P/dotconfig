@@ -24,6 +24,16 @@ ranger btop go composer composer dust atuin
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 ```
 
+## Optional:
+
+Autocompletion & syntax highlight
+
+```
+git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+```
+
 # Install [oh-my-tmux](https://github.com/gpakosz/.tmux?tab=readme-ov-file#installation)
 
 ```
