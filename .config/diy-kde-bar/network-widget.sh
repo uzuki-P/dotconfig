@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
+ID=$1
+
 function default_interface {
-    ip route | awk '/^default via/ {print $5; exit}'
+  ip route | awk '/^default via/ {print $5; exit}'
 }
 
 iface=$(default_interface)
 dt="1"
-unit="KB"
+unit="MB"
 
 function check_proc_net_dev {
     if [ ! -f "/proc/net/dev" ]; then
@@ -48,7 +50,7 @@ init_sent=$(awk '{print $10}' <<< $init_line)
 
 (while true; do cat /proc/net/dev; sleep "$dt"; done) |\
     stdbuf -oL grep "^[ ]*$iface:" |\
-    awk -v scalar="$scalar" -v unit="$unit" -v iface="$iface" '
+    awk -v scalar="$scalar" -v unit="$unit" -v iface="$iface" -v ids="$ID" '
 BEGIN{old_received='"$init_received"';old_sent='"$init_sent"'}
 {
   received=$2
@@ -59,8 +61,8 @@ BEGIN{old_received='"$init_received"';old_sent='"$init_sent"'}
   old_received=received;
   old_sent=sent;
   if(rx >= 0 && wx >= 0){
-    format=sprintf("%1.0f/%1.0f %s/s\n", rx, wx, unit);
-    system("qdbus org.kde.plasma.doityourselfbar /id_15 org.kde.plasma.doityourselfbar.pass \"| B | NET "format" | | |\"");
+    format=sprintf("%.2f/%.2f %s/s\n", rx, wx, unit);
+    system("qdbus org.kde.plasma.doityourselfbar /id_"ids" org.kde.plasma.doityourselfbar.pass \"| C | NET "format" | | |\"");
 
     fflush(stdout);
   }
