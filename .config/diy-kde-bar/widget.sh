@@ -5,12 +5,11 @@ ID=$1
 while true
 do
   MEM=$(/home/uzuki_p/.config/diy-kde-bar/script/memory.sh)
-  #DISK=$(disk)
+  TEMP=$(sensors | grep "^[ ]*CPU" | awk '{print substr($2,2)}')
   
   DATA=""
-  DATA+="| A | MEM $MEM | | |"
-  #DATA+="| C | DISK $DISK | | |"
-  # DATA+="| C | BATT $BATT% | | |"
+  DATA+="| A | $MEM | 'RAM Usage' | |"
+  DATA+="| B | $TEMP | 'CPU Temp' | |"
 
   qdbus org.kde.plasma.doityourselfbar /id_$ID \
     org.kde.plasma.doityourselfbar.pass "$DATA"

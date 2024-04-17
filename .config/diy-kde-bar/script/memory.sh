@@ -42,7 +42,7 @@ END {
 
   # short text
   #printf("%02.f%%\n", pct)
-  printf("%1.0f GB", used)
+  printf("%.1f GB", used)
 
   # color
   if (pct > 90) {
