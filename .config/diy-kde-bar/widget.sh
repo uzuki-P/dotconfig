@@ -6,10 +6,10 @@ while true
 do
   MEM=$(/home/uzuki_p/.config/diy-kde-bar/script/memory.sh)
   TEMP=$(sensors | grep "^[ ]*CPU" | awk '{print substr($2,2)}')
-  DISK=$(df -h -P "$HOME" | awk '/\/.*/ { print $5 }')
+  # DISK=$(df -h -P "$HOME" | awk '/\/.*/ { print $5 }')
   
   DATA=""
-  DATA+="| A | $DISK | Home Storage Used | |"
+  # DATA+="| A | $DISK | Home Storage Used | |"
   DATA+="| A | $MEM | RAM Usage | |"
   DATA+="| A | $TEMP | CPU Temp | |"
 
