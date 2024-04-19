@@ -14,6 +14,7 @@ local servers = {
   "gopls",
   "htmx",
   "emmet_ls",
+  "pylsp",
 }
 
 -- lsps with default config
