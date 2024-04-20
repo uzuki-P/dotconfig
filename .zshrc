@@ -82,6 +82,7 @@ export PATH=$PATH:$HOME/.cargo/env
 export PATH=$PATH:/home/linuxbrew/.linuxbrew/bin
 export PATH=$PATH:$HOME/go/bin
 export PATH=$PATH:$HOME/.config/composer/vendor/bin
+export PATH=$PATH:$HOME/.local/bin
 
 # directory colors
 eval `dircolors ~/dircolors.256dark`

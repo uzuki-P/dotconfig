@@ -11,6 +11,7 @@ local options = {
 
     dart = { "dart_format" },
     go = { "gofmt" },
+    python = { "ruff" },
   },
 
   -- format_on_save = {
