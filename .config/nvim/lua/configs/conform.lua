@@ -9,6 +9,7 @@ local options = {
 
 		sh = { "shfmt" },
 
+    dart = { "dart_format" },
     go = { "gofmt" },
     python = { "ruff" },
   },
