@@ -26,13 +26,13 @@ return {
         -- web dev stuff
         "css-lsp",
         "html-lsp",
-        "typescript-language-server",
-        "deno",
+        -- "typescript-language-server",
+        -- "deno",
         "prettier",
 
         -- c/cpp stuff
-        "clangd",
-        "clang-format",
+        -- "clangd",
+        -- "clang-format",
 
         -- shell stuff
         "shfmt",
@@ -48,10 +48,10 @@ return {
         "lua",
         "html",
         "css",
-        "javascript",
-        "typescript",
-        "tsx",
-        "c",
+        -- "javascript",
+        -- "typescript",
+        -- "tsx",
+        -- "c",
         "markdown",
         "markdown_inline",
       },
@@ -112,7 +112,7 @@ return {
       "stevearc/dressing.nvim", -- optional for vim.ui.select
     },
     config = true,
-    --	setup = overrides.flutter_tools,
+    ft = 'dart',
   },
 
   "NvChad/nvcommunity",

@@ -1,5 +1,5 @@
 if vim.g.vscode then
-  -- NVim for vscode config
+  require 'init_vscode'
 else
   require 'init_nvchad'
 end
