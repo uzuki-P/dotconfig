@@ -9,6 +9,7 @@ local servers = {
   "cssls",
   "tsserver",
   "clangd",
+  "dartls",
   "gopls",
   "htmx",
   "emmet_ls",

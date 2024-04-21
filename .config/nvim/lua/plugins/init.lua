@@ -67,6 +67,7 @@ return {
   {
     "nvim-tree/nvim-tree.lua",
     opts = {
+      filters = { git_ignored = false },
       git = {
         enable = true,
       },
@@ -105,15 +106,16 @@ return {
     end,
   },
 
-  {
-    "akinsho/flutter-tools.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "stevearc/dressing.nvim", -- optional for vim.ui.select
-    },
-    config = true,
-    ft = 'dart',
-  },
+  -- {
+  --   "akinsho/flutter-tools.nvim",
+  --   dependencies = {
+  --     "nvim-lua/plenary.nvim",
+  --     "stevearc/dressing.nvim", -- optional for vim.ui.select
+  --   },
+  --   config = true,
+  --   ft = "dart",
+  --   event = "BufRead pubspec.yaml",
+  -- },
 
   "NvChad/nvcommunity",
   { import = "nvcommunity.git.diffview" },
