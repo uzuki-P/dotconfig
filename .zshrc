@@ -74,13 +74,15 @@ JAVA_HOME=$HOME/.sdkman/candidates/java/current/bin/java
 # Set cargo from rustup
 . "$HOME/.cargo/env"
 
+# set GOROOT
+. ~/.asdf/plugins/golang/set-env.zsh
+
 # Path
 export PATH=$PATH:$HOME/sdk/flutter/bin
 export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/platform-tools
 export PATH=$PATH:$HOME/bin
 export PATH=$PATH:$HOME/.cargo/env
 export PATH=$PATH:/home/linuxbrew/.linuxbrew/bin
-export PATH=$PATH:$HOME/go/bin
 export PATH=$PATH:$HOME/.config/composer/vendor/bin
 export PATH=$PATH:$HOME/.local/bin
 
@@ -116,12 +118,12 @@ alias gdiff='git diff --color-words'
 alias glog='git log --graph --oneline --all --decorate'
 alias glogo='glog `git reflog | cut -c1-7`'
 
+# ranger. Move to working directory when close.
+alias ranger='ranger --choosedir=$HOME/.rangerdir; LASTDIR=`cat $HOME/.rangerdir`; cd "$LASTDIR"'
+
 # set cd as zoxide
 eval "$(zoxide init --cmd cd zsh)"
 
 # atuin config. https://docs.atuin.sh/guide/installation/#shell-plugin
 eval "$(atuin init zsh)"
-
-# ranger. Move to working directory when close.
-alias ranger='ranger --choosedir=$HOME/.rangerdir; LASTDIR=`cat $HOME/.rangerdir`; cd "$LASTDIR"'
 
