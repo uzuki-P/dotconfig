@@ -15,7 +15,7 @@ stow neovim vim zsh tmux zoxide
 ## Optional: 
 
 ```
-ranger btop go composer composer dust atuin 
+ranger btop composer composer dust atuin 
 ```
 
 # Install [oh-my-zsh](https://ohmyz.sh/#install)
