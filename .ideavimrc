@@ -15,6 +15,8 @@ Plug 'machakann/vim-highlightedyank'
 
 """ Plugin settings -------------------------
 let g:argtextobj_pairs="[:],(:),<:>"
+let g:NERDTreeMapCloseDir="h"
+let g:NERDTreeMapActivateNode="l"
 
 " <C-n> seems to me as a better solution than <M-n>,
 " but we should finally support vim-visual-multi because vim-multiple-cursors is deprecated now
@@ -29,7 +31,7 @@ set relativenumber
 
 """ Idea specific settings ------------------
 set ideajoin
-set ideastatusicon=gray
+"set ideastatusicon=gray
 set NERDTree
 
 "" -- Map IDE actions to IdeaVim -- https://jb.gg/abva4t
@@ -64,6 +66,3 @@ map H h
 map <leader>i ~hi
 " Remove selection and toggle case. E.g. `v2l<leader>u`: `getProperty` -> `property`
 vmap <leader>u d~h
-
-" I think it's a better solution
-map U <C-R>
