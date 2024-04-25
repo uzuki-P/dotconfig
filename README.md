@@ -9,7 +9,7 @@ git clone https://github.com/uzuki-P/dotconfig ~/dotconfig
 ## Required: 
 
 ```
-stow neovim vim zsh tmux zoxide 
+stow neovim vim zsh tmux zoxide gcc make git ripgrep fd-find unzip 
 ```
 
 ## Optional: 
