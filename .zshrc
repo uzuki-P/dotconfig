@@ -65,8 +65,8 @@ export MANPATH="/usr/local/man:$MANPATH"
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
 
-ANDROID_HOME=$HOME/sdk/android
-JAVA_HOME=$HOME/.sdkman/candidates/java/current/bin/java
+#export JAVA_HOME=/home/uzuki_p/.jdks/azul-17.0.11
+export ANDROID_HOME=$HOME/sdk/android
 
 # Set JAVA_HOME using asdf-vm
 . $HOME/.asdf/plugins/java/set-java-home.zsh
@@ -75,7 +75,7 @@ JAVA_HOME=$HOME/.sdkman/candidates/java/current/bin/java
 . "$HOME/.cargo/env"
 
 # set GOROOT
-. ~/.asdf/plugins/golang/set-env.zsh
+. "$HOME/.asdf/plugins/golang/set-env.zsh"
 
 # Path
 export PATH=$PATH:$HOME/sdk/flutter/bin
