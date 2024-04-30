@@ -27,3 +27,4 @@ unset rc
 [[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh
 eval "$(atuin init bash)"
 . "$HOME/.cargo/env"
+export PATH="/home/uzuki_p/.shorebird/bin:$PATH"

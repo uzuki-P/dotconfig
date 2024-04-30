@@ -69,7 +69,7 @@ export MANPATH="/usr/local/man:$MANPATH"
 export ANDROID_HOME=$HOME/sdk/android
 
 # Set JAVA_HOME using asdf-vm
-. $HOME/.asdf/plugins/java/set-java-home.zsh
+#. $HOME/.asdf/plugins/java/set-java-home.zsh
 
 # Set cargo from rustup
 . "$HOME/.cargo/env"
@@ -129,3 +129,11 @@ eval "$(atuin init zsh)"
 
 # nvim
 alias nv='NVIM_APPNAME="nvchad" nvim'
+
+## [Completion]
+## Completion scripts setup. Remove the following line to uninstall
+[[ -f /home/uzuki_p/.dart-cli-completion/zsh-config.zsh ]] && . /home/uzuki_p/.dart-cli-completion/zsh-config.zsh || true
+## [/Completion]
+
+# Shorebird config
+export PATH="/home/uzuki_p/.shorebird/bin:$PATH"

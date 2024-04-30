@@ -96,3 +96,7 @@ cd
 asdf install
 ```
 
+## change java version on fedora
+```
+sudo alternatives --config java
+```
