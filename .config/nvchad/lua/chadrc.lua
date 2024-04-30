@@ -5,8 +5,8 @@
 local M = {}
 
 M.ui = {
-  theme = "material-lighter",
-  theme_toggle = { "material-lighter", "material-lighter" },
+  theme = "catppuccin",
+  theme_toggle = { "catppuccin", "catppuccin" },
 
   hl_override = {
     Comment = { italic = true },
