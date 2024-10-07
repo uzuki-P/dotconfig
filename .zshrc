@@ -1,4 +1,3 @@
-# Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
@@ -46,7 +45,6 @@ zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 # HIST_STAMPS="mm/dd/yyyy"
 
 plugins=(
-  asdf
   git-prompt
   ssh-agent
   zsh-autosuggestions
@@ -70,12 +68,11 @@ export ANDROID_HOME=$HOME/sdk/android
 
 # Set JAVA_HOME using asdf-vm
 #. $HOME/.asdf/plugins/java/set-java-home.zsh
+# set GOROOT
+#. "$HOME/.asdf/plugins/golang/set-env.zsh"
 
 # Set cargo from rustup
 . "$HOME/.cargo/env"
-
-# set GOROOT
-. "$HOME/.asdf/plugins/golang/set-env.zsh"
 
 # Path
 export PATH=$PATH:$HOME/sdk/flutter/bin
@@ -126,6 +123,7 @@ eval "$(zoxide init --cmd cd zsh)"
 
 # atuin config. https://docs.atuin.sh/guide/installation/#shell-plugin
 eval "$(atuin init zsh)"
+. "$HOME/.atuin/bin/env"
 
 # nvim
 alias nv='NVIM_APPNAME="nvchad" nvim'
@@ -137,3 +135,8 @@ alias nv='NVIM_APPNAME="nvchad" nvim'
 
 # Shorebird config
 export PATH="/home/uzuki_p/.shorebird/bin:$PATH"
+
+# flutter pub global package
+export PATH="$PATH":"$HOME/.pub-cache/bin"
+
+
