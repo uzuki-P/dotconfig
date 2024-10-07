@@ -122,8 +122,8 @@ alias ranger='ranger --choosedir=$HOME/.rangerdir; LASTDIR=`cat $HOME/.rangerdir
 eval "$(zoxide init --cmd cd zsh)"
 
 # atuin config. https://docs.atuin.sh/guide/installation/#shell-plugin
-eval "$(atuin init zsh)"
 . "$HOME/.atuin/bin/env"
+eval "$(atuin init zsh)"
 
 # nvim
 alias nv='NVIM_APPNAME="nvchad" nvim'
