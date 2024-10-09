@@ -83,6 +83,8 @@ export PATH=$PATH:/home/linuxbrew/.linuxbrew/bin
 export PATH=$PATH:$HOME/.config/composer/vendor/bin
 export PATH=$PATH:$HOME/.local/bin
 
+export PATH=$PATH:$HOME/bin/clipboard-linux-amd64/bin
+
 # directory colors
 eval `dircolors ~/dircolors.256dark`
 
@@ -117,6 +119,9 @@ alias glogo='glog `git reflog | cut -c1-7`'
 
 # ranger. Move to working directory when close.
 alias ranger='ranger --choosedir=$HOME/.rangerdir; LASTDIR=`cat $HOME/.rangerdir`; cd "$LASTDIR"'
+
+# intellij
+alias idea='/home/uzuki_p/apps/idea/bin/idea'
 
 # set cd as zoxide
 eval "$(zoxide init --cmd cd zsh)"
