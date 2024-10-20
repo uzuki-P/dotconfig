@@ -1,3 +1,5 @@
+# Add deno completions to search path
+if [[ ":$FPATH:" != *":/home/uzuki_p/.zsh/completions:"* ]]; then export FPATH="/home/uzuki_p/.zsh/completions:$FPATH"; fi
 export ZSH="$HOME/.oh-my-zsh"
 
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
@@ -123,12 +125,11 @@ alias ranger='ranger --choosedir=$HOME/.rangerdir; LASTDIR=`cat $HOME/.rangerdir
 # intellij
 alias idea='/home/uzuki_p/apps/idea/bin/idea'
 
+# copy to clipboard
+alias cb='xclip -selection clipboard'
+
 # set cd as zoxide
 eval "$(zoxide init --cmd cd zsh)"
-
-# atuin config. https://docs.atuin.sh/guide/installation/#shell-plugin
-. "$HOME/.atuin/bin/env"
-eval "$(atuin init zsh)"
 
 # nvim
 alias nv='NVIM_APPNAME="nvchad" nvim'
@@ -144,4 +145,8 @@ export PATH="/home/uzuki_p/.shorebird/bin:$PATH"
 # flutter pub global package
 export PATH="$PATH":"$HOME/.pub-cache/bin"
 
+. "/home/uzuki_p/.deno/env"
+# Initialize zsh completions (added by deno install script)
+autoload -Uz compinit
+compinit
 

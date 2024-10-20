@@ -1,67 +1,16 @@
 return {
   {
     "stevearc/conform.nvim",
-    event = "BufWritePre", -- uncomment for format on save
-    config = function()
-      require "configs.conform"
-    end,
+    -- event = 'BufWritePre', -- uncomment for format on save
+    opts = require "configs.conform",
   },
 
+  -- These are some examples, uncomment them if you want to see them work!
   {
     "neovim/nvim-lspconfig",
     config = function()
-      require("nvchad.configs.lspconfig").defaults()
       require "configs.lspconfig"
     end,
-  },
-
-  {
-    "williamboman/mason.nvim",
-    opts = {
-      ensure_installed = {
-        -- lua stuff
-        "lua-language-server",
-        "stylua",
-
-        -- web dev stuff
-        "css-lsp",
-        "html-lsp",
-        -- "typescript-language-server",
-        -- "deno",
-        "prettier",
-
-        -- c/cpp stuff
-        -- "clangd",
-        -- "clang-format",
-
-        -- shell stuff
-        "shfmt",
-      },
-    },
-  },
-
-  {
-    "nvim-treesitter/nvim-treesitter",
-    opts = {
-      ensure_installed = {
-        "vim",
-        "lua",
-        "html",
-        "css",
-        -- "javascript",
-        -- "typescript",
-        -- "tsx",
-        -- "c",
-        "markdown",
-        "markdown_inline",
-      },
-      indent = {
-        enable = true,
-        -- disable = {
-        --   "python"
-        -- },
-      },
-    },
   },
 
   {
@@ -83,10 +32,11 @@ return {
 
       view = {
         side = "right",
-        width = 50,
+        width = 45,
       },
     },
   },
+
   {
     "yamatsum/nvim-cursorline",
     lazy = false,
