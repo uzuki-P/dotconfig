@@ -2,13 +2,13 @@ let mapleader=" "
 
 """ Plugins  --------------------------------
 set surround
-set multiple-cursors
-set commentary
-set argtextobj
+" set multiple-cursors
+" set commentary
+" set argtextobj
 " set easymotion
-set textobj-entire
-set ReplaceWithRegister
-set exchange
+" set textobj-entire
+" set ReplaceWithRegister
+" set exchange
 
 " --- Enable IdeaVim plugins https://jb.gg/ideavim-plugins
 Plug 'machakann/vim-highlightedyank'
@@ -42,9 +42,12 @@ set NERDTree
 nmap <Leader>t :source ~/.ideavimrc<CR>:echo "IdeaVim reloaded!"<CR>
 
 map <leader>d <Action>(Debug)
+map <leader>y <Action>(Copy)
 map <leader>r <Action>(RenameElement)
 map <leader>c <Action>(Stop)
 map <leader>z <Action>(ToggleDistractionFreeMode)
+
+map <leader>x :q <CR>
 
 map <leader>e <Action>(SelectInProjectView)
 map <leader><tab> <Action>(Switcher)
@@ -107,3 +110,4 @@ sethandler <C-V> a:vim
 sethandler <C-W> a:vim
 sethandler <C-X> a:ide
 sethandler <C-\> a:ide
+
