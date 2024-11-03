@@ -1,9 +1,10 @@
 local options = {
   formatters_by_ft = {
     lua = { "stylua" },
-    -- css = { "prettier" },
-    -- html = { "prettier" },
+    css = { "prettier" },
+    html = { "prettier" },
     dart = { "dart_format" },
+    typescript = { "deno_format" },
   },
 
   -- format_on_save = {
