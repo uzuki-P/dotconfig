@@ -6,11 +6,11 @@ source ~/.config/fish/conf.d/paths.fish
 function starship_transient_rprompt_func
   starship module time
 end
-starship init fish  | source
+starship init fish | source
 enable_transience
 
 # zoxide
-zoxide init --cmd cd fish  | source
+zoxide init --cmd cd fish | source
 
 # setup yazi. https://yazi-rs.github.io/docs/quick-start#shell-wrapper
 function y
