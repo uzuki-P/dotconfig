@@ -29,6 +29,7 @@ set incsearch
 set number
 set relativenumber
 set ignorecase
+set clipboard=none
 
 """ Idea specific settings ------------------
 set ideajoin
@@ -42,16 +43,17 @@ set NERDTree
 nmap <Leader>t :source ~/.ideavimrc<CR>:echo "IdeaVim reloaded!"<CR>
 
 map <leader>d <Action>(Debug)
-map <leader>y <Action>(Copy)
+map <leader>y "+y
 map <leader>r <Action>(RenameElement)
 map <leader>c <Action>(Stop)
-map <leader>z <Action>(ToggleDistractionFreeMode)
+map <leader>zc <Action>(ToggleDistractionFreeMode)
 
 map <leader>x :q <CR>
 
 map <leader>e <Action>(SelectInProjectView)
 map <leader><tab> <Action>(Switcher)
 map <leader>a <Action>(FindAction)
+map <leader>fa <Action>(FindInFiles)
 map <leader><leader> <Action>(SearchEverywhere)
 map <leader>n <Action>(GotoFile)
 map <leader>h <Action>(Vcs.ShowTabbedFileHistory)
@@ -71,7 +73,7 @@ vmap <C-S-K> <Action>(MoveDown)
 map <leader>l V<Action>(ReformatCode)
 
 map <leader>b <Action>(ToggleLineBreakpoint)
-map <leader>i <Action>(FileStructurePopup)
+map <leader>s <Action>(FileStructurePopup)
 map <leader>o <Action>(OverrideMethods)
 
 map <leader>J Ji <ESC>
@@ -109,5 +111,6 @@ sethandler <C-U> a:vim
 sethandler <C-V> a:vim
 sethandler <C-W> a:vim
 sethandler <C-X> a:ide
-sethandler <C-\> a:ide
+sethandler <C-\> a:ideset
 
+clipboard^=ideaput
