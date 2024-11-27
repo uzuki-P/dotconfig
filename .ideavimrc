@@ -40,6 +40,10 @@ set NERDTree
 "" map <leader>f <Plug>(easymotion-s)
 "" map <leader>e <Plug>(easymotion-f)
 
+"" use 'Track Action Id' to set action
+
+map gk <Action>(QuickJavaDoc)
+
 nmap <Leader>t :source ~/.ideavimrc<CR>:echo "IdeaVim reloaded!"<CR>
 
 map <leader>d <Action>(Debug)
@@ -52,8 +56,8 @@ map <leader>x :q <CR>
 
 map <leader>e <Action>(SelectInProjectView)
 map <leader><tab> <Action>(Switcher)
-map <leader>a <Action>(FindAction)
-map <leader>fa <Action>(FindInFiles)
+map <leader>a <Action>(GotoAction)
+map <leader>fa <Action>(GotoFile)
 map <leader><leader> <Action>(SearchEverywhere)
 map <leader>n <Action>(GotoFile)
 map <leader>h <Action>(Vcs.ShowTabbedFileHistory)
@@ -104,7 +108,7 @@ sethandler <C-L> a:vim
 sethandler <C-N> a:vim
 sethandler <A-N> a:ide
 sethandler <C-O> a:vim
-sethandler <C-Q> a:vim
+sethandler <C-Q> a:ide
 sethandler <C-R> a:vim
 sethandler <C-T> a:vim
 sethandler <C-U> a:vim
