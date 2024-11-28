@@ -11,6 +11,8 @@ if status is-interactive
     abbr --add nord-mesh-on 'nordvpn set meshnet on'
     abbr --add nord-mesh-off 'nordvpn set meshnet off'
 
+    abbr --add nv 'NVIM_APPNAME=nvchad nvim'
+
     # git
     abbr --add gss 'git status --short'
     abbr --add gc 'git commit'
