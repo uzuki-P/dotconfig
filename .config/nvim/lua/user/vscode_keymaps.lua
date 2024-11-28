@@ -67,7 +67,7 @@ keymap({"n", "v"}, "<leader>pe", "<cmd>lua require('vscode').action('projectMana
 
 -- ----- pajar custom config
 keymap("n", "<leader>e", "<cmd>lua require('vscode').action('workbench.view.explorer')<CR>")
-keymap("n", "<leader>x", "<cmd>lua require('vscode').action('workbench.action.closeActiveEditor')<CR>")
+keymap("n", "<leader>w", "<cmd>lua require('vscode').action('workbench.action.closeActiveEditor')<CR>")
 keymap("n", "<leader>a", "<cmd>lua require('vscode').action('workbench.action.showCommands')<CR>")
 keymap("n", "<leader>ac", "<cmd>lua require('vscode').action('workbench.action.toggleSidebarVisibility')<CR>")
 keymap("n", "<tab>", "<cmd>lua require('vscode').action('workbench.action.nextEditor')<CR>")
