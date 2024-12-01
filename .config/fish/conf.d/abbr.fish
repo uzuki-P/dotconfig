@@ -1,6 +1,7 @@
 if status is-interactive
     abbr --add tm 'tmux new -As main'
     abbr --add tmc 'tmux new -As code'
+    abbr --add tmi 'tmux new -As idea'
 
     abbr --add idea '~/apps/idea/bin/idea'
     abbr --add cb 'xclip -selection clipboard'
