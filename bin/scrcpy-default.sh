@@ -7,8 +7,10 @@ SDL_VIDEODRIVER=x11 \
   --show-touches \
   --stay-awake \
   --window-borderless \
-  --window-x=$((1920-390-4)) \
-  --window-y=$((1080+4)) \
+#  --window-x=$((1920-390-4)) \
+#  --window-y=$((1080+4)) \
   --window-width=390 \
   # --window-height=700 \
-  --no-audio
+  --no-audio \
+  --shortcut-mod="lalt,ralt"
+
