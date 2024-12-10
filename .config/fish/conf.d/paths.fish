@@ -16,6 +16,7 @@ fish_add_path -ga ~/.shorebird/bin
 
 set -gx MANPATH /usr/local/man
 set -gx ANDROID_HOME $HOME/sdk/android
+set -gx ANDROID_SDK $HOME/sdk/android
 
 # rustup shell setup
 if not contains "$HOME/.cargo/bin" $PATH
