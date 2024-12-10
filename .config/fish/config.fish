@@ -1,6 +1,6 @@
 # Custom sourcing of colors, exports, paths, grc, multi-function fish files, etc.
 source ~/.config/fish/conf.d/abbr.fish
-source ~/.config/fish/conf.d/colors.fish # this could be obsolete by starship & eza
+#source ~/.config/fish/conf.d/colors.fish # this could be obsolete by starship & eza
 source ~/.config/fish/conf.d/paths.fish
 
 function starship_transient_rprompt_func
