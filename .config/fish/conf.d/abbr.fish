@@ -14,6 +14,8 @@ if status is-interactive
 
     abbr --add nv 'NVIM_APPNAME=nvchad nvim'
 
+    abbr --add android-emulator '~/sdk/android/emulator/emulator -avd Pixel_8a_API_28 -no-boot-anim -noaudio -no-snapshot'
+
     # git
     abbr --add gss 'git status --short'
     abbr --add gc 'git commit'
