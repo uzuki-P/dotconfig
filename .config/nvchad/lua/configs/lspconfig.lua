@@ -5,7 +5,7 @@ local lspconfig = require "lspconfig"
 
 -- EXAMPLE
 local servers = {
-  "html", "cssls", "dartls", "denols", "tailwindcss",
+  "html", "cssls", "dartls", "denols"
 }
 local nvlsp = require "nvchad.configs.lspconfig"
 

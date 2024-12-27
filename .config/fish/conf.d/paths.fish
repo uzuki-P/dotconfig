@@ -14,6 +14,9 @@ fish_add_path -ga ~/.local/bin
 fish_add_path -ga ~/.pub-cache/bin
 fish_add_path -ga ~/.shorebird/bin
 
+## for bootdev https://github.com/bootdotdev/bootdev?tab=readme-ov-file#1-install-go-122-or-later
+fish_add_path -ga ~/.local/opt/go/bin
+
 set -gx MANPATH /usr/local/man
 set -gx ANDROID_HOME $HOME/sdk/android
 set -gx ANDROID_SDK $HOME/sdk/android

@@ -129,14 +129,14 @@ alias idea='/home/uzuki_p/apps/idea/bin/idea'
 alias cb='xclip -selection clipboard'
 
 # set cd as zoxide
-eval "$(zoxide init --cmd cd zsh)"
+#eval "$(zoxide init --cmd cd zsh)"
 
 # nvim
 alias nv='NVIM_APPNAME="nvchad" nvim'
 
 ## [Completion]
 ## Completion scripts setup. Remove the following line to uninstall
-[[ -f /home/uzuki_p/.dart-cli-completion/zsh-config.zsh ]] && . /home/uzuki_p/.dart-cli-completion/zsh-config.zsh || true
+#[[ -f /home/uzuki_p/.dart-cli-completion/zsh-config.zsh ]] && . /home/uzuki_p/.dart-cli-completion/zsh-config.zsh || true
 ## [/Completion]
 
 # Shorebird config
@@ -150,3 +150,6 @@ export PATH="$PATH":"$HOME/.pub-cache/bin"
 autoload -Uz compinit
 compinit
 
+
+# Generated for envman. Do not edit.
+[ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
