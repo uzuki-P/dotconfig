@@ -1,5 +1,12 @@
-keybind = alt+f11=toggle_fullscreen
 shell-integration = fish
+window-decoration = false
+window-height = 9999
+window-width = 9999
+
+cursor-color = #FF4081
+cursor-style-blink = true
 theme = dark:Chalk,light:OneHalfLight
 
+keybind = f11=toggle_fullscreen
+keybind = alt+f12=toggle_window_decorations
 
