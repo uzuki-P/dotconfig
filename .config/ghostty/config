@@ -1,0 +1,5 @@
+keybind = alt+f11=toggle_fullscreen
+shell-integration = fish
+theme = dark:Chalk,light:OneHalfLight
+
+
