@@ -17,11 +17,13 @@ fish_add_path -ga ~/.shorebird/bin
 fish_add_path -ga ~/.puro/bin
 fish_add_path -ga ~/.puro/shared/pub_cache/bin
 fish_add_path -ga ~/.puro/envs/default/flutter/bin
+fish_add_path -ga ~/.npm-global/bin
 
 ## for bootdev https://github.com/bootdotdev/bootdev?tab=readme-ov-file#1-install-go-122-or-later
 fish_add_path -ga ~/.local/opt/go/bin
 
 set -gx MANPATH /usr/local/man
+set -gx JAVA_HOME /usr/lib/jvm/java-17-openjdk-17.0.13.0.11-3.fc41.x86_64
 set -gx ANDROID_HOME $HOME/sdk/android
 set -gx ANDROID_SDK $HOME/sdk/android
 set -gx PURO_ROOT $HOME/.puro

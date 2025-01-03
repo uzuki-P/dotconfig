@@ -1,7 +1,7 @@
 shell-integration = fish
 window-decoration = false
-window-height = 9999
-window-width = 9999
+window-height = 999
+window-width = 999
 
 cursor-color = #FF4081
 cursor-style-blink = true
