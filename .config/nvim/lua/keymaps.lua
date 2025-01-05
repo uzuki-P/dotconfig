@@ -38,28 +38,25 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
--- yank and paste to system clipboard
 vim.keymap.set({ 'n', 'v' }, '<leader>y', '"+y', { desc = 'Copy to clipboard' })
 vim.keymap.set({ 'n', 'v' }, '<leader>p', '"+p', { desc = 'Paste from clipboard' })
 
 -- better indent handling
-vim.keymap.set('v', '<', '<gv', { desc = 'remove tab' })
-vim.keymap.set('v', '>', '>gv', { desc = 'add tab' })
+vim.keymap.set('v', '<', '<gv', { desc = 'Remove Indent' })
+vim.keymap.set('v', '>', '>gv', { desc = 'Add Indent' })
 
--- move text up and down
 vim.keymap.set('v', 'J', ':m .+1<CR>==', { desc = 'Move whole line down' })
 vim.keymap.set('v', 'K', ':m .-2<CR>==', { desc = 'Move whole line up' })
 vim.keymap.set('x', 'J', ":move '>+1<CR>gv-gv", { desc = 'Move whole line down' })
 vim.keymap.set('x', 'K', ":move '<-2<CR>gv-gv", { desc = 'Move whole line up' })
 
--- paste preserves primal yanked piece
 vim.keymap.set('v', 'p', '"_dP', { desc = 'Paste preserves primal yanked piece' })
 
--- alt+j next error, alt+k prev error
 vim.keymap.set('n', '<M-k>', '<cmd>cprev<CR>', { desc = 'Jump to prev error' })
 vim.keymap.set('n', '<M-j>', '<cmd>cnext<CR>', { desc = 'Jump to next error' })
 
--- reload nvim config
-vim.keymap.set('n', '<space>nr', '<cmd>source %<CR>', { desc = '[N]vim [R]eload' })
+vim.keymap.set('n', '<space>nr', '<cmd>source $MYVIMRC | echo "config reloaded"<CR>', { desc = '[N]vim [R]eload' })
+
+vim.keymap.set('n', '-', '<cmd>Oil<CR>')
 
 -- vim: ts=2 sts=2 sw=2 et
