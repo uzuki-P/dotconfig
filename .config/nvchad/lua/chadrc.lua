@@ -9,7 +9,7 @@ M.base46 = {
 	theme = "one_light",
 
   theme_toggle = { "one_light", "one_light" },
-  transparency = false,
+  transparency = true,
 
   hl_override = {
     Comment = { italic = true },
