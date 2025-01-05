@@ -3,6 +3,9 @@ window-decoration = false
 window-height = 999
 window-width = 999
 
+mouse-hide-while-typing = true
+background-opacity = 0.97
+
 cursor-color = #FF4081
 cursor-style-blink = true
 theme = dark:Chalk,light:OneHalfLight
