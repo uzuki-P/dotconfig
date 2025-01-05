@@ -21,7 +21,6 @@ set backspace=indent,eol,start	" Backspace behaviour
 
 syntax enable
 set background=dark
-colorscheme catppuccin_mocha
 hi Normal guibg=NONE ctermbg=NONE
 
 " Cursor in terminal
