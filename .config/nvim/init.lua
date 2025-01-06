@@ -1,9 +1,3 @@
-if vim.g.vscode then
-  -- VSCode extension
-  require 'vscode_config.lazy'
-  return
-end
-
 --[[
 
 =====================================================================

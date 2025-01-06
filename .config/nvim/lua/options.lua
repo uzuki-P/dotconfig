@@ -3,7 +3,11 @@
 -- NOTE: You can change these options as you wish!
 --  For more options, you can see `:help option-list`
 
+vim.opt.wrap = false
 vim.opt.relativenumber = true
+
+vim.opt.ruler = true
+vim.opt.colorcolumn = '80'
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
