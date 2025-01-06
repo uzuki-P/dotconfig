@@ -1,8 +1,9 @@
 #!/bin/sh
 
 SDL_VIDEODRIVER=x11 \
-  scrcpy -d \
-  --video-bit-rate=5000000 \
+  scrcpy \
+  # -d \
+  --video-bit-rate=1000 \
   --turn-screen-off \
   --show-touches \
   --stay-awake \

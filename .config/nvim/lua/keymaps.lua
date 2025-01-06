@@ -57,6 +57,8 @@ vim.keymap.set('n', '<M-j>', '<cmd>cnext<CR>', { desc = 'Jump to next error' })
 
 vim.keymap.set('n', '<space>nr', '<cmd>source $MYVIMRC | echo "config reloaded"<CR>', { desc = '[N]vim [R]eload' })
 
-vim.keymap.set('n', '-', '<cmd>Oil<CR>')
+vim.keymap.set('n', '-', '<CMD>Oil<CR>', { desc = 'Open parent directory' })
+
+vim.keymap.set('n', '<space>bc', '<cmd>bd<CR>', { desc = '[B]uffer [C]lose' })
 
 -- vim: ts=2 sts=2 sw=2 et
