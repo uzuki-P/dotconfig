@@ -1,3 +1,5 @@
+command = /usr/bin/nu
+
 shell-integration = fish
 window-decoration = false
 window-height = 999

@@ -485,4 +485,4 @@ set -g allow-passthrough on
 set -ga update-environment TERM
 set -ga update-environment TERM_PROGRAM
 
-
+set-option -g default-shell /usr/bin/nu
