@@ -2,6 +2,7 @@ let mapleader=" "
 
 """ Plugins  --------------------------------
 set surround
+set which-key
 " set multiple-cursors
 " set commentary
 " set argtextobj
@@ -9,6 +10,7 @@ set surround
 " set textobj-entire
 " set ReplaceWithRegister
 " set exchange
+set notimeout
 
 " --- Enable IdeaVim plugins https://jb.gg/ideavim-plugins
 Plug 'machakann/vim-highlightedyank'
@@ -43,25 +45,32 @@ set NERDTree
 "" use 'Track Action Id' to set action
 
 map gk <Action>(QuickJavaDoc)
+map gc <Action>(CommentByLineComment)
 
-nmap <Leader>t :source ~/.ideavimrc<CR>:echo "IdeaVim reloaded!"<CR>
+nmap <Leader>nr :source ~/.ideavimrc<CR>:echo "IdeaVim reloaded!"<CR>
 
 map <leader>d <Action>(Debug)
 map <leader>y "+y
-map <leader>r <Action>(RenameElement)
-map <leader>c <Action>(Stop)
+map <leader>rn <Action>(RenameElement)
 map <leader>zc <Action>(ToggleDistractionFreeMode)
 
 map <leader>w :q <CR>
 
+map <leader><leader> <Action>(Switcher)
 map <leader>e <Action>(SelectInProjectView)
-map <leader><tab> <Action>(Switcher)
-map <leader>a <Action>(GotoAction)
-map <leader>fa <Action>(GotoFile)
-map <leader><leader> <Action>(SearchEverywhere)
-map <leader>n <Action>(GotoFile)
-map <leader>h <Action>(Vcs.ShowTabbedFileHistory)
+map <leader>f <Action>(ReformatCode)
+map <leader><tab> <Action>(RecentFiles)
+map <leader>sa <Action>(GotoAction)
+map <leader>st <Action>(FileStructurePopup)
+map <leader>se <Action>(SearchEverywhere)
+map <leader>sf <Action>(GotoFile)
+map <leader>gh <Action>(Vcs.ShowTabbedFileHistory)
 map <S-Space> <Action>(GotoNextError)
+
+map <C-h> <C-w><C-h> <CR>
+map <C-l> <C-w><C-l> <CR>
+map <C-j> <C-w><C-j> <CR>
+map <C-k> <C-w><C-k> <CR>
 
 " Map Tab to switch to the next tab in normal mode
 nnoremap <Tab> :tabnext<CR>
@@ -69,18 +78,13 @@ nnoremap <S-Tab> :tabprev<CR>
 
 " Move line up/down
 vmap <S-J> <Action>(MoveStatementDown)
-vmap <C-S-J> <Action>(MoveUp)
 vmap <S-K> <Action>(MoveStatementUp)
-vmap <C-S-K> <Action>(MoveDown)
 
 " Reformat the current line only
 map <leader>l V<Action>(ReformatCode)
 
 map <leader>b <Action>(ToggleLineBreakpoint)
-map <leader>s <Action>(FileStructurePopup)
-map <leader>o <Action>(OverrideMethods)
-
-map <leader>J Ji <ESC>
+map <leader>or <Action>(OverrideMethods)
 
 " Don't use Ex mode, use Q for formatting.
 map Q gq

@@ -97,6 +97,8 @@ use std "path add"
 # path add ($env.HOME | path join ".local" "bin")
 # $env.PATH = ($env.PATH | uniq)
 path add ($env.HOME | path join ".npm-global" "bin")
+path add ($env.HOME | path join "script")
+path add ($env.HOME | path join "bin")
 
 # To load from a custom file you can use:
 # source ($nu.default-config-dir | path join 'custom.nu')
