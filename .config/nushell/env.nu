@@ -111,6 +111,13 @@ carapace _carapace nushell | save --force ~/.cache/carapace/init.nu
 $env.PNPM_HOME = $"($env.HOME)/.local/share/pnpm"
 $env.PATH = ($env.PATH | split row (char esep) | prepend $env.PNPM_HOME )
 
+$env.MANPATH = '/usr/local/man'
+$env.JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-17.0.13.0.11-3.fc41.x86_64'
+$env.ANDROID_HOME = ($env.HOME | path join "sdk" "android")
+$env.ANDROID_SDK = ($env.HOME | path join "sdk" "android")
+$env.PURO_ROOT = ($env.HOME | path join ".puro")
+$env.PUB_CACHE = ($env.HOME | path join ".puro" "shared" "pub_cache")
+
 zoxide init --cmd cd nushell | save -f ~/.zoxide.nu
 
 mkdir ~/.cache/starship
