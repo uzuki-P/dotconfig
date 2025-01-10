@@ -49,7 +49,8 @@ map gc <Action>(CommentByLineComment)
 
 nmap <Leader>nr :source ~/.ideavimrc<CR>:echo "IdeaVim reloaded!"<CR>
 
-map <leader>d <Action>(Debug)
+map <leader>dr <Action>(Debug)
+map <leader>ds <Action>(Stop)
 map <leader>y "+y
 map <leader>rn <Action>(RenameElement)
 map <leader>zc <Action>(ToggleDistractionFreeMode)
