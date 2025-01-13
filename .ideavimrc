@@ -1,5 +1,6 @@
 let mapleader=" "
 
+
 """ Plugins  --------------------------------
 set surround
 set which-key
@@ -49,6 +50,7 @@ map gc <Action>(CommentByLineComment)
 
 nmap <Leader>nr :source ~/.ideavimrc<CR>:echo "IdeaVim reloaded!"<CR>
 
+map <leader>dq <Action>(Flutter.Toolbar.ReloadAction)
 map <leader>dr <Action>(Debug)
 map <leader>ds <Action>(Stop)
 map <leader>y "+y
@@ -92,6 +94,8 @@ map Q gq
 
 " Just makes me nervous
 map H h
+
+unmap s
 
 " From GUI settings
 sethandler <C-2> a:ide
