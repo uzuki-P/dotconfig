@@ -167,6 +167,18 @@ return {
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
+      -- setup fish lsp
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = 'fish',
+        callback = function()
+          vim.lsp.start {
+            name = 'fish-lsp',
+            cmd = { 'fish-lsp', 'start' },
+            cmd_env = { fish_lsp_show_client_popups = false },
+          }
+        end,
+      })
+
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
       --
@@ -189,6 +201,7 @@ return {
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
         denols = {},
+        -- fish_lsp = {},
         --
 
         lua_ls = {
