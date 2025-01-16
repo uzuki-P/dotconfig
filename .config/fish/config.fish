@@ -3,13 +3,14 @@ source ~/.config/fish/conf.d/abbr.fish
 #source ~/.config/fish/conf.d/colors.fish # this could be obsolete by starship & eza
 source ~/.config/fish/conf.d/paths.fish
 
+# starship. https://starship.rs/
 function starship_transient_rprompt_func
   starship module time
 end
 starship init fish | source
 enable_transience
 
-# zoxide
+# zoxide. https://github.com/ajeetdsouza/zoxide
 zoxide init --cmd cd fish | source
 
 # setup yazi. https://yazi-rs.github.io/docs/quick-start#shell-wrapper
@@ -22,12 +23,18 @@ function y
 	rm -f -- "$tmp"
 end
 
-# pnpm
+# pnpm. 
 set -gx PNPM_HOME "/home/uzuki_p/.local/share/pnpm"
 if not string match -q -- $PNPM_HOME $PATH
   set -gx PATH "$PNPM_HOME" $PATH
 end
-# pnpm end
 
 # Generated for envman. Do not edit.
 test -s ~/.config/envman/load.fish; and source ~/.config/envman/load.fish
+
+# Carapace. https://carapace-sh.github.io/carapace-bin/spec/bridge.html?highlight=fish#fish
+set -Ux CARAPACE_BRIDGES 'zsh,fish,bash,inshellisense' # optional
+mkdir -p ~/.config/fish/completions
+carapace --list | awk '{print $1}' | xargs -I{} touch ~/.config/fish/completions/{}.fish # disable auto-loaded completions (#185)
+carapace _carapace | source
+

@@ -1,4 +1,4 @@
-command = /usr/bin/nu
+command = /usr/bin/fish
 
 shell-integration = fish
 window-decoration = false

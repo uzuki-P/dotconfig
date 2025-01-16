@@ -15,6 +15,7 @@ set notimeout
 
 " --- Enable IdeaVim plugins https://jb.gg/ideavim-plugins
 Plug 'machakann/vim-highlightedyank'
+Plug 'justinmk/vim-sneak'
 
 """ Plugin settings -------------------------
 let g:argtextobj_pairs="[:],(:),<:>"
@@ -64,6 +65,7 @@ map <leader>e <Action>(SelectInProjectView)
 map <leader>f <Action>(ReformatCode)
 map <leader><tab> <Action>(RecentFiles)
 map <leader>sa <Action>(GotoAction)
+map <leader>sg <Action>(FindInPath)
 map <leader>st <Action>(FileStructurePopup)
 map <leader>se <Action>(SearchEverywhere)
 map <leader>sf <Action>(GotoFile)
@@ -95,7 +97,7 @@ map Q gq
 " Just makes me nervous
 map H h
 
-unmap s
+" nmap s :<CR>
 
 " From GUI settings
 sethandler <C-2> a:ide
