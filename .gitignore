@@ -1,5 +1,4 @@
-.vim/.netrwhist
-.bashrc
-.bash_profile
-
-.config/nushell/history.txt
+_home/.vim/.netrwhist
+_home/.bashrc
+_home/.bash_profile
+_home/.config/nushell/history.txt
