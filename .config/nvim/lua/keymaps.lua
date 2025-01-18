@@ -59,6 +59,15 @@ vim.keymap.set('n', '<space>nr', '<cmd>source $MYVIMRC | echo "config reloaded"<
 
 vim.keymap.set('n', '-', '<CMD>Oil<CR>', { desc = 'Open parent directory' })
 
-vim.keymap.set('n', '<space>bc', '<cmd>bd<CR>', { desc = '[B]uffer [C]lose' })
+vim.keymap.set('n', '<space>x', '<cmd>bd<CR>', { desc = '[B]uffer [C]lose' })
+
+-- unmap 's' single char replacement for easier nvim.surround
+vim.keymap.set('n', 's', '', { noremap = true, silent = true })
+
+-- ctrl+backspace for delete word
+vim.keymap.set('i', '<C-BS>', '<C-o>db', { noremap = true, silent = true })
+
+-- Map Ctrl + S to save the current file in normal mode
+vim.keymap.set('n', '<C-s>', ':w<CR>', { noremap = true, silent = true })
 
 -- vim: ts=2 sts=2 sw=2 et

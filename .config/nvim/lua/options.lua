@@ -3,8 +3,14 @@
 -- NOTE: You can change these options as you wish!
 --  For more options, you can see `:help option-list`
 
+-- enable exrc
+vim.opt.exrc = true
+
 vim.opt.wrap = false
 vim.opt.relativenumber = true
+
+vim.opt.shiftwidth = 2
+vim.opt.tabstop = 2
 
 vim.opt.ruler = true
 vim.opt.colorcolumn = '80'
