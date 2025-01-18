@@ -9,7 +9,7 @@ vim.opt.exrc = true
 vim.opt.wrap = true
 vim.opt.linebreak = true
 vim.opt.showbreak = '↪ '
-vim.opt.textwidth = 80
+vim.opt.textwidth = 120
 vim.opt.wrapmargin = 5
 
 vim.opt.relativenumber = true
@@ -18,7 +18,7 @@ vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
 
 vim.opt.ruler = true
-vim.opt.colorcolumn = '80'
+vim.opt.colorcolumn = '80,120'
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
