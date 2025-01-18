@@ -1,9 +1,0 @@
-{
-  "blink.cmp": { "branch": "main", "commit": "51fb932f63af0d6722ad6e31c8e931a5a684bd25" },
-  "lazy.nvim": { "branch": "main", "commit": "7e6c863bc7563efbdd757a310d17ebc95166cef3" },
-  "lazydev.nvim": { "branch": "main", "commit": "8620f82ee3f59ff2187647167b6b47387a13a018" },
-  "mini.nvim": { "branch": "main", "commit": "2faada1cffce5609d78ac5e81eaf3754e0476758" },
-  "nvim-lspconfig": { "branch": "master", "commit": "f4ed656e876e45cf914d7beb972830561178e232" },
-  "nvim-surround": { "branch": "main", "commit": "9f0cb495f25bff32c936062d85046fbda0c43517" },
-  "snacks.nvim": { "branch": "main", "commit": "d312053f78b4fb55523def179ac502438dd93193" }
-}
