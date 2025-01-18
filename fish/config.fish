@@ -1,8 +1,6 @@
 source ~/.config/fish/conf.d/abbr.fish
 source ~/.config/fish/conf.d/paths.fish
 
-set -g fish_case_sensitive_suggestions false
-
 function fish_greeting
     switch (random 1 5)
         case 1
