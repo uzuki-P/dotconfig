@@ -486,3 +486,11 @@ set -ga update-environment TERM
 set -ga update-environment TERM_PROGRAM
 
 set-option -g default-shell /usr/bin/fish
+
+# remove clear tmux history on ctrl+l
+unbind -n C-l
+
+# don't exit from tmux when closing a session
+set -g detach-on-destroy off
+
+# vim: set filetype=conf ts=2 sts=2 sw=2 et:
