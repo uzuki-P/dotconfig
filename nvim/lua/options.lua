@@ -6,7 +6,12 @@
 -- enable exrc
 vim.opt.exrc = true
 
-vim.opt.wrap = false
+vim.opt.wrap = true
+vim.opt.linebreak = true
+vim.opt.showbreak = '↪ '
+vim.opt.textwidth = 80
+vim.opt.wrapmargin = 5
+
 vim.opt.relativenumber = true
 
 vim.opt.shiftwidth = 2
@@ -60,7 +65,7 @@ vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 vim.opt.inccommand = 'split'
 
 -- Show which line your cursor is on
-vim.opt.cursorline = false
+vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
