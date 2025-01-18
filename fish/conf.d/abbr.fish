@@ -12,6 +12,7 @@ if status is-interactive
     abbr --add nord-mesh-on 'nordvpn set meshnet on'
     abbr --add nord-mesh-off 'nordvpn set meshnet off'
 
+    abbr --add n nvim
     abbr --add nv 'NVIM_APPNAME=nvchad nvim'
 
     abbr --add android-emulator '~/sdk/android/emulator/emulator -avd Pixel_8a_API_28 -no-boot-anim -noaudio -no-snapshot'
@@ -28,4 +29,3 @@ if status is-interactive
     abbr --add glog 'git log --graph --oneline --all --decorate'
     abbr --add glogo 'glog `git reflog | cut -c1-7`'
 end
-

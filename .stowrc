@@ -1,4 +1,5 @@
 --target=~/.config
 --ignore=.stowrc
 --ignore=_home
+--ignore=setup.sh
 --ignore=DS_Store
