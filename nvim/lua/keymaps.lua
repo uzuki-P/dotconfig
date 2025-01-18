@@ -45,29 +45,30 @@ vim.keymap.set({ 'n', 'v' }, '<leader>y', '"+y', { desc = 'Copy to clipboard' })
 vim.keymap.set('v', '<', '<gv', { desc = 'Remove Indent' })
 vim.keymap.set('v', '>', '>gv', { desc = 'Add Indent' })
 
-vim.keymap.set('v', 'J', ':m .+1<CR>==', { desc = 'Move whole line down' })
-vim.keymap.set('v', 'K', ':m .-2<CR>==', { desc = 'Move whole line up' })
-vim.keymap.set('x', 'J', ":move '>+1<CR>gv-gv", { desc = 'Move whole line down' })
-vim.keymap.set('x', 'K', ":move '<-2<CR>gv-gv", { desc = 'Move whole line up' })
+-- vim.keymap.set('v', 'J', ':m .+1<CR>==', { desc = 'Move whole line down' })
+-- vim.keymap.set('v', 'K', ':m .-2<CR>==', { desc = 'Move whole line up' })
+-- vim.keymap.set('x', 'J', ":move '>+1<CR>gv-gv", { desc = 'Move whole line down' })
+-- vim.keymap.set('x', 'K', ":move '<-2<CR>gv-gv", { desc = 'Move whole line up' })
 
 vim.keymap.set('v', 'p', '"_dP', { desc = 'Paste preserves primal yanked piece' })
 
-vim.keymap.set('n', '<M-k>', '<cmd>cprev<CR>', { desc = 'Jump to prev error' })
-vim.keymap.set('n', '<M-j>', '<cmd>cnext<CR>', { desc = 'Jump to next error' })
+vim.keymap.set('n', '<M-p>', '<cmd>cprev<CR>', { desc = 'Jump to prev error' })
+vim.keymap.set('n', '<M-n>', '<cmd>cnext<CR>', { desc = 'Jump to next error' })
 
 vim.keymap.set('n', '<space>nr', '<cmd>source $MYVIMRC | echo "config reloaded"<CR>', { desc = '[N]vim [R]eload' })
 
-vim.keymap.set('n', '-', '<CMD>Oil<CR>', { desc = 'Open parent directory' })
+-- vim.keymap.set('n', '-', '<CMD>Oil<CR>', { desc = 'Open parent directory' })
+vim.keymap.set('n', '-', '<CMD>lua MiniFiles.open()<CR>', { desc = 'Open parent directory' })
 
 vim.keymap.set('n', '<space>x', '<cmd>bd<CR>', { desc = '[B]uffer [C]lose' })
 
 -- unmap 's' single char replacement for easier nvim.surround
-vim.keymap.set('n', 's', '', { noremap = true, silent = true })
-
--- ctrl+backspace for delete word
-vim.keymap.set('i', '<C-BS>', '<C-o>db', { noremap = true, silent = true })
+vim.keymap.set('n', 's', '', {})
 
 -- Map Ctrl + S to save the current file in normal mode
-vim.keymap.set('n', '<C-s>', ':w<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<C-s>', ':w<CR>', { desc = 'Save file' })
+
+vim.keymap.set('n', '<Tab>', ':bnext<CR>', { desc = 'Next tab/buffer' })
+vim.keymap.set('n', '<S-Tab>', ':bprev<CR>', { desc = 'Next tab/buffer' })
 
 -- vim: ts=2 sts=2 sw=2 et
