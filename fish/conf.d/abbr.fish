@@ -13,7 +13,9 @@ if status is-interactive
     abbr --add nord-mesh-off 'nordvpn set meshnet off'
 
     abbr --add n nvim
-    abbr --add nv 'NVIM_APPNAME=nvchad nvim'
+    #abbr --add nv 'NVIM_APPNAME=nvchad nvim'
+
+    abbr --add lg lazygit
 
     abbr --add android-emulator '~/sdk/android/emulator/emulator -avd Pixel_8a_API_28 -no-boot-anim -noaudio -no-snapshot'
 
