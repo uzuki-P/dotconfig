@@ -1,6 +1,5 @@
 # : << EOF
 # Oh my tmux!
-# 💛🩷💙🖤❤️🤍
 # https://github.com/gpakosz/.tmux
 # (‑●‑●)> dual licensed under the WTFPL v2 license and the MIT license,
 #         without any warranty.
@@ -381,7 +380,7 @@ tmux_conf_urlscan_options="--compact --dedupe"
 # this is the place to override or undo settings
 
 # increase history size
-#set -g history-limit 10000
+set -g history-limit 10000
 
 # start with mouse mode enabled
 set -g mouse on
@@ -519,5 +518,8 @@ unbind -n C-l
 
 # don't exit from tmux when closing a session
 set -g detach-on-destroy off
+
+# https://github.com/gpakosz/.tmux/issues/776#issuecomment-2594954852
+set -g extended-keys off #!important
 
 # vim: set filetype=conf ts=2 sts=2 sw=2 et:
