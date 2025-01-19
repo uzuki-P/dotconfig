@@ -6,7 +6,7 @@
 -- enable exrc
 vim.opt.exrc = true
 
-vim.opt.wrap = true
+vim.opt.wrap = false
 vim.opt.linebreak = true
 vim.opt.showbreak = '↪ '
 vim.opt.textwidth = 120

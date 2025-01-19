@@ -39,8 +39,6 @@ require('lazy').setup({
 
   require 'kickstart/plugins/todo-comments',
 
-  require 'kickstart/plugins/mini',
-
   require 'kickstart/plugins/treesitter',
 
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the

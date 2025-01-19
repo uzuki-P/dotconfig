@@ -9,8 +9,11 @@ if status is-interactive
     abbr --add la 'exa -lag --git --header'
     abbr --add flutter-update 'flutter upgrade && flutter doctor && shorebird upgrade && shorebird doctor'
 
-    abbr --add nord-mesh-on 'nordvpn set meshnet on'
-    abbr --add nord-mesh-off 'nordvpn set meshnet off'
+    abbr --add nm-on 'nordvpn set meshnet on'
+    abbr --add nm-off 'nordvpn set meshnet off'
+
+    abbr --add n-c 'nordvpn c id'
+    abbr --add n-d 'nordvpn d'
 
     abbr --add n nvim
     #abbr --add nv 'NVIM_APPNAME=nvchad nvim'
