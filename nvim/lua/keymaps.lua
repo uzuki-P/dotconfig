@@ -64,8 +64,8 @@ vim.keymap.set('n', '<space>x', '<cmd>bd<CR>', { desc = '[B]uffer [C]lose' })
 vim.keymap.set('n', '<space>b_', '<cmd>vs<CR>', { desc = '[B]uffer Split |' })
 vim.keymap.set('n', '<space>b-', '<cmd>split<CR>', { desc = '[B]uffer Split --' })
 
-vim.keymap.set('n', '<space>l', ':.lua<CR>')
-vim.keymap.set('v', '<space>l', ':lua<CR>')
+-- vim.keymap.set('n', '<space>l', ':.lua<CR>')
+-- vim.keymap.set('v', '<space>l', ':lua<CR>')
 
 -- unmap 's' single char replacement for easier nvim.surround
 vim.keymap.set('n', 's', '', {})
