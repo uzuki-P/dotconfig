@@ -37,6 +37,7 @@ return {
         header = function()
           return 'Apa carik wak???'
         end,
+        query_updaters = 'abcdefghijklmnopqrstuvwxyz0123456789',
       }
 
       --- mini.files configuration
@@ -69,7 +70,7 @@ return {
           local buf_id = args.data.buf_id
           -- Tweak left-hand side of mapping to your liking
           vim.keymap.set('n', 'g.', toggle_dotfiles, { buffer = buf_id, desc = 'Show/Hide dotfiles' })
-          vim.keymap.set('n', 'g~', files_set_cwd, { buffer = args.data.buf_id })
+          vim.keymap.set('n', 'gcd', files_set_cwd, { buffer = buf_id, desc = 'Set [C]urrent working [D]irectory' })
         end,
       })
 
@@ -81,7 +82,31 @@ return {
           preview = true,
           width_preview = 100,
         },
+        -- oil like mapping
+        mappings = {
+          go_in = '',
+          go_in_plus = '<CR>',
+          go_out = '-',
+          go_out_plus = '',
+          synchronize = '<C-S>',
+        },
       }
+
+      local mini_files_open = function()
+        -- Close explorer if it is opened
+        -- if MiniFiles.close() then
+        --   return
+        -- end
+
+        -- Compute whether current buffer is for file on disk.
+        -- If yes - use it to open explorer; otherwise use cwd.
+        local buf_path = vim.api.nvim_buf_get_name(0)
+        local path = vim.loop.fs_stat(buf_path) ~= nil and buf_path or vim.fn.getcwd()
+        MiniFiles.open(path)
+      end
+
+      vim.keymap.set('n', '-', mini_files_open, { desc = 'Open MiniFiles' })
+
       --- END mini.files configuration
     end,
   },
