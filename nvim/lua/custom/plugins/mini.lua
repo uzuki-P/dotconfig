@@ -41,7 +41,7 @@ return {
       }
 
       --- mini.files configuration
-      local show_dotfiles = true
+      local show_dotfiles = false
 
       local filter_show = function(_)
         return true
@@ -75,6 +75,7 @@ return {
       })
 
       require('mini.files').setup {
+        content = { filter = filter_hide },
         options = {
           permanent_delete = false,
         },
