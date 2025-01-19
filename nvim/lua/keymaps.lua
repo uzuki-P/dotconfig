@@ -58,9 +58,14 @@ vim.keymap.set('n', '<M-n>', '<cmd>cnext<CR>', { desc = 'Jump to next error' })
 vim.keymap.set('n', '<space>nr', '<cmd>source $MYVIMRC | echo "config reloaded"<CR>', { desc = '[N]vim [R]eload' })
 
 -- vim.keymap.set('n', '-', '<CMD>Oil<CR>', { desc = 'Open parent directory' })
-vim.keymap.set('n', '-', '<CMD>lua MiniFiles.open()<CR>', { desc = 'Open parent directory' })
 
 vim.keymap.set('n', '<space>x', '<cmd>bd<CR>', { desc = '[B]uffer [C]lose' })
+
+vim.keymap.set('n', '<space>b_', '<cmd>vs<CR>', { desc = '[B]uffer Split |' })
+vim.keymap.set('n', '<space>b-', '<cmd>split<CR>', { desc = '[B]uffer Split --' })
+
+vim.keymap.set('n', '<space>l', ':.lua<CR>')
+vim.keymap.set('v', '<space>l', ':lua<CR>')
 
 -- unmap 's' single char replacement for easier nvim.surround
 vim.keymap.set('n', 's', '', {})
