@@ -10,7 +10,7 @@ function fish_greeting
         case 3
             echo "🐡"
         case 4
-            echo "🐳"
+            echo "🐋"
         case 5
             echo "🦈"
     end
