@@ -12,5 +12,7 @@ cursor-color = #FF4081
 cursor-style-blink = true
 theme = dark:Chalk,light:OneHalfLight
 
+keybind = ctrl+enter=unbind
+keybind = alt+f11=toggle_fullscreen
 keybind = alt+f12=toggle_window_decorations
 

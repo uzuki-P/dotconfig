@@ -58,7 +58,7 @@ map <leader>y "+y
 map <leader>rn <Action>(RenameElement)
 map <leader>zc <Action>(ToggleDistractionFreeMode)
 
-map <leader>w :q <CR>
+map <leader>x :q <CR>
 
 map <leader><leader> <Action>(Switcher)
 map <leader>e <Action>(SelectInProjectView)
