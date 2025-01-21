@@ -1,5 +1,5 @@
 > NOTE:
-> [oh-my-tmux](https://github.com/gpakosz/.tmux) is already on `.config/tmux` 
+> [oh-my-tmux](https://github.com/gpakosz/.tmux) is already on `.config/tmux`  
 > I personally use fish (and trying nushell)
 
 # Setup
