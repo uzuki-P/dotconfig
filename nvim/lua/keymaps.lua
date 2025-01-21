@@ -1,6 +1,8 @@
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+vim.api.nvim_set_keymap('i', 'jj', '<Esc>', { noremap = false })
+
 -- Clear highlights on search when pressing <Esc> in normal mode
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
@@ -75,5 +77,8 @@ vim.keymap.set('n', '<C-s>', ':w<CR>', { desc = 'Save file' })
 
 vim.keymap.set('n', '<Tab>', ':bnext<CR>', { desc = 'Next tab/buffer' })
 vim.keymap.set('n', '<S-Tab>', ':bprev<CR>', { desc = 'Next tab/buffer' })
+
+-- quick close/exit
+vim.keymap.set('n', '<leader>qq', ':q<CR>', { silent = true, noremap = true, desc = 'WARNING! quit buffer' })
 
 -- vim: ts=2 sts=2 sw=2 et
