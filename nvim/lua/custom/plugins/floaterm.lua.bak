@@ -1,0 +1,8 @@
+return {
+  {
+    'voldikss/vim-floaterm',
+    keys = {
+      { '<leader>tt', '<cmd>FloatermToggle "base"<cr>', desc = 'Open toggle terminal' },
+    },
+  },
+}

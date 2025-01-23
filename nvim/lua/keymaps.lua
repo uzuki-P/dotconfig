@@ -54,8 +54,11 @@ vim.keymap.set('v', '>', '>gv', { desc = 'Add Indent' })
 
 vim.keymap.set('v', 'p', '"_dP', { desc = 'Paste preserves primal yanked piece' })
 
-vim.keymap.set('n', '<M-p>', '<cmd>cprev<CR>', { desc = 'Jump to prev error' })
-vim.keymap.set('n', '<M-n>', '<cmd>cnext<CR>', { desc = 'Jump to next error' })
+-- vim.keymap.set('n', '<M-p>', '<cmd>cprev<CR>', { desc = 'Jump to prev error' })
+-- vim.keymap.set('n', '<M-n>', '<cmd>cnext<CR>', { desc = 'Jump to next error' })
+
+vim.keymap.set('n', '<M-p>', vim.diagnostic.goto_next)
+vim.keymap.set('n', '<M-n>', vim.diagnostic.goto_prev)
 
 vim.keymap.set('n', '<space>nr', '<cmd>source $MYVIMRC | echo "config reloaded"<CR>', { desc = '[N]vim [R]eload' })
 
@@ -79,6 +82,6 @@ vim.keymap.set('n', '<Tab>', ':bnext<CR>', { desc = 'Next tab/buffer' })
 vim.keymap.set('n', '<S-Tab>', ':bprev<CR>', { desc = 'Next tab/buffer' })
 
 -- quick close/exit
-vim.keymap.set('n', '<leader>qq', ':q<CR>', { silent = true, noremap = true, desc = 'WARNING! quit buffer' })
+-- vim.keymap.set('n', '<leader>qq', ':q<CR>', { silent = true, noremap = true, desc = 'WARNING! quit buffer' })
 
 -- vim: ts=2 sts=2 sw=2 et

@@ -26,6 +26,7 @@ return {
       require('mini.jump2d').setup()
       require('mini.icons').setup()
       require('mini.tabline').setup()
+      require('mini.sessions').setup()
 
       require('mini.indentscope').setup {
         draw = {
@@ -33,11 +34,15 @@ return {
         },
       }
 
-      require('mini.starter').setup {
+      local starter = require 'mini.starter'
+      starter.setup {
         header = function()
           return 'Apa carik wak???'
         end,
         query_updaters = 'abcdefghijklmnopqrstuvwxyz0123456789',
+        items = {
+          starter.sections.sessions(5, true),
+        },
       }
 
       --- mini.files configuration
