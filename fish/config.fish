@@ -1,4 +1,5 @@
 source ~/.config/fish/conf.d/abbr.fish
+source ~/.config/fish/conf.d/keybind.fish
 source ~/.config/fish/conf.d/paths.fish
 
 function fish_greeting
@@ -26,7 +27,7 @@ starship init fish | source
 # zoxide. https://github.com/ajeetdsouza/zoxide
 zoxide init --cmd cd fish | source
 
-# setup yazi. https://yazi-rs.github.io/docs/quick-start#shell-wrapper
+# yazi. https://yazi-rs.github.io/docs/quick-start#shell-wrapper
 function y
     set tmp (mktemp -t "yazi-cwd.XXXXXX")
     yazi $argv --cwd-file="$tmp"
@@ -42,5 +43,5 @@ if not string match -q -- $PNPM_HOME $PATH
     set -gx PATH "$PNPM_HOME" $PATH
 end
 
-# Carapace. https://carapace-sh.github.io/carapace-bin/spec/bridge.html?highlight=fish#fish
+# carapace. https://carapace-sh.github.io/carapace-bin/spec/bridge.html?highlight=fish#fish
 carapace _carapace | source
