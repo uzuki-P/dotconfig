@@ -35,6 +35,7 @@ local function create_floating_window(opts)
 
   -- Create the floating window
   local win = vim.api.nvim_open_win(buf, true, win_config)
+  vim.cmd 'startinsert'
 
   return { buf = buf, win = win }
 end
