@@ -2,6 +2,8 @@
 --  See `:help vim.keymap.set()`
 
 vim.api.nvim_set_keymap('i', 'jj', '<Esc>', { noremap = false })
+vim.api.nvim_set_keymap('i', '<M-BS>', '<C-W>', { noremap = false })
+-- vim.api.nvim_set_keymap('i', '<C-BS>', '<C-W>', { noremap = false })
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -60,7 +62,8 @@ vim.keymap.set('v', 'p', '"_dP', { desc = 'Paste preserves primal yanked piece' 
 vim.keymap.set('n', '<M-p>', vim.diagnostic.goto_next)
 vim.keymap.set('n', '<M-n>', vim.diagnostic.goto_prev)
 
-vim.keymap.set('n', '<space>nr', '<cmd>source $MYVIMRC | echo "config reloaded"<CR>', { desc = '[N]vim [R]eload' })
+-- vim.keymap.set('n', '<space>nr', '<cmd>source $MYVIMRC | echo "config reloaded"<CR>', { desc = '[N]vim [R]eload' })
+vim.keymap.set('n', '<space>nx', '<cmd>source % | echo "runned"<CR>') -- run this lua files
 
 -- vim.keymap.set('n', '-', '<CMD>Oil<CR>', { desc = 'Open parent directory' })
 
@@ -83,5 +86,8 @@ vim.keymap.set('n', '<S-Tab>', ':bprev<CR>', { desc = 'Next tab/buffer' })
 
 -- quick close/exit
 -- vim.keymap.set('n', '<leader>qq', ':q<CR>', { silent = true, noremap = true, desc = 'WARNING! quit buffer' })
+
+-- Floating terminal
+vim.keymap.set('n', '<leader>tt', '<cmd>Floaterminal<CR>', { silent = true, noremap = true, desc = 'Floating terminal' })
 
 -- vim: ts=2 sts=2 sw=2 et

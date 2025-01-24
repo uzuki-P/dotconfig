@@ -12,6 +12,7 @@ vim.opt.showbreak = '↪ '
 vim.opt.textwidth = 120
 vim.opt.wrapmargin = 5
 
+vim.opt.number = true
 vim.opt.relativenumber = true
 
 vim.opt.shiftwidth = 2
