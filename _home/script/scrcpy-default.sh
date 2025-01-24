@@ -2,8 +2,8 @@
 
 SDL_VIDEODRIVER=x11 \
   scrcpy \
-  # -d \
-  --video-bit-rate=1000 \
+  --video-bit-rate=2000000 \
+  --max-size=720 \
   --turn-screen-off \
   --show-touches \
   --stay-awake \
