@@ -21,6 +21,10 @@ return {
       -- delay between pressing a key and opening which-key (milliseconds)
       -- this setting is independent of vim.opt.timeoutlen
       delay = 100,
+      keys = {
+        scroll_down = '<c-n>', -- binding to scroll down inside the popup
+        scroll_up = '<c-p>', -- binding to scroll up inside the popup
+      },
       icons = {
         -- set icon mappings to true if you have a Nerd Font
         mappings = vim.g.have_nerd_font,
