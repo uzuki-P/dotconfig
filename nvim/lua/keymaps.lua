@@ -3,7 +3,10 @@
 
 vim.api.nvim_set_keymap('i', 'jj', '<Esc>', { noremap = false })
 vim.api.nvim_set_keymap('i', '<M-BS>', '<C-W>', { noremap = false })
--- vim.api.nvim_set_keymap('i', '<C-BS>', '<C-W>', { noremap = false })
+vim.api.nvim_set_keymap('i', '<C-BS>', '<C-W>', { noremap = true })
+vim.api.nvim_set_keymap('i', '<C-?>', '<C-W>', { noremap = true })
+vim.api.nvim_set_keymap('i', '<C-H>', '<C-W>', { noremap = true })
+vim.api.nvim_set_keymap('i', '^H', '<C-W>', { noremap = true })
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
