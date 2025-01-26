@@ -14,8 +14,8 @@ return {
         project_config = true,
       },
     },
-    -- flutter_path = '/home/uzuki_p/.puro/envs/stable/flutter/bin/flutter',
-    flutter_path = '/home/uzuki_p/.puro/envs/3.24.5/flutter/bin/flutter',
+    flutter_path = '/home/uzuki_p/.puro/envs/stable/flutter/bin/flutter',
+    -- flutter_path = '/home/uzuki_p/.puro/envs/3.24.5/flutter/bin/flutter',
     debugger = {
       enabled = true,
       run_via_dap = true,
