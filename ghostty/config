@@ -6,12 +6,27 @@ window-height = 999
 window-width = 999
 
 mouse-hide-while-typing = true
+minimum-contrast=1.1
 
 cursor-color = #FF4081
 cursor-style-blink = true
 theme = dark:tokyonight_night,light:catppuccin-latte
 
+# custom tabs. https://github.com/ttys3/my-ghostty-config
+gtk-wide-tabs = false
+gtk-tabs-location = bottom
+# gtk-custom-css = tab-style.css
+window-theme = ghostty
+
+# Approximate the kitty scrollback_lines=8000 setting.
+# Note: This is in bytes, not lines.
+scrollback-limit = 800000
+
 keybind = ctrl+enter=unbind
 keybind = alt+f11=toggle_fullscreen
 keybind = alt+f12=toggle_window_decorations
+
+keybind = ctrl+a>minus=new_split:down
+keybind = ctrl+a>shift+minus=new_split:right
+keybind = ctrl+a>c=new_tab
 

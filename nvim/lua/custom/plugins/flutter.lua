@@ -7,6 +7,11 @@ return {
   },
   config = true,
   opts = {
+    lsp = {
+      settings = {
+        showTodos = false,
+      },
+    },
     decorations = {
       statusline = {
         app_version = true,
