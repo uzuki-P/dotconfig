@@ -7,6 +7,7 @@ vim.api.nvim_set_keymap('i', '<C-BS>', '<C-W>', { noremap = true })
 vim.api.nvim_set_keymap('i', '<C-?>', '<C-W>', { noremap = true })
 vim.api.nvim_set_keymap('i', '<C-H>', '<C-W>', { noremap = true })
 vim.api.nvim_set_keymap('i', '^H', '<C-W>', { noremap = true })
+-- vim.api.nvim_set_keymap('i', '<BS><BS>', '<C-W>', { noremap = true })
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -66,11 +67,11 @@ vim.keymap.set('n', '<M-p>', vim.diagnostic.goto_next)
 vim.keymap.set('n', '<M-n>', vim.diagnostic.goto_prev)
 
 -- vim.keymap.set('n', '<space>nr', '<cmd>source $MYVIMRC | echo "config reloaded"<CR>', { desc = '[N]vim [R]eload' })
-vim.keymap.set('n', '<space>nx', '<cmd>source % | echo "runned"<CR>') -- run this lua files
+vim.keymap.set('n', '<space>nx', '<cmd>source % | echo "runned"<CR>', { desc = 'run this lua files' })
 
 -- vim.keymap.set('n', '-', '<CMD>Oil<CR>', { desc = 'Open parent directory' })
 
-vim.keymap.set('n', '<space>x', '<cmd>bd<CR>', { desc = '[B]uffer [C]lose' })
+vim.keymap.set('n', '<space>x', '<cmd>bd<CR>', { desc = '[B]uffer [C]lose', silent = true })
 
 vim.keymap.set('n', '<space>b_', '<cmd>vs<CR>', { desc = '[B]uffer Split |' })
 vim.keymap.set('n', '<space>b-', '<cmd>split<CR>', { desc = '[B]uffer Split --' })
@@ -84,8 +85,8 @@ vim.keymap.set('n', 's', '', {})
 -- Map Ctrl + S to save the current file in normal mode
 vim.keymap.set('n', '<C-s>', ':w<CR>', { desc = 'Save file' })
 
-vim.keymap.set('n', '<Tab>', ':bnext<CR>', { desc = 'Next tab/buffer' })
-vim.keymap.set('n', '<S-Tab>', ':bprev<CR>', { desc = 'Next tab/buffer' })
+vim.keymap.set('n', '<Tab>', ':bnext<CR>', { desc = 'Next tab/buffer', silent = true })
+vim.keymap.set('n', '<S-Tab>', ':bprev<CR>', { desc = 'Next tab/buffer', silent = true })
 
 -- quick close/exit
 -- vim.keymap.set('n', '<leader>qq', ':q<CR>', { silent = true, noremap = true, desc = 'WARNING! quit buffer' })
