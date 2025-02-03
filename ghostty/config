@@ -15,7 +15,7 @@ theme = dark:tokyonight_night,light:catppuccin-latte
 # custom tabs. https://github.com/ttys3/my-ghostty-config
 gtk-wide-tabs = false
 gtk-tabs-location = bottom
-# gtk-custom-css = tab-style.css
+gtk-custom-css = tab-style.css
 window-theme = ghostty
 
 # Approximate the kitty scrollback_lines=8000 setting.
@@ -28,5 +28,14 @@ keybind = alt+f12=toggle_window_decorations
 
 keybind = ctrl+a>minus=new_split:down
 keybind = ctrl+a>shift+minus=new_split:right
+keybind = ctrl+a>o=goto_split:next
+keybind = ctrl+a>shift+o=goto_split:previous
+keybind = ctrl+a>h=goto_split:left
+keybind = ctrl+a>l=goto_split:right
+keybind = ctrl+a>k=goto_split:top
+keybind = ctrl+a>j=goto_split:bottom
 keybind = ctrl+a>c=new_tab
+
+# libadwaita enabled only
+keybind = ctrl+a>w=toggle_tab_overview 
 

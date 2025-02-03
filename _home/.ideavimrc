@@ -53,22 +53,25 @@ map <leader>dq <Action>(Flutter.Toolbar.ReloadAction)
 map <leader>dr <Action>(Debug)
 map <leader>ds <Action>(Stop)
 map <leader>y "+y
-map <leader>rn <Action>(RenameElement)
 map <leader>zc <Action>(ToggleDistractionFreeMode)
+
+map <leader>rn <Action>(RenameElement)
+map <leader>rem <Action>(ExtractMethod)
+map <leader>rev <Action>(IntroduceVariable)
 
 map <leader>x :q <CR>
 
-map <leader><leader> <Action>(Switcher)
+map <leader><leader> <Action>(RecentFiles)
+map <leader><tab> <Action>(RecentFiles)
 map <leader>e <Action>(SelectInProjectView)
 map <leader>f <Action>(ReformatCode)
-map <leader><tab> <Action>(RecentFiles)
 map <leader>sa <Action>(GotoAction)
 map <leader>sg <Action>(FindInPath)
-map <leader>st <Action>(FileStructurePopup)
+map <leader>ds <Action>(FileStructurePopup)
 map <leader>se <Action>(SearchEverywhere)
 map <leader>sf <Action>(GotoFile)
 map <leader>gh <Action>(Vcs.ShowTabbedFileHistory)
-map <S-Space> <Action>(GotoNextError)
+map <C-M-n> <Action>(GotoNextError)
 
 map <C-h> <C-w><C-h> 
 map <C-l> <C-w><C-l>
@@ -95,7 +98,7 @@ map Q gq
 " Just makes me nervous
 map H h
 
-" nmap s :<CR>
+nmap s :<CR>
 
 " From GUI settings
 sethandler <C-2> a:ide
