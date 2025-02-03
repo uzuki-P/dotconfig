@@ -1,9 +1,11 @@
 return {
   'nvim-flutter/flutter-tools.nvim',
   lazy = false,
+  ft = 'dart',
   dependencies = {
     'nvim-lua/plenary.nvim',
     'stevearc/dressing.nvim', -- optional for vim.ui.select
+    'artemave/workspace-diagnostics.nvim',
   },
   config = true,
   opts = {
@@ -11,6 +13,9 @@ return {
       settings = {
         showTodos = false,
       },
+      -- on_attach = function(client, bufnr)
+      --   require('workspace-diagnostics').populate_workspace_diagnostics(client, bufnr)
+      -- end,
     },
     decorations = {
       statusline = {

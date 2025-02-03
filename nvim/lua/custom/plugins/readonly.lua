@@ -1,5 +1,6 @@
 return {
   'bgaillard/readonly.nvim',
+  lazy = false,
   dependencies = {
     'rcarriga/nvim-notify',
   },
@@ -12,5 +13,4 @@ return {
       '~/.puro/.',
     },
   },
-  lazy = false,
 }

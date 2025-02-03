@@ -18,6 +18,7 @@ if status is-interactive
 
     abbr --add n nvim
     #abbr --add nv 'NVIM_APPNAME=nvchad nvim'
+    abbr --add lnv 'NVIM_APPNAME=lazy-vim nvim'
 
     abbr --add lg lazygit
 
