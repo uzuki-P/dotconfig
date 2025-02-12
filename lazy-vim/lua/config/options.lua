@@ -3,6 +3,7 @@
 -- Add any additional options here
 
 vim.g.snacks_animate = false
+vim.g.snacks_animate_scroll = false
 
 local opt = vim.opt
 
