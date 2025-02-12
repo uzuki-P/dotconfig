@@ -2,6 +2,18 @@
     min-height: 0px;
 }
 
+/*center address*/
+.UrlFragment-Wrapper--ShouldHighlight {
+    width: 100%;
+    text-align: center;
+}
+
+.UrlFragment-Wrapper > .UrlFragment--Lowlight,
+.UrlFragment-Wrapper > .UrlFragment-LinkWrapper > .UrlFragment--Lowlight {
+    display: none;
+}
+/* END center address */
+
 
 /* --- stolen from https://github.com/tovifun/VivalArc/issues/21#issuecomment-2408496416 --- */
 :root{
@@ -61,7 +73,7 @@
 
 .inner #tabs-tabbar-container,
 .inner .button-toolbar.workspace-popup.tabbar-workspace-button.button-menu {
-    transition: width 0.5s;
+    transition: width 0.3s;
 }
 
 /* --- END stolen from VivalArc --- */
