@@ -3,18 +3,13 @@ let mapleader=" "
 """ Plugins  --------------------------------
 set surround
 set which-key
-" set multiple-cursors
-" set commentary
-" set argtextobj
 set easymotion
-" set textobj-entire
-" set ReplaceWithRegister
-" set exchange
+set mini-ai
 set notimeout
+set NERDTree
 
 " --- Enable IdeaVim plugins https://jb.gg/ideavim-plugins
 Plug 'machakann/vim-highlightedyank'
-" Plug 'justinmk/vim-sneak'
 
 """ Plugin settings -------------------------
 let g:argtextobj_pairs="[:],(:),<:>"
@@ -36,8 +31,6 @@ set clipboard=none
 
 """ Idea specific settings ------------------
 set ideajoin
-"set ideastatusicon=gray
-set NERDTree
 
 "" -- Map IDE actions to IdeaVim -- https://jb.gg/abva4t
 nmap <enter> <Plug>(easymotion-s)
@@ -62,7 +55,6 @@ map <leader>rev <Action>(IntroduceVariable)
 map <leader>x :q <CR>
 
 map <leader><leader> <Action>(RecentFiles)
-map <leader><tab> <Action>(RecentFiles)
 map <leader>e <Action>(SelectInProjectView)
 map <leader>f <Action>(ReformatCode)
 map <leader>sa <Action>(GotoAction)
