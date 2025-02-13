@@ -24,7 +24,7 @@ fish_add_path -ga ~/.npm-global/bin
 fish_add_path -ga ~/.local/opt/go/bin
 
 set -gx MANPATH /usr/local/man
-set -gx JAVA_HOME /usr/lib/jvm/java-17-openjdk-17.0.13.0.11-3.fc41.x86_64
+set -gx JAVA_HOME /usr/lib/jvm/java-17-openjdk-17.0.14.0.7-1.fc41.x86_64
 set -gx ANDROID_HOME $HOME/sdk/android
 set -gx ANDROID_SDK $HOME/sdk/android
 set -gx PURO_ROOT $HOME/.puro
@@ -35,4 +35,3 @@ if not contains "$HOME/.cargo/bin" $PATH
     # Prepending path in case a system-installed rustc needs to be overridden
     set -x PATH "$HOME/.cargo/bin" $PATH
 end
-

@@ -53,7 +53,8 @@ map <leader>rn <Action>(RenameElement)
 map <leader>rem <Action>(ExtractMethod)
 map <leader>rev <Action>(IntroduceVariable)
 
-map <leader>x :q <CR>
+" buffer delete
+map <leader>bd :q <CR>
 
 map <leader><leader> <Action>(RecentFiles)
 map <leader>e <Action>(SelectInProjectView)
@@ -72,8 +73,8 @@ map <C-j> <C-w><C-j>
 map <C-k> <C-w><C-k>
 
 " Map Tab to switch to the next tab in normal mode
-nnoremap <Tab> :tabnext<CR>
-nnoremap <S-Tab> :tabprev<CR>
+nnoremap <S-l> :tabnext<CR>
+nnoremap <S-h> :tabprev<CR>
 
 " Move line up/down
 vmap <S-J> <Action>(MoveStatementDown)
@@ -89,7 +90,7 @@ map <leader>or <Action>(OverrideMethods)
 map Q gq
 
 " Just makes me nervous
-map H h
+" map H h
 
 nmap s :<CR>
 
