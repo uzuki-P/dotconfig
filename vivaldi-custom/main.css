@@ -2,6 +2,15 @@
     min-height: 0px;
 }
 
+/*  windows config  */
+#browser.win.address-top .toolbar:has(.window-buttongroup.on-mainbar) {
+    min-height: 0px;
+}
+.disable-titlebar#browser.win .window-buttongroup {
+    height: 34px;
+}
+/* END windows config  */
+
 /* center address */
 .UrlFragment-Wrapper--ShouldHighlight {
     width: 100%;
