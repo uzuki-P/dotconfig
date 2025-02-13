@@ -34,6 +34,7 @@ set ideajoin
 
 "" -- Map IDE actions to IdeaVim -- https://jb.gg/abva4t
 nmap <enter> <Plug>(easymotion-s)
+vmap <enter> <Plug>(easymotion-s)
 
 "" use 'Track Action Id' to set action
 
@@ -56,7 +57,7 @@ map <leader>x :q <CR>
 
 map <leader><leader> <Action>(RecentFiles)
 map <leader>e <Action>(SelectInProjectView)
-map <leader>f <Action>(ReformatCode)
+map <leader>cf <Action>(ReformatCode)
 map <leader>sa <Action>(GotoAction)
 map <leader>sg <Action>(FindInPath)
 map <leader>ds <Action>(FileStructurePopup)
