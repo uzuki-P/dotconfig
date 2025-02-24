@@ -1,15 +1,14 @@
+/* min height address bar */
 #browser.linux:not(.native).address-top .toolbar:has(.window-buttongroup.on-mainbar) {
     min-height: 0px;
 }
-
-/*  windows config  */
 #browser.win.address-top .toolbar:has(.window-buttongroup.on-mainbar) {
     min-height: 0px;
 }
 .disable-titlebar#browser.win .window-buttongroup {
     height: 34px;
 }
-/* END windows config  */
+/* END min height address bar */
 
 /* center address */
 .UrlFragment-Wrapper--ShouldHighlight {
@@ -50,8 +49,6 @@
 
 .inner > .tabbar-wrapper > .tabbar-wrapper{
     position: absolute;
-    /*background-image: url("chrome://vivaldi-data/thumbnail/WVKXPHMBICN2BPZCJFRT6B4RYYRCN6JS.png");*/
-    /*background-size: cover;*/
     overflow: hidden;
     z-index: 1;
 }
@@ -60,6 +57,5 @@
 .inner .button-toolbar.workspace-popup.tabbar-workspace-button.button-menu {
     transition: width 300ms ease-out 0ms;
 }
-
 /* --- END stolen from VivalArc --- */
 
