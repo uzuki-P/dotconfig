@@ -83,7 +83,7 @@ vmap <S-K> <Action>(MoveStatementUp)
 " Reformat the current line only
 map <leader>l V<Action>(ReformatCode)
 
-map <leader>b <Action>(ToggleLineBreakpoint)
+map <leader>db <Action>(ToggleLineBreakpoint)
 map <leader>or <Action>(OverrideMethods)
 
 " Don't use Ex mode, use Q for formatting.
