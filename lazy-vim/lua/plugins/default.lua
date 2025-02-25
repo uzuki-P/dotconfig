@@ -21,14 +21,32 @@ return {
   },
   {
     "neovim/nvim-lspconfig",
-    opts = function(_, opts)
+    opts = {
       -- disable inlay hints
-      vim.list_extend(opts.inlay_hints, {
+      inlay_hints = {
         enabled = false,
-        exclude = {
-          "dart",
+        -- exclude = {
+        --   "dart",
+        -- },
+      },
+    },
+  },
+  {
+    "rcarriga/nvim-dap-ui",
+    opts = {
+      layouts = {
+        {
+          elements = {
+            { id = "watches", size = 0.2 }, -- Watch expressions
+            { id = "scopes", size = 0.1 }, -- Variables in scope
+            { id = "stacks", size = 0.1 }, -- Call stack
+            { id = "breakpoints", size = 0.1 }, -- Active breakpoints
+            { id = "repl", size = 0.5 }, -- Debug console output
+          },
+          size = 0.2, -- 20% of the screen width
+          position = "right",
         },
-      })
-    end,
+      },
+    },
   },
 }
