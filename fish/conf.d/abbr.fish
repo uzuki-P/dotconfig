@@ -17,7 +17,7 @@ if status is-interactive
     abbr --add n-d 'nordvpn d'
 
     abbr --add n nvim
-    abbr --add nv 'NVIM_APPNAME=lazy-vim nvim'
+    abbr --add nv 'NVIM_APPNAME=nvim-bak nvim'
 
     abbr --add lg lazygit
 

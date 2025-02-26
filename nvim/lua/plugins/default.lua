@@ -12,6 +12,35 @@ return {
     },
   },
   {
+    "saghen/blink.cmp",
+    optional = true,
+    opts = {
+      snippets = {
+        preset = "luasnip",
+      },
+    },
+  },
+  {
+    "nvim-treesitter/nvim-treesitter",
+    opts = {
+      ensure_installed = {
+        "bash",
+        "html",
+        "javascript",
+        "json",
+        "lua",
+        "markdown",
+        "markdown_inline",
+        "query",
+        "regex",
+        "tsx",
+        "typescript",
+        "vim",
+        "yaml",
+      },
+    },
+  },
+  {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
     opts = function(_, opts)
@@ -38,12 +67,12 @@ return {
         {
           elements = {
             { id = "watches", size = 0.2 }, -- Watch expressions
-            { id = "scopes", size = 0.1 }, -- Variables in scope
-            { id = "stacks", size = 0.1 }, -- Call stack
+            { id = "scopes", size = 1.05 }, -- Variables in scope
+            { id = "stacks", size = 0.05 }, -- Call stack
             { id = "breakpoints", size = 0.1 }, -- Active breakpoints
-            { id = "repl", size = 0.5 }, -- Debug console output
+            { id = "repl", size = 0.6 }, -- Debug console output
           },
-          size = 0.2, -- 20% of the screen width
+          size = 0.3, -- % of the screen width
           position = "right",
         },
       },

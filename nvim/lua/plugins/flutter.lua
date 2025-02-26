@@ -31,10 +31,17 @@ return {
     },
   },
   opts = {
+    root_patterns = { ".git", "pubspec.yaml" },
     lsp = {
       settings = {
         showTodos = false,
+        completeFunctionCalls = true,
+        analysisExcludedFolders = { "/home/uzuki_p/.puro/envs/stable/flutter/bin/flutter" },
+        renameFilesWithClasses = "prompt", -- "always"
+        enableSnippets = false,
+        updateImportsOnRename = true, -- Whether to update imports and other directives when files are renamed. Required for `FlutterRename` command.
       },
+
       -- on_attach = function(client, bufnr)
       --   require('workspace-diagnostics').populate_workspace_diagnostics(client, bufnr)
       -- end,
@@ -60,6 +67,7 @@ return {
     debugger = {
       enabled = true,
       run_via_dap = true,
+      exception_breakpoints = {},
       register_configurations = function(_)
         require("dap").adapters.dart = {
           type = "executable",
