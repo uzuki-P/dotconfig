@@ -11,15 +11,22 @@ return {
       },
     },
   },
-  {
-    "saghen/blink.cmp",
-    optional = true,
-    opts = {
-      snippets = {
-        preset = "luasnip",
-      },
-    },
-  },
+  -- {
+  --   "saghen/blink.cmp",
+  --   optional = true,
+  --   opts = {
+  --     snippets = {
+  --       preset = "luasnip",
+  --     },
+  --   },
+  -- },
+  -- {
+  --   "rafamadriz/friendly-snippets",
+  --   config = function()
+  --     require("luasnip.loaders.from_vscode").lazy_load()
+  --     require("luasnip.loaders.from_vscode").lazy_load({ paths = { vim.fn.stdpath("config") .. "/snippets" } })
+  --   end,
+  -- },
   {
     "nvim-treesitter/nvim-treesitter",
     opts = {

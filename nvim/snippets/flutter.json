@@ -1,6 +1,6 @@
 {
   "Stateless Widget": {
-    "prefix": "stlw",
+    "prefix": "statelessW",
     "body": [
       "class ${1:name} extends StatelessWidget {",
       "  const ${1:name}({super.key});\n",

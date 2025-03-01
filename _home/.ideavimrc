@@ -43,9 +43,9 @@ map gc <Action>(CommentByLineComment)
 
 nmap <Leader>nr :source ~/.ideavimrc<CR>:echo "IdeaVim reloaded!"<CR>
 
-map <leader>dq <Action>(Flutter.Toolbar.ReloadAction)
-map <leader>dr <Action>(Debug)
-map <leader>ds <Action>(Stop)
+map <leader>dfr <Action>(Flutter.Toolbar.ReloadAction)
+map <leader>dfd <Action>(Debug)
+map <leader>dfs <Action>(Stop)
 map <leader>y "+y
 map <leader>zc <Action>(ToggleDistractionFreeMode)
 
