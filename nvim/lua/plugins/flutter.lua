@@ -36,9 +36,10 @@ return {
       settings = {
         showTodos = false,
         completeFunctionCalls = true,
-        analysisExcludedFolders = { "/home/uzuki_p/.puro/envs/stable/flutter/bin/flutter" },
+        -- analysisExcludedFolders = { "/home/uzuki_p/.puro/envs/stable/flutter/bin/flutter" },
+        analysisExcludedFolders = { "/home/uzuki_p/.puro/" },
         renameFilesWithClasses = "prompt", -- "always"
-        enableSnippets = false,
+        enableSnippets = true,
         updateImportsOnRename = true, -- Whether to update imports and other directives when files are renamed. Required for `FlutterRename` command.
       },
 
@@ -67,7 +68,9 @@ return {
     debugger = {
       enabled = true,
       run_via_dap = true,
-      exception_breakpoints = {},
+      -- if empty dap will not stop on any exceptions, otherwise it will stop on those specified
+      -- see |:help dap.set_exception_breakpoints()| for more info
+      exception_breakpoints = nil,
       register_configurations = function(_)
         require("dap").adapters.dart = {
           type = "executable",
