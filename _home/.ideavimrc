@@ -55,17 +55,20 @@ map <leader>rev <Action>(IntroduceVariable)
 
 " buffer delete
 map <leader>bd :q <CR>
+map <leader>bo <Action>(CloseAllEditorsButActive)
 
-map <leader><leader> <Action>(RecentFiles)
+map <leader><leader> <Action>(GotoFile)
+map <leader>, <Action>(RecentFiles)
 map <leader>e <Action>(SelectInProjectView)
 map <leader>cf <Action>(ReformatCode)
+map <leader>ca <Action>(ShowIntentionActions)
 map <leader>sa <Action>(GotoAction)
 map <leader>sg <Action>(FindInPath)
 map <leader>ds <Action>(FileStructurePopup)
 map <leader>se <Action>(SearchEverywhere)
-map <leader>sf <Action>(GotoFile)
 map <leader>gh <Action>(Vcs.ShowTabbedFileHistory)
-map <C-M-n> <Action>(GotoNextError)
+map <leader>xx <Action>(ActivateDartAnalysisToolWindow)
+map ]e <Action>(GotoNextError)
 
 map <C-h> <C-w><C-h> 
 map <C-l> <C-w><C-l>

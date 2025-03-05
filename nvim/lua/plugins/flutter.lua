@@ -36,8 +36,11 @@ return {
       settings = {
         showTodos = false,
         completeFunctionCalls = true,
-        -- analysisExcludedFolders = { "/home/uzuki_p/.puro/envs/stable/flutter/bin/flutter" },
-        analysisExcludedFolders = { "/home/uzuki_p/.puro/" },
+        analysisExcludedFolders = {
+          "/home/uzuki_p/.puro/envs/stable/flutter/bin/flutter",
+          "/home/uzuki_p/.puro",
+          "/home/uzuki_p/.puro/envs/3.24.5/flutter/bin/flutter",
+        },
         renameFilesWithClasses = "prompt", -- "always"
         enableSnippets = true,
         updateImportsOnRename = true, -- Whether to update imports and other directives when files are renamed. Required for `FlutterRename` command.
@@ -64,7 +67,7 @@ return {
       focus_on_open = true, -- focus on the newly opened log window
     },
     flutter_path = "/home/uzuki_p/.puro/envs/stable/flutter/bin/flutter",
-    -- flutter_path = '/home/uzuki_p/.puro/envs/3.24.5/flutter/bin/flutter',
+    -- flutter_path = "/home/uzuki_p/.puro/envs/3.24.5/flutter/bin/flutter",
     debugger = {
       enabled = true,
       run_via_dap = true,
@@ -84,14 +87,14 @@ return {
         }
         require("dap").configurations.dart = {
           {
+            name = "[Stable] main_staging.dart (Staging flavor)",
             type = "flutter",
             request = "launch",
-            name = "[Stable] main_staging.dart (Staging flavor)",
+            cwd = "${workspaceFolder}",
+            program = "${workspaceFolder}/lib/main_staging.dart",
             flutter_mode = "staging",
             dartSdkPath = "/home/uzuki_p/.puro/envs/stable/flutter/bin/cache/dart-sdk/bin/dart",
             flutterSdkPath = "/home/uzuki_p/.puro/envs/stable/flutter/bin/flutter",
-            program = "${workspaceFolder}/lib/main_staging.dart",
-            cwd = "${workspaceFolder}",
             args = { "--flavor", "staging" },
           },
           {
@@ -99,7 +102,7 @@ return {
             request = "launch",
             name = "[3.24.5] main.dart (Staging flavor)",
             flutter_mode = "staging",
-            dartSdkPath = "/home/uzuki_p/.puro/envs/3.24.5/flutter/bin/cache/dart-sdk/bin/dart",
+            dartSdkPath = "/home/uzuki_p/.puro/envs/3.24.5/flutter/bin/cache/dart-sdk/",
             flutterSdkPath = "/home/uzuki_p/.puro/envs/3.24.5/flutter/bin/flutter",
             program = "${workspaceFolder}/lib/main.dart",
             cwd = "${workspaceFolder}",
@@ -113,6 +116,17 @@ return {
             dartSdkPath = "/home/uzuki_p/.puro/envs/stable/flutter/bin/cache/dart-sdk/bin/dart",
             flutterSdkPath = "/home/uzuki_p/.puro/envs/stable/flutter/bin/flutter",
             program = "${workspaceFolder}/lib/main_staging.dart",
+            cwd = "${workspaceFolder}",
+            -- args = { "--flavor", "staging" },
+          },
+          {
+            type = "flutter",
+            request = "launch",
+            name = "[Stable] main.dart (no flavor)",
+            -- flutter_mode = "staging",
+            dartSdkPath = "/home/uzuki_p/.puro/envs/stable/flutter/bin/cache/dart-sdk/bin/dart",
+            flutterSdkPath = "/home/uzuki_p/.puro/envs/stable/flutter/bin/flutter",
+            program = "${workspaceFolder}/lib/main.dart",
             cwd = "${workspaceFolder}",
             -- args = { "--flavor", "staging" },
           },

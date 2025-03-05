@@ -30,3 +30,6 @@ screenutil
 OneSignal
 github
 FlutterGen
+#eolocator/!
+geolocator/!
+geolocator
