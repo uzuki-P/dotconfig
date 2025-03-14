@@ -49,25 +49,29 @@ map <leader>dfs <Action>(Stop)
 map <leader>y "+y
 map <leader>zc <Action>(ToggleDistractionFreeMode)
 
-map <leader>rn <Action>(RenameElement)
-map <leader>rem <Action>(ExtractMethod)
-map <leader>rev <Action>(IntroduceVariable)
+map <leader>cr <Action>(RenameElement)
+map <leader>cem <Action>(ExtractMethod)
+map <leader>cew <Action>(Flutter.ExtractWidget)
+map <leader>cev <Action>(IntroduceVariable)
 
 " buffer delete
 map <leader>bd :q <CR>
 map <leader>bo <Action>(CloseAllEditorsButActive)
 
-map <leader><leader> <Action>(GotoFile)
+map - <Action>(SelectInProjectView)
+map <leader><Space> <Action>(GotoFile)
 map <leader>, <Action>(RecentFiles)
-map <leader>e <Action>(SelectInProjectView)
 map <leader>cf <Action>(ReformatCode)
 map <leader>ca <Action>(ShowIntentionActions)
 map <leader>sa <Action>(GotoAction)
 map <leader>sg <Action>(FindInPath)
 map <leader>ds <Action>(FileStructurePopup)
+map <leader>du <Action>(ActivateDebugToolWindow)
 map <leader>se <Action>(SearchEverywhere)
-map <leader>gh <Action>(Vcs.ShowTabbedFileHistory)
+map <leader>gf <Action>(Vcs.ShowTabbedFileHistory)
 map <leader>xx <Action>(ActivateDartAnalysisToolWindow)
+map <leader>uz <Action>(ToggleZenMode)
+map [e <Action>(GotoPreviousError)
 map ]e <Action>(GotoNextError)
 
 map <C-h> <C-w><C-h> 
@@ -87,6 +91,7 @@ vmap <S-K> <Action>(MoveStatementUp)
 map <leader>l V<Action>(ReformatCode)
 
 map <leader>db <Action>(ToggleLineBreakpoint)
+map <leader>dc <Action>(Resume)
 map <leader>or <Action>(OverrideMethods)
 
 " Don't use Ex mode, use Q for formatting.

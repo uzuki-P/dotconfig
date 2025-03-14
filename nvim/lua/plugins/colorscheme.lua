@@ -1,5 +1,9 @@
 return {
-  -- { "catppuccin/nvim" },
+  { "catppuccin/nvim" },
+  { "yorik1984/newpaper.nvim" },
+  { "sainnhe/edge" },
+  { "morhetz/gruvbox" },
+  { "chiendo97/intellij.vim" },
   {
     "f-person/auto-dark-mode.nvim",
     -- enabled = false,
