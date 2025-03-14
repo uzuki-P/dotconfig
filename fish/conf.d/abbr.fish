@@ -29,6 +29,7 @@ if status is-interactive
     abbr --add gco 'git checkout'
     abbr --add gaa 'git add -A'
     abbr --add gpr 'git pull --rebase'
+    abbr --add gpnr 'git pull --no-rebase'
     abbr --add gfap 'git fetch -ap'
     abbr --add gp 'git push'
     abbr --add gdiff 'git diff --color-words'
