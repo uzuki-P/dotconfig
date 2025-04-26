@@ -19,16 +19,20 @@ fish_add_path -ga ~/.puro/bin
 fish_add_path -ga ~/.puro/shared/pub_cache/bin
 fish_add_path -ga ~/.puro/envs/default/flutter/bin
 fish_add_path -ga ~/.npm-global/bin
+fish_add_path -ga ~/.maestro/bin
 
 ## for bootdev https://github.com/bootdotdev/bootdev?tab=readme-ov-file#1-install-go-122-or-later
 fish_add_path -ga ~/.local/opt/go/bin
 
 set -gx MANPATH /usr/local/man
-set -gx JAVA_HOME /usr/lib/jvm/java-17-openjdk-17.0.14.0.7-6.fc41
+set -gx JAVA_HOME /usr/lib/jvm/temurin-17-jdk
 set -gx ANDROID_HOME $HOME/sdk/android
 set -gx ANDROID_SDK $HOME/sdk/android
 set -gx PURO_ROOT $HOME/.puro
 set -gx PUB_CACHE $HOME/.puro/shared/pub_cache
+
+# copyq wayland. https://github.com/hluk/CopyQ/issues/27#issuecomment-549766568
+set -gx QT_QPA_PLATFORM xcb
 
 # rustup shell setup
 if not contains "$HOME/.cargo/bin" $PATH

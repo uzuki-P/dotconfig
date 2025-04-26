@@ -66,8 +66,8 @@ return {
       open_cmd = "15split", -- command to use to open the log buffer
       focus_on_open = true, -- focus on the newly opened log window
     },
-    flutter_path = "/home/uzuki_p/.puro/envs/stable/flutter/bin/flutter",
-    -- flutter_path = "/home/uzuki_p/.puro/envs/3.24.5/flutter/bin/flutter",
+    -- flutter_path = "/home/uzuki_p/.puro/envs/stable/flutter/bin/flutter",
+    flutter_path = "/home/uzuki_p/.puro/envs/3.24.5/flutter/bin/flutter",
     debugger = {
       enabled = true,
       run_via_dap = true,

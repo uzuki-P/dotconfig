@@ -35,6 +35,7 @@ keybind = ctrl+a>l=goto_split:right
 keybind = ctrl+a>k=goto_split:top
 keybind = ctrl+a>j=goto_split:bottom
 keybind = ctrl+a>c=new_tab
+keybind = ctrl+a>x=close_surface
 keybind = ctrl+a>ctrl+l=next_tab
 keybind = ctrl+a>ctrl+h=previous_tab
 keybind = ctrl+a>n=new_window
