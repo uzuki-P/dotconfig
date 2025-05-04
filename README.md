@@ -21,6 +21,11 @@ gcc make git ripgrep fd-find unzip
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
+## Install [carapace](https://carapace.sh/) (shell completion. Honestly still not sure how this works)
+
+Download from [here](https://github.com/carapace-sh/carapace-bin/releases)
+
+
 ## Install [puro](https://puro.dev/) (flutter version manager)
 
 ```bash
@@ -30,7 +35,7 @@ puro use -g stable
 
 ## Install [intellij idea ce](https://www.jetbrains.com/idea/download)
 
-On download page scroll a bit to download the community edition. Download flutter and android plugins. Restart IDE. Create android project and set `android-sdk` folder to `~/sdk/android`.
+On download page scroll a bit to download the community edition. Download flutter and android plugins. Restart IDE. Create android project and set `android-sdk` folder to `~/sdk/android`. Also download android-platform-tools from the idea.
 
 > Use `tar xvf` to extract.
 
@@ -47,9 +52,11 @@ git reset --hard    # change the default config to dotconfig
 
 # NOTES
 
-## change java version on fedora
+## change java version on fedora 42
 
 ```bash
+sudo dnf install adoptium-temurin-java-repository
+sudo dnf install temurin-17-jdk
 sudo alternatives --config java
 ```
 

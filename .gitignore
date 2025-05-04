@@ -5,3 +5,6 @@ _home/.config/nushell/history.txt
 
 # fish auto gen
 fish/fish_variables
+
+# nvim deps
+nvim/lazy-lock.json
