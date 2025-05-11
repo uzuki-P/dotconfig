@@ -1,7 +1,6 @@
 #!/bin/sh
 
-SDL_VIDEODRIVER=x11 \
-  scrcpy \
+/home/uzuki_p/apps/scrcpy/scrcpy \
   --video-bit-rate=6000000 \
   --max-size=720 \
   --turn-screen-off \
@@ -11,5 +10,3 @@ SDL_VIDEODRIVER=x11 \
   --no-audio \
   --no-mouse-hover \
   --shortcut-mod="lalt,ralt"
-
-# --show-touches \
