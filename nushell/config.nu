@@ -657,7 +657,7 @@ $env.config = {
             modifier: control
             keycode: backspace
             mode: [emacs, vi_insert]
-            event: { edit: backspaceword }
+            event: { edit: cutwordleft }
         }
         {
             name: delete_one_character_forward
@@ -909,17 +909,23 @@ alias tmi = tmux new -As idea
 alias idea = ~/apps/idea/bin/idea
 
 alias cb = xclip -selection clipboard
-# alias ll = exa -lg --git --header
-# alias la = exa -lag --git --header
+# alias ll = eza -lg --git --header
+# alias la = eza -lag --git --header
 alias ll = ls -l
 alias la = ls --all -l
 alias lt = eza --tree --level=2 --long --icons --git
 
 # alias flutter-update = 'flutter upgrade && flutter doctor && shorebird upgrade && shorebird doctor'
-alias nord-mesh-on = nordvpn set meshnet on
-alias nord-mesh-off = nordvpn set meshnet off
+alias nm-on = nordvpn set meshnet on
+alias nm-off = nordvpn set meshnet off
 
+alias n-c = nordvpn c id
+alias n-d = nordvpn d
+
+alias n = nvim
 alias nv = NVIM_APPNAME=nvchad nvim
+
+alias lg = lazygit
 
 alias android-emulator = ~/sdk/android/emulator/emulator -avd Pixel_8a_API_28 -no-boot-anim -noaudio -no-snapshot
 
@@ -929,6 +935,7 @@ alias gc = git commit
 alias gco = git checkout
 alias gaa = git add -A
 alias gpr = git pull --rebase
+alias gpnr = git pull --no-rebase
 alias gfap = git fetch -ap
 alias gp = git push
 alias gdiff = git diff --color-words

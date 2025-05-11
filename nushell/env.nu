@@ -96,11 +96,25 @@ use std "path add"
 # path add ($env.CARGO_HOME | path join "bin")
 # path add ($env.HOME | path join ".local" "bin")
 # $env.PATH = ($env.PATH | uniq)
-path add ($env.HOME | path join ".npm-global" "bin")
-path add ($env.HOME | path join "script")
-path add ($env.HOME | path join "bin")
-
-# To load from a custom file you can use:
+path add '/home/linuxbrew/.linuxbrew/bin'
+path add '~/sdk/android/tools'
+path add '~/go/bin'
+path add '~/sdk/android/tools/bin'
+path add '~/sdk/android/platform-tools'
+path add '~/script'                    
+path add '~/bin'                        
+path add '~/.cargo/env'
+path add '~/.config/composer/vendor/bin'
+path add '~/.local/bin'
+path add '~/.pub-cache/bin'
+path add '~/.shorebird/bin'
+path add '~/.puro/bin'
+path add '~/.puro/shared/pub_cache/bin'
+path add '~/.puro/envs/default/flutter/bin'
+path add '~/.npm-global/bin'
+path add '~/.maestro/bin'
+                                       
+# To load from a custom file you can u se:
 # source ($nu.default-config-dir | path join 'custom.nu')
 
 # ---------- Custom ----------
@@ -112,7 +126,7 @@ $env.PNPM_HOME = $"($env.HOME)/.local/share/pnpm"
 $env.PATH = ($env.PATH | split row (char esep) | prepend $env.PNPM_HOME )
 
 $env.MANPATH = '/usr/local/man'
-$env.JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-17.0.13.0.11-3.fc41.x86_64'
+$env.JAVA_HOME = '/usr/lib/jvm/temurin-17-jdk'
 $env.ANDROID_HOME = ($env.HOME | path join "sdk" "android")
 $env.ANDROID_SDK = ($env.HOME | path join "sdk" "android")
 $env.PURO_ROOT = ($env.HOME | path join ".puro")

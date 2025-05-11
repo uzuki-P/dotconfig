@@ -3,6 +3,7 @@ set -e fish_user_paths
 
 ## ADD to PATH ##
 #fish_add_path -ga ~/sdk/flutter/bin
+fish_add_path -ga /home/linuxbrew/.linuxbrew/bin
 fish_add_path -ga ~/sdk/android/tools
 fish_add_path -ga ~/go/bin
 fish_add_path -ga ~/sdk/android/tools/bin
@@ -10,7 +11,6 @@ fish_add_path -ga ~/sdk/android/platform-tools
 fish_add_path -ga ~/script
 fish_add_path -ga ~/bin
 fish_add_path -ga ~/.cargo/env
-fish_add_path -ga /home/linuxbrew/.linuxbrew/bin
 fish_add_path -ga ~/.config/composer/vendor/bin
 fish_add_path -ga ~/.local/bin
 fish_add_path -ga ~/.pub-cache/bin
