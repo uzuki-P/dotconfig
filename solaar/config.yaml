@@ -7,7 +7,7 @@
   _battery: 4100
   _modelId: B03400000000
   _sensitive: {divert-keys: false, hires-scroll-mode: ignore, hires-smooth-invert: ignore, hires-smooth-resolution: ignore, reprogrammable-keys: false,
-    thumb-scroll-invert: false, thumb-scroll-mode: false}
+    smart-shift: false, thumb-scroll-invert: false, thumb-scroll-mode: false}
   _serial: '76372796'
   _unitId: '76372796'
   _wpid: B034
@@ -16,7 +16,7 @@
   dpi: 1000
   hires-scroll-mode: false
   hires-smooth-invert: false
-  hires-smooth-resolution: true
+  hires-smooth-resolution: false
   reprogrammable-keys: {80: 80, 81: 81, 82: 82, 83: 83, 86: 82, 195: 195, 196: 196}
   scroll-ratchet: 2
   smart-shift: 10
