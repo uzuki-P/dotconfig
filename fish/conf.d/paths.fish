@@ -20,10 +20,13 @@ fish_add_path -ga ~/.puro/shared/pub_cache/bin
 fish_add_path -ga ~/.puro/envs/default/flutter/bin
 fish_add_path -ga ~/.npm-global/bin
 fish_add_path -ga ~/.maestro/bin
+fish_add_path -ga ~/apps/scrcpy # make sure below android/tools 
 
 ## for bootdev https://github.com/bootdotdev/bootdev?tab=readme-ov-file#1-install-go-122-or-later
 fish_add_path -ga ~/.local/opt/go/bin
 
+set -gx VISUAL nvim
+set -gx EDITOR nvim
 set -gx MANPATH /usr/local/man
 set -gx JAVA_HOME /usr/lib/jvm/temurin-17-jdk
 set -gx ANDROID_HOME $HOME/sdk/android
