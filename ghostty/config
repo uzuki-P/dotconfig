@@ -20,7 +20,7 @@ window-theme = ghostty
 
 # Approximate the kitty scrollback_lines=8000 setting.
 # Note: This is in bytes, not lines.
-scrollback-limit = 800000
+scrollback-limit = 80000000000
 
 keybind = ctrl+enter=unbind
 keybind = alt+f11=toggle_fullscreen

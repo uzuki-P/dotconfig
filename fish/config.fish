@@ -45,3 +45,6 @@ end
 
 # carapace. https://carapace-sh.github.io/carapace-bin/spec/bridge.html?highlight=fish#fish
 carapace _carapace | source
+
+# Generated for envman. Do not edit.
+test -s ~/.config/envman/load.fish; and source ~/.config/envman/load.fish

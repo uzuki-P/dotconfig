@@ -2,7 +2,7 @@
 
 /home/uzuki_p/apps/scrcpy/scrcpy \
   --video-bit-rate=6000000 \
-  --max-size=720 \
+  --max-size=1080 \
   --turn-screen-off \
   --stay-awake \
   --window-borderless \

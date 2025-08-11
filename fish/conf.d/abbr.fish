@@ -12,7 +12,8 @@ if status is-interactive
     abbr --add nm-on 'nordvpn set meshnet on'
     abbr --add nm-off 'nordvpn set meshnet off'
 
-    abbr --add n-c 'nordvpn c id'
+    abbr --add n-id 'nordvpn c id'
+    abbr --add n-sg 'nordvpn c sg'
     abbr --add n-d 'nordvpn d'
 
     abbr --add n nvim
