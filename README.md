@@ -25,7 +25,6 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 Download from [here](https://github.com/carapace-sh/carapace-bin/releases)
 
-
 ## Install [puro](https://puro.dev/) (flutter version manager)
 
 ```bash
@@ -41,7 +40,7 @@ On download page scroll a bit to download the community edition. Download flutte
 
 ## Run setup.sh
 
-There's might be some conflict since config files might be created when we install the dependencies. So we need to call `--adopt` manually first. 
+There's might be some conflict since config files might be created when we install the dependencies. So we need to call `--adopt` manually first.
 
 ```
 cd ~/dotconfig
@@ -60,7 +59,7 @@ sudo dnf install temurin-17-jdk
 sudo alternatives --config java
 ```
 
-## zsh config:
+## zsh config
 
 Autocompletion & syntax highlight for zsh:
 
@@ -68,5 +67,18 @@ Autocompletion & syntax highlight for zsh:
 git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+```
+
+## sudo.yazi
+
+```bash
+ya pack -a TD-Sky/sudo
+```
+
+## vial config
+
+```
+# Iteung
+KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{serial}=="*vial:f64c2b3c*", ATTRS{idVendor}=="7370", ATTRS{idProduct}=="0287", MODE="0660", GROUP="uzuki_p", TAG+="uaccess", TAG+="udev-acl"
 ```
 

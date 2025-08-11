@@ -1,0 +1,4 @@
+exit
+exi
+$env.PATH
+exit
