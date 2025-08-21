@@ -1,0 +1,57 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "agent": {
+    "default_profile": "ask"
+  },
+  "context_servers": {
+    "mcp-server-context7": {
+      "source": "extension",
+      "enabled": true,
+      "settings": {
+        "default_minimum_tokens": "10000"
+      }
+    }
+  },
+  "project_panel": {
+    "dock": "right"
+  },
+  "preferred_line_length": 80,
+  "show_wrap_guides": true,
+  "wrap_guides": [80, 120],
+  "indent_guides": {
+    "background_coloring": "indent_aware"
+  },
+  "vim_mode": true,
+  "ui_font_size": 16,
+  // "ui_font_family": "JetBrainsMono Nerd Font Mono",
+  "buffer_font_size": 16,
+  "buffer_font_family": "JetBrainsMono Nerd Font Mono",
+  "buffer_font_features": {
+    "calt": false // Disable ligatures
+  },
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "One Dark"
+  },
+  "vim": {
+    "use_system_clipboard": "on_yank",
+    "use_smartcase_find": true,
+    "toggle_relative_line_numbers": true,
+    "highlight_on_yank_duration": 200
+  },
+  "tab_size": 2,
+  "hard_tabs": false,
+  "terminal": {
+    "shell": {
+      "program": "fish"
+    }
+  }
+}
