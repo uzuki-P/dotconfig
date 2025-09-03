@@ -8,7 +8,7 @@
   },
   // Window's navigation
   {
-    "context": "Dock || Terminal || Editor",
+    "context": "(Dock && !Terminal) || Editor",
     "bindings": {
       // Window's motions
       "ctrl-h": "workspace::ActivatePaneLeft",
@@ -23,13 +23,6 @@
       "q": "git_panel::Close"
     }
   },
-  {
-    "context": "AgentPanel",
-    "bindings": {
-      "ctrl-\\": "workspace::ToggleRightDock",
-      "cmd-k": "workspace::ToggleRightDock"
-    }
-  },
   // File panel (netrw)
   {
     "context": "ProjectPanel && not_editing",
@@ -42,9 +35,7 @@
       "c": "project_panel::Copy",
       "p": "project_panel::Paste",
       // Close project panel as project file panel on the right
-      "q": "workspace::ToggleLeftDock",
-      "space e": "workspace::ToggleLeftDock",
-      ":": "command_palette::Toggle",
+      "space e": "workspace::ToggleRightDock",
       "space s a": "command_palette::Toggle",
       "%": "project_panel::NewFile",
       "/": "project_panel::NewSearchInDirectory",
@@ -84,21 +75,19 @@
   {
     "context": "Editor && VimControl && !VimWaiting && !menu",
     "bindings": {
+      ":": "go_to_line::Toggle",
       "space p": "editor::Paste",
       // Refactoring
       "space c r ": "editor::Rename",
       // Chat with AI
       "space a a": "agent::ToggleFocus",
-      "ctrl-\\": "workspace::ToggleRightDock",
-      "cmd-k": "workspace::ToggleRightDock",
       "space a e": "assistant::InlineAssist",
       "cmd-l": "assistant::InlineAssist",
-      "space a t": "workspace::ToggleRightDock",
       // Git
       "space g g": [
         "task::Spawn",
         {
-          "task_name": "lazygit",
+          "task_name": "Lazy Git",
           "reveal_target": "center"
         }
       ],
@@ -162,7 +151,7 @@
       // Format
       "space c f": "editor::Format",
       // File explorer
-      "space e": "workspace::ToggleLeftDock",
+      "space e": "workspace::ToggleRightDock",
       // Telescope
       "space space": "file_finder::Toggle",
       // Terminal
@@ -195,7 +184,7 @@
       // Line's Motions
       "shift-j": "editor::MoveLineDown",
       "shift-k": "editor::MoveLineUp",
-      "space y": "editor::Copy",
+      "space y": ["workspace::SendKeystrokes", "\" + y"],
       "space p": "editor::Paste"
     }
   },

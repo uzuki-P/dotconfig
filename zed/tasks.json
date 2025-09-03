@@ -1,0 +1,34 @@
+// Project tasks configuration. See https://zed.dev/docs/tasks for documentation.
+[
+  {
+    "label": "Lazy Git",
+    "command": "lazygit",
+    "env": { "foo": "bar" },
+    "use_new_terminal": true,
+    "allow_concurrent_runs": false,
+    "reveal": "always",
+    "reveal_target": "center",
+    "hide": "on_success",
+    "shell": {
+      "program": "fish"
+    },
+    "tags": ["git"]
+  },
+  {
+    "label": "Run Android Emulator",
+    "command": "/home/uzuki_p/script/emulator.sh",
+    "use_new_terminal": true,
+    "allow_concurrent_runs": false,
+    // What to do with the terminal pane and tab, after the command was started:
+    // * `always` — always show the task's pane, and focus the corresponding tab in it (default)
+    // * `no_focus` — always show the task's pane, add the task's tab in it, but don't focus it
+    // * `never` — do not alter focus, but still add/reuse the task's tab in its pane
+    "reveal": "no_focus",
+    "reveal_target": "dock",
+    "hide": "always",
+    "shell": {
+      "program": "fish"
+    },
+    "tags": ["android", "emulator"]
+  }
+]
