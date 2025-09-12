@@ -43,6 +43,9 @@ if not string match -q -- $PNPM_HOME $PATH
     set -gx PATH "$PNPM_HOME" $PATH
 end
 
+# fnm
+fnm env --use-on-cd --shell fish | source
+
 # carapace. https://carapace-sh.github.io/carapace-bin/spec/bridge.html?highlight=fish#fish
 carapace _carapace | source
 

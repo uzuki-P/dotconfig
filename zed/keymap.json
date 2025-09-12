@@ -30,7 +30,7 @@
       "a": "project_panel::NewFile",
       "A": "project_panel::NewDirectory",
       "r": "project_panel::Rename",
-      "d": "project_panel::Delete",
+      "d": "project_panel::Trash",
       "x": "project_panel::Cut",
       "c": "project_panel::Copy",
       "p": "project_panel::Paste",
@@ -75,6 +75,9 @@
   {
     "context": "Editor && VimControl && !VimWaiting && !menu",
     "bindings": {
+      "space d b": "editor::ToggleBreakpoint",
+      "space d r": "debugger::Start",
+      "space d s": "debugger::Stop",
       ":": "go_to_line::Toggle",
       "space p": "editor::Paste",
       // Refactoring
@@ -211,7 +214,11 @@
     "context": "vim_mode == normal || vim_mode == visual",
     "bindings": {
       "s": "vim::PushSneak",
-      "S": "vim::PushSneakBackward"
+      "S": "vim::PushSneakBackward",
+      "j": ["workspace::SendKeystrokes", "g j"],
+      "k": ["workspace::SendKeystrokes", "g k"],
+      "$": ["workspace::SendKeystrokes", "g $"],
+      "0": ["workspace::SendKeystrokes", "g 0"]
     }
   },
   {
