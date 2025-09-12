@@ -20,7 +20,7 @@ format = "via [$symbol]($style)"
 format = "via [$symbol]($style)"
 
 [dart]
-format = "via [$symbol]($style)"
+format = "via [$symbol($version)]($style)"
 
 [deno]
 format = "via [$symbol]($style)"
@@ -74,7 +74,7 @@ format = 'via [$symbol]($style)'
 format = 'via [$symbol]($style)'
 
 [nodejs]
-format = 'via [$symbol]($style)'
+format = 'via [$symbol($version)]($style)'
 
 [ocaml]
 format = 'via [$symbol(\($switch_indicator$switch_name\) )]($style)'
@@ -86,7 +86,7 @@ format = 'via [$symbol]($style)'
 format = 'via [$symbol]($style)'
 
 [php]
-format = 'via [$symbol]($style)'
+format = 'via [$symbol($version)]($style)'
 
 [pulumi]
 format = 'via [$symbol$stack]($style)'
@@ -95,7 +95,7 @@ format = 'via [$symbol$stack]($style)'
 format = 'via [$symbol]($style)'
 
 [python]
-format = 'via [$symbol]($style)'
+format = 'via [$symbol($version)]($style)'
 
 [quarto]
 format = 'via [$symbol]($style)'
