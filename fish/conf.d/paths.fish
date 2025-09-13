@@ -10,7 +10,6 @@ fish_add_path -ga ~/sdk/android/tools/bin
 fish_add_path -ga ~/sdk/android/platform-tools
 fish_add_path -ga ~/script
 fish_add_path -ga ~/bin
-fish_add_path -ga ~/.cargo/env
 fish_add_path -ga ~/.config/composer/vendor/bin
 fish_add_path -ga ~/.local/bin
 fish_add_path -ga ~/.pub-cache/bin
@@ -36,9 +35,3 @@ set -gx PUB_CACHE $HOME/.puro/shared/pub_cache
 
 # copyq wayland. https://github.com/hluk/CopyQ/issues/27#issuecomment-549766568
 set -gx QT_QPA_PLATFORM xcb
-
-# rustup shell setup
-if not contains "$HOME/.cargo/bin" $PATH
-    # Prepending path in case a system-installed rustc needs to be overridden
-    set -x PATH "$HOME/.cargo/bin" $PATH
-end

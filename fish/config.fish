@@ -1,6 +1,7 @@
 source ~/.config/fish/conf.d/abbr.fish
 source ~/.config/fish/conf.d/keybind.fish
 source ~/.config/fish/conf.d/paths.fish
+source ~/.config/fish/conf.d/rustup.fish
 
 function fish_greeting
     switch (random 1 5)
@@ -50,4 +51,4 @@ fnm env --use-on-cd --shell fish | source
 carapace _carapace | source
 
 # Generated for envman. Do not edit.
-test -s ~/.config/envman/load.fish; and source ~/.config/envman/load.fish
+# test -s ~/.config/envman/load.fish; and source ~/.config/envman/load.fish

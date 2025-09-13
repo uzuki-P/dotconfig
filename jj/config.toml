@@ -1,0 +1,13 @@
+#:schema https://jj-vcs.github.io/jj/latest/config-schema.json
+
+[ui]
+default-command = "log"
+
+[user]
+name = "Uzuki-P"
+email = "rahmatfajar15@gmail.com"
+
+[template-aliases]
+# Full email address (default)
+# 'format_short_signature(signature)' = 'signature.email()'
+'format_short_signature(signature)' = 'signature.name()'
