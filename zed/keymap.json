@@ -1,11 +1,11 @@
 [
   // Terminal
-  {
-    "context": "Workspace",
-    "bindings": {
-      "ctrl-/": "workspace::ToggleBottomDock"
-    }
-  },
+  // {
+  //   "context": "Workspace",
+  //   "bindings": {
+  //     "ctrl-/": "workspace::ToggleBottomDock"
+  //   }
+  // },
   // Window's navigation
   {
     "context": "(Dock && !Terminal) || Editor",
@@ -23,6 +23,7 @@
       "q": "git_panel::Close"
     }
   },
+
   // File panel (netrw)
   {
     "context": "ProjectPanel && not_editing",
@@ -32,7 +33,7 @@
       "r": "project_panel::Rename",
       "d": "project_panel::Trash",
       "x": "project_panel::Cut",
-      "c": "project_panel::Copy",
+      "y": "project_panel::Copy",
       "p": "project_panel::Paste",
       // Close project panel as project file panel on the right
       "space e": "workspace::ToggleRightDock",
@@ -85,7 +86,6 @@
       // Chat with AI
       "space a a": "agent::ToggleFocus",
       "space a e": "assistant::InlineAssist",
-      "cmd-l": "assistant::InlineAssist",
       // Git
       "space g g": [
         "task::Spawn",
@@ -127,6 +127,7 @@
       "shift-h": "pane::ActivatePreviousItem",
       "shift-l": "pane::ActivateNextItem",
       "-": "pane::RevealInProjectPanel",
+      "space e": "project_panel::ToggleFocus",
       "space ,": "tab_switcher::Toggle",
       // Jump to the previous location
       "space b b": "pane::AlternateFile",
@@ -153,8 +154,6 @@
       "space s s": "outline::Toggle",
       // Format
       "space c f": "editor::Format",
-      // File explorer
-      "space e": "workspace::ToggleRightDock",
       // Telescope
       "space space": "file_finder::Toggle",
       // Terminal
@@ -225,6 +224,12 @@
     "context": "vim_operator == a || vim_operator == i || vim_operator == cs",
     "bindings": {
       "b": "vim::AnyBrackets"
+    }
+  },
+  {
+    "context": "AgentPanel && not_editing",
+    "bindings": {
+      "space a a": "workspace::ToggleRightDock"
     }
   }
 ]

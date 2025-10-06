@@ -1,6 +1,12 @@
 {
-  "minimap": {
-    "show": "auto"
+  "edit_predictions": {
+    "mode": "eager",
+    "copilot": {
+      "proxy": null,
+      "proxy_no_verify": null,
+      "enterprise_uri": null
+    },
+    "enabled_in_text_threads": false
   },
   "icon_theme": "Catppuccin Latte",
   "confirm_quit": true,
@@ -22,8 +28,8 @@
     "dock": "right"
   },
   "agent": {
-    "single_file_review": false,
-    "play_sound_when_agent_done": false,
+    "single_file_review": true,
+    "play_sound_when_agent_done": true,
     "use_modifier_to_send": true,
     "dock": "right",
     "default_profile": "write"
@@ -38,6 +44,7 @@
     }
   },
   "project_panel": {
+    "default_width": 600,
     "dock": "right",
     "entry_spacing": "standard",
     "show_diagnostics": "all",
