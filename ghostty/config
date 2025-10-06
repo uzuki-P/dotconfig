@@ -10,7 +10,7 @@ minimum-contrast=1.1
 
 cursor-color = #FF4081
 cursor-style-blink = true
-theme = dark:tokyonight_night,light:catppuccin-latte
+theme = dark:TokyoNight Night,light:Catppuccin Latte
 
 # custom tabs. https://github.com/ttys3/my-ghostty-config
 gtk-wide-tabs = false

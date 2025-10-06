@@ -1,0 +1,7 @@
+{
+  "import": [
+    "@cspell/dict-id-id/cspell-ext.json",
+    "https://cdn.jsdelivr.net/npm/@cspell/dict-id-id/cspell-ext.json"
+  ],
+  "dictionaries": ["id, id-ID"]
+}
