@@ -1,4 +1,5 @@
 {
+  "base_keymap": "JetBrains",
   "edit_predictions": {
     "mode": "eager",
     "copilot": {
@@ -15,7 +16,7 @@
   "terminal": {
     "dock": "bottom",
     "shell": {
-      "program": "fish"
+      "program": "/usr/bin/fish"
     }
   },
   "collaboration_panel": {
@@ -25,6 +26,7 @@
     "dock": "right"
   },
   "git_panel": {
+    "button": false,
     "dock": "right"
   },
   "agent": {
@@ -37,14 +39,14 @@
   "context_servers": {
     "mcp-server-context7": {
       "source": "extension",
-      "enabled": true,
+      "enabled": false,
       "settings": {
         "default_minimum_tokens": "10000"
       }
     }
   },
   "project_panel": {
-    "default_width": 600,
+    "default_width": 400,
     "dock": "right",
     "entry_spacing": "standard",
     "show_diagnostics": "all",
