@@ -1,11 +1,4 @@
 [
-  // Terminal
-  // {
-  //   "context": "Workspace",
-  //   "bindings": {
-  //     "ctrl-/": "workspace::ToggleBottomDock"
-  //   }
-  // },
   // Window's navigation
   {
     "context": "(Dock && !Terminal) || Editor",
@@ -17,14 +10,7 @@
       "ctrl-j": "workspace::ActivatePaneDown"
     }
   },
-  // {
-  //   "context": "GitPanel",
-  //   "bindings": {
-  //     "q": "git_panel::Close"
-  //   }
-  // },
-
-  // File panel (netrw)
+  // File panel
   {
     "context": "ProjectPanel && not_editing",
     "bindings": {
@@ -35,7 +21,6 @@
       "x": "project_panel::Cut",
       "y": "project_panel::Copy",
       "p": "project_panel::Paste",
-      // Close project panel as project file panel on the right
       "space e": "workspace::ToggleRightDock",
       "space s a": "command_palette::Toggle",
       "%": "project_panel::NewFile",
@@ -63,16 +48,10 @@
   {
     "context": "EmptyPane || SharedScreen",
     "bindings": {
-      // Open file finder
       "space space": "file_finder::Toggle",
-      // New file
       "space f n": "workspace::NewFile",
-      // Open recent project
       "space f p": "projects::OpenRecent",
-      // Search in all the files
       "space s g": "workspace::NewSearch"
-      // Quit zed
-      // "space q q": "zed::Quit"
     }
   },
   {
@@ -87,7 +66,6 @@
       "space c r ": "editor::Rename",
       // Chat with AI
       "space a a": "agent::ToggleFocus",
-      "space a e": "assistant::InlineAssist",
       // Git
       "space g g": [
         "task::Spawn",
