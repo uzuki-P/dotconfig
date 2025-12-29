@@ -21,6 +21,8 @@ if status is-interactive
 
     abbr --add lg lazygit
 
+    abbr --add bun 'bun --bun'
+
     abbr --add android-emulator '~/sdk/android/emulator/emulator -avd Pixel_8a_API_28 -no-boot-anim -noaudio -no-snapshot'
 
     # git

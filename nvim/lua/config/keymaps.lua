@@ -3,4 +3,5 @@
 -- Add any additional keymaps here
 
 vim.keymap.set({ "n", "v" }, "<leader>y", '"+y', { desc = "Copy to clipboard" })
+vim.keymap.set({ "n", "v" }, "<leader>p", '"+p', { desc = "Paste from clipboard" })
 vim.api.nvim_set_keymap("i", "<C-BS>", "<C-W>", { desc = "Delete word" })

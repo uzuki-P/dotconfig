@@ -20,7 +20,8 @@ fish_add_path -ga ~/.puro/envs/default/flutter/bin
 fish_add_path -ga ~/.npm-global/bin
 fish_add_path -ga ~/.maestro/bin
 fish_add_path -ga ~/apps/scrcpy # make sure below android/tools 
-fish_add_path -ga ~/.opencode/bin # opencode
+fish_add_path -ga ~/.opencode/bin
+fish_add_path -ga ~/.bun/bin
 
 ## for bootdev https://github.com/bootdotdev/bootdev?tab=readme-ov-file#1-install-go-122-or-later
 fish_add_path -ga ~/.local/opt/go/bin
@@ -33,6 +34,7 @@ set -gx ANDROID_HOME $HOME/sdk/android
 set -gx ANDROID_SDK $HOME/sdk/android
 set -gx PURO_ROOT $HOME/.puro
 set -gx PUB_CACHE $HOME/.puro/shared/pub_cache
+set -gx BUN_INSTALL $HOME/.bun
 
 # copyq wayland. https://github.com/hluk/CopyQ/issues/27#issuecomment-549766568
 set -gx QT_QPA_PLATFORM xcb

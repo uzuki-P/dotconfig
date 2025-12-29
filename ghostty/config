@@ -43,3 +43,4 @@ keybind = ctrl+a>n=new_window
 # libadwaita enabled only
 keybind = ctrl+a>w=toggle_tab_overview 
 
+keybind = shift+enter=text:\x1b\r
