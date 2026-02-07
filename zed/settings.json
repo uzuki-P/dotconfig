@@ -1,7 +1,10 @@
 {
+	"scrollbar": {
+		"git_diff": true,
+	},
 	"search": {
 		"regex": false,
-		"center_on_match": true
+		"center_on_match": true,
 	},
 	"base_keymap": "JetBrains",
 	"edit_predictions": {
@@ -9,9 +12,9 @@
 		"copilot": {
 			"proxy": null,
 			"proxy_no_verify": null,
-			"enterprise_uri": null
+			"enterprise_uri": null,
 		},
-		"enabled_in_text_threads": false
+		"enabled_in_text_threads": false,
 	},
 	"icon_theme": "Catppuccin Latte",
 	"confirm_quit": true,
@@ -20,25 +23,25 @@
 	"terminal": {
 		"dock": "bottom",
 		"shell": {
-			"program": "/usr/bin/fish"
-		}
+			"program": "/usr/bin/fish",
+		},
 	},
 	"collaboration_panel": {
-		"button": false
+		"button": true,
 	},
 	"outline_panel": {
-		"dock": "right"
+		"dock": "right",
 	},
 	"git_panel": {
 		"button": false,
-		"dock": "right"
+		"dock": "right",
 	},
 	"agent": {
 		"single_file_review": true,
 		"play_sound_when_agent_done": true,
 		"use_modifier_to_send": true,
 		"dock": "right",
-		"default_profile": "write"
+		"default_profile": "write",
 	},
 	"context_servers": {},
 	"project_panel": {
@@ -46,31 +49,31 @@
 		"dock": "right",
 		"entry_spacing": "standard",
 		"show_diagnostics": "all",
-		"hide_root": false
+		"hide_root": false,
 	},
 	"preferred_line_length": 80,
 	"show_wrap_guides": true,
 	"wrap_guides": [80, 120],
 	"indent_guides": {
-		"background_coloring": "indent_aware"
+		"background_coloring": "indent_aware",
 	},
 	"vim_mode": true,
 	"ui_font_size": 16,
 	"buffer_font_size": 16,
 	"buffer_font_family": "JetBrainsMono Nerd Font Mono",
 	"buffer_font_features": {
-		"calt": false // Disable ligatures
+		"calt": false, // Disable ligatures
 	},
 	"theme": {
 		"mode": "system",
 		"light": "One Light",
-		"dark": "JetBrains New Dark"
+		"dark": "JetBrains New Dark",
 	},
 	"vim": {
 		"use_system_clipboard": "on_yank",
 		"use_smartcase_find": true,
 		"toggle_relative_line_numbers": true,
-		"highlight_on_yank_duration": 200
+		"highlight_on_yank_duration": 200,
 	},
 	"tab_size": 2,
 	"hard_tabs": true,
@@ -80,10 +83,10 @@
 			"settings": {
 				"css": {
 					"lint": {
-						"unknownAtRules": "ignore"
-					}
-				}
-			}
-		}
-	}
+						"unknownAtRules": "ignore",
+					},
+				},
+			},
+		},
+	},
 }
