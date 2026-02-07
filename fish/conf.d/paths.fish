@@ -36,5 +36,7 @@ set -gx PURO_ROOT $HOME/.puro
 set -gx PUB_CACHE $HOME/.puro/shared/pub_cache
 set -gx BUN_INSTALL $HOME/.bun
 
+set -gx SSH_AUTH_SOCK "$XDG_RUNTIME_DIR/ssh-agent.socket"
+
 # copyq wayland. https://github.com/hluk/CopyQ/issues/27#issuecomment-549766568
 set -gx QT_QPA_PLATFORM xcb
