@@ -2,8 +2,8 @@ command = /usr/bin/fish
 
 shell-integration = fish
 window-decoration = false
-window-height = 999
-window-width = 999
+window-height = 32
+window-width = 130
 
 mouse-hide-while-typing = true
 minimum-contrast=1.1
