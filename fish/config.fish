@@ -38,7 +38,7 @@ function y
     rm -f -- "$tmp"
 end
 
-# pnpm. 
+# pnpm.
 set -gx PNPM_HOME "/home/uzuki_p/.local/share/pnpm"
 if not string match -q -- $PNPM_HOME $PATH
     set -gx PATH "$PNPM_HOME" $PATH
@@ -47,7 +47,7 @@ end
 # fnm
 fnm env --use-on-cd --shell fish | source
 
-# carapace. https://carapace-sh.github.io/carapace-bin/spec/bridge.html?highlight=fish#fish
+# carapace. https://github.com/carapace-sh/carapace-bin/releases
 carapace _carapace | source
 
 # Generated for envman. Do not edit.

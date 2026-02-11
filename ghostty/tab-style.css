@@ -26,8 +26,8 @@ tabbar tabbox tab {
 }
 
 tabbar tabbox tab:selected {
-  background-color: color-mix(in srgb, @accent_bg_color 90%, white 10%);
-  /*color: #ffffff;*/
+  /* background-color: color-mix(in srgb, @accent_bg_color 90%, white 10%); */
+  /* color: #ffffff; */
 }
 
 tabbar tabbox tab label {
