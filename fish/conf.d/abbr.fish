@@ -1,9 +1,9 @@
 if status is-interactive
     abbr --add tm 'tmux new -As main'
-    abbr --add tmc 'tmux new -As code'
-    abbr --add tmi 'tmux new -As idea'
+    # abbr --add tmc 'tmux new -As code'
+    # abbr --add tmi 'tmux new -As idea'
 
-    abbr --add idea '~/apps/idea/bin/idea'
+    # abbr --add idea '~/apps/idea/bin/idea'
     abbr --add cb 'xclip -selection clipboard'
     abbr --add ll 'eza -lg --git --header'
     abbr --add la 'eza -lag --git --header'
@@ -12,18 +12,22 @@ if status is-interactive
     abbr --add nm-on 'nordvpn set meshnet on'
     abbr --add nm-off 'nordvpn set meshnet off'
 
-    abbr --add n-id 'nordvpn c id'
-    abbr --add n-sg 'nordvpn c sg'
+    # abbr --add n-id 'nordvpn c id'
+    # abbr --add n-sg 'nordvpn c sg'
     abbr --add n-d 'nordvpn d'
 
     abbr --add n nvim
-    abbr --add nv 'NVIM_APPNAME=nvim-bak nvim'
+    # abbr --add nv 'NVIM_APPNAME=nvim-bak nvim'
 
     abbr --add lg lazygit
 
-    abbr --add bun 'bun --bun'
+    # abbr --add bun 'bun --bun'
 
-    abbr --add android-emulator '~/sdk/android/emulator/emulator -avd Pixel_8a_API_28 -no-boot-anim -noaudio -no-snapshot'
+    abbr --add android-emulator '~/Android/Sdk/emulator/emulator -avd Pixel_8a_API_28 -no-boot-anim -noaudio -no-snapshot'
+
+    abbr --add ccd 'claude --dangerously-skip-permissions'
+
+    abbr --add ubuntu-db 'distrobox enter ubuntu -- fish'
 
     # git
     abbr --add gss 'git status --short'

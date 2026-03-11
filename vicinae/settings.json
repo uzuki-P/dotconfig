@@ -19,7 +19,21 @@
    "launcher_window": {
       "opacity": 1
    },
+   "favorites": [
+      "applications:com.mattjakeman.ExtensionManager",
+      "clipboard:history"
+   ],
    "providers": {
+      "@1weiho/store.raycast.svgl": {
+         "entrypoints": {
+            "request": {
+               "enabled": false
+            },
+            "setup-shadcn-registry": {
+               "enabled": false
+            }
+         }
+      },
       "applications": {
          "preferences": {
             "paths": [
@@ -33,6 +47,13 @@
       "clipboard": {
          "preferences": {
             "monitoring": true
+         },
+         "entrypoints": {
+            "history": {
+               "preferences": {
+                  "defaultAction": "copy"
+               }
+            }
          }
       },
       "core": {

@@ -2,7 +2,7 @@
 truncate_to_repo = false
 
 [bun]
-format = "via [$symbol]($style)"
+format = "via [$symbol($version)]($style)"
 
 [buf]
 format = "via [$symbol]($style)"
