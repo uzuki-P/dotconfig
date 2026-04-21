@@ -7,8 +7,8 @@
 			"ctrl-h": "workspace::ActivatePaneLeft",
 			"ctrl-l": "workspace::ActivatePaneRight",
 			"ctrl-k": "workspace::ActivatePaneUp",
-			"ctrl-j": "workspace::ActivatePaneDown"
-		}
+			"ctrl-j": "workspace::ActivatePaneDown",
+		},
 	},
 	// File panel
 	{
@@ -41,8 +41,8 @@
 			"shift-g": "menu::SelectLast",
 			"g g": "menu::SelectFirst",
 			"-": "project_panel::SelectParent",
-			"ctrl-6": "pane::AlternateFile"
-		}
+			"ctrl-6": "pane::AlternateFile",
+		},
 	},
 	// Empty pane, set of keybindings that are available when there is no active editor
 	{
@@ -51,8 +51,8 @@
 			"space space": "file_finder::Toggle",
 			"space f n": "workspace::NewFile",
 			"space f p": "projects::OpenRecent",
-			"space s g": "workspace::NewSearch"
-		}
+			"space s g": "workspace::NewSearch",
+		},
 	},
 	{
 		"context": "Editor && VimControl && !VimWaiting && !menu",
@@ -68,12 +68,13 @@
 			"space a a": "agent::ToggleFocus",
 			// Git
 			"space g f h": "git::FileHistory",
+			"space g w t": "git::Worktree",
 			"space g g": [
 				"task::Spawn",
 				{
 					"task_name": "Lazy Git",
-					"reveal_target": "center"
-				}
+					"reveal_target": "center",
+				},
 			],
 			"space g h d": "editor::ExpandAllDiffHunks",
 			"space g h D": "git::Diff",
@@ -156,8 +157,8 @@
 			"[ e": "editor::GoToPreviousDiagnostic",
 			// Excerpts
 			"] q": "editor::MoveToStartOfNextExcerpt",
-			"[ q": "editor::MoveToStartOfExcerpt"
-		}
+			"[ q": "editor::MoveToStartOfExcerpt",
+		},
 	},
 	{
 		"context": "Editor && vim_mode == visual && !VimWaiting && !VimObject",
@@ -166,8 +167,8 @@
 			"shift-j": "editor::MoveLineDown",
 			"shift-k": "editor::MoveLineUp",
 			"space y": ["workspace::SendKeystrokes", "\" + y"],
-			"space p": "editor::Paste"
-		}
+			"space p": "editor::Paste",
+		},
 	},
 	// Center the cursor on the screen when scrolling and find all references
 	{
@@ -178,15 +179,15 @@
 			"n": ["workspace::SendKeystrokes", "n z z z v"],
 			"shift-n": ["workspace::SendKeystrokes", "shift-n z z z v"],
 			"shift-g": ["workspace::SendKeystrokes", "shift-g z z"],
-			"g r": "editor::FindAllReferences"
-		}
+			"g r": "editor::FindAllReferences",
+		},
 	},
 	{
 		"context": "vim_operator == d",
 		"bindings": {
 			"o": "editor::ExpandAllDiffHunks",
-			"r": "git::Restore"
-		}
+			"r": "git::Restore",
+		},
 	},
 	{
 		"context": "vim_mode == normal || vim_mode == visual",
@@ -196,19 +197,19 @@
 			"j": ["workspace::SendKeystrokes", "g j"],
 			"k": ["workspace::SendKeystrokes", "g k"],
 			"$": ["workspace::SendKeystrokes", "g $"],
-			"0": ["workspace::SendKeystrokes", "g 0"]
-		}
+			"0": ["workspace::SendKeystrokes", "g 0"],
+		},
 	},
 	{
 		"context": "vim_operator == a || vim_operator == i || vim_operator == cs",
 		"bindings": {
-			"b": "vim::AnyBrackets"
-		}
+			"b": "vim::AnyBrackets",
+		},
 	},
 	{
 		"context": "AgentPanel && not_editing",
 		"bindings": {
-			"space a a": "workspace::ToggleRightDock"
-		}
-	}
+			"space a a": "workspace::ToggleRightDock",
+		},
+	},
 ]
