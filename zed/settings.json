@@ -1,4 +1,39 @@
 {
+	"buffer_font_family": "JetBrainsMonoNL Nerd Font",
+	"buffer_font_fallbacks": ["Roboto", "Noto Color Emoji"],
+	"message_editor": {
+		"auto_replace_emoji_shortcode": true,
+	},
+	"language_models": {
+		"openai_compatible": {
+			"GLM": {
+				"api_url": "https://api.z.ai/api/coding/paas/v4",
+				"available_models": [
+					{
+						"name": "GLM-4.7",
+						"max_tokens": 200000,
+						"max_output_tokens": 32000,
+						"max_completion_tokens": 200000,
+						"capabilities": {
+							"tools": true,
+							"images": true,
+							"parallel_tool_calls": false,
+							"prompt_cache_key": false,
+							"chat_completions": true,
+						},
+					},
+				],
+			},
+		},
+	},
+	"agent_servers": {
+		"claude-acp": {
+			"favorite_config_option_values": {
+				"mode": ["bypassPermissions"],
+			},
+			"type": "registry",
+		},
+	},
 	"middle_click_paste": false,
 	"scrollbar": {
 		"git_diff": true,
@@ -9,7 +44,7 @@
 	},
 	"base_keymap": "JetBrains",
 	"edit_predictions": {
-		"mode": "eager",
+		"mode": "subtle",
 		"copilot": {
 			"proxy": null,
 			"proxy_no_verify": null,
@@ -28,7 +63,7 @@
 		},
 	},
 	"collaboration_panel": {
-		"button": false,
+		"button": true,
 	},
 	"outline_panel": {
 		"dock": "right",
@@ -38,11 +73,69 @@
 		"dock": "right",
 	},
 	"agent": {
+		"show_turn_stats": true,
+		"notify_when_agent_waiting": "primary_screen",
+		"favorite_models": [],
+		"tool_permissions": {
+			"default": "allow",
+		},
+		"profiles": {
+			"write": {
+				"default_model": {
+					"provider": "GLM",
+					"model": "GLM-4.7",
+					"enable_thinking": false,
+				},
+				"name": "Write",
+				"tools": {
+					"copy_path": true,
+				},
+				"enable_all_context_servers": false,
+				"context_servers": {},
+			},
+			"bypass": {
+				"default_model": {
+					"provider": "GLM",
+					"model": "GLM-4.7",
+					"enable_thinking": true,
+				},
+				"name": "Bypass",
+				"tools": {
+					"copy_path": true,
+					"create_directory": true,
+					"delete_path": true,
+					"diagnostics": true,
+					"edit_file": true,
+					"fetch": true,
+					"list_directory": true,
+					"project_notifications": false,
+					"move_path": true,
+					"now": true,
+					"find_path": true,
+					"read_file": true,
+					"restore_file_from_disk": true,
+					"save_file": true,
+					"open": true,
+					"grep": true,
+					"spawn_agent": true,
+					"terminal": true,
+					"thinking": true,
+					"web_search": true,
+				},
+				"enable_all_context_servers": false,
+				"context_servers": {},
+			},
+		},
+		"default_model": {
+			"provider": "GLM",
+			"model": "GLM-4.7",
+			"enable_thinking": false,
+		},
 		"single_file_review": true,
 		"play_sound_when_agent_done": true,
 		"use_modifier_to_send": false,
 		"dock": "right",
-		"default_profile": "write",
+		"default_profile": "bypass",
 	},
 	"context_servers": {},
 	"project_panel": {
@@ -60,8 +153,7 @@
 	},
 	"vim_mode": true,
 	"ui_font_size": 16,
-	"buffer_font_size": 16,
-	"buffer_font_family": "JetBrainsMono Nerd Font",
+	"buffer_font_size": 15.0,
 	"buffer_font_features": {
 		"calt": false, // Disable ligatures
 	},
