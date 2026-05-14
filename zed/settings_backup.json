@@ -1,31 +1,31 @@
 {
 	"cli_default_open_behavior": "existing_window",
-	"buffer_font_family": "JetBrainsMonoNL Nerd Font",
+ "buffer_font_family": "JetBrainsMonoNL Nerd Font",
 	"buffer_font_fallbacks": ["Roboto", "Noto Color Emoji"],
 	"message_editor": {
 		"auto_replace_emoji_shortcode": true,
 	},
 	"language_models": {
 		"openai_compatible": {
-			"GLM 5.1": {
-				"api_url": "https://api.z.ai/api/coding/paas/v4",
-				"available_models": [
-					{
-						"name": "glm-5.1",
-						"max_tokens": 200000,
-						"max_output_tokens": 32000,
-						"max_completion_tokens": 200000,
-						"capabilities": {
-							"tools": true,
-							"images": false,
-							"parallel_tool_calls": false,
-							"prompt_cache_key": false,
-							"chat_completions": true,
-						},
-					},
-				],
-			},
-		},
+   "GLM 5.1": {
+    "api_url": "https://api.z.ai/api/coding/paas/v4",
+    "available_models": [
+     {
+      "name": "glm-5.1",
+      "max_tokens": 200000,
+      "max_output_tokens": 32000,
+      "max_completion_tokens": 200000,
+      "capabilities": {
+       "tools": true,
+       "images": false,
+       "parallel_tool_calls": false,
+       "prompt_cache_key": false,
+       "chat_completions": true
+      }
+     }
+    ]
+   }
+  },
 	},
 	"agent_servers": {
 		"claude-acp": {
@@ -46,6 +46,12 @@
 	"base_keymap": "JetBrains",
 	"edit_predictions": {
 		"mode": "subtle",
+		"copilot": {
+			"proxy": null,
+			"proxy_no_verify": null,
+			"enterprise_uri": null,
+		},
+		"enabled_in_text_threads": false,
 	},
 	"confirm_quit": true,
 	"autosave": "on_focus_change",
@@ -59,7 +65,7 @@
 	},
 	"collaboration_panel": {
 		"dock": "right",
-		"button": false,
+  "button": false,
 	},
 	"outline_panel": {
 		"dock": "right",
@@ -72,12 +78,12 @@
 		"show_turn_stats": true,
 		"notify_when_agent_waiting": "primary_screen",
 		"favorite_models": [
-			{
-				"provider": "GLM 5.1",
-				"model": "glm-5.1",
-				"enable_thinking": false,
-			},
-		],
+   {
+    "provider": "GLM 5.1",
+    "model": "glm-5.1",
+    "enable_thinking": false
+   }
+  ],
 		"tool_permissions": {
 			"default": "allow",
 		},
@@ -134,19 +140,20 @@
 			"enable_thinking": false,
 		},
 		"single_file_review": true,
+		"play_sound_when_agent_done": true,
 		"use_modifier_to_send": false,
 		"dock": "left",
 		"default_profile": "bypass",
 	},
-	"context_servers": {
-		"posthog": {
-			"enabled": true,
-			"url": "https://mcp.posthog.com/mcp?features=dashboards,insights,product_analytics,experiments,surveys,annotations,replay,error_tracking,logs,flags,cohorts,events,persons,actions,workspace,docs,alerts,platform_features,search,debug",
-			"headers": {
-				"Authorization": "Bearer undefined",
-			},
-		},
-	},
+  "context_servers": {
+    "posthog": {
+      "enabled": true,
+      "url": "https://mcp.posthog.com/mcp?features=dashboards,insights,product_analytics,experiments,surveys,annotations,replay,error_tracking,logs,flags,cohorts,events,persons,actions,workspace,docs,alerts,platform_features,search,debug",
+      "headers": {
+        "Authorization": "Bearer undefined"
+      }
+    }
+  },
 	"project_panel": {
 		"default_width": 400,
 		"dock": "right",
