@@ -136,8 +136,6 @@
 			"space c f": "editor::Format",
 			// Telescope
 			"space space": "file_finder::Toggle",
-			// Terminal
-			"space t": "workspace::ToggleBottomDock",
 			// Windows management
 			// "space w s": "pane::SplitDown",
 			// "space w v": "pane::SplitRight",
