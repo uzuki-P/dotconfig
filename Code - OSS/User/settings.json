@@ -24,6 +24,7 @@
     "vim.cursorStylePerMode.insert": "line",
     "vim.cursorStylePerMode.visual": "block-outline",
     "vim.cursorStylePerMode.replace": "underline",
+
     "vim.handleKeys": {
         "<C-p>": false,
         "<C-f>": false,
@@ -57,7 +58,6 @@
     "git.autofetch": true,
     "extensions.autoUpdate": false,
     "kilo-code.new.autoApprove.enabled": true,
-    "workbench.colorTheme": "Catppuccin Macchiato",
     "window.confirmBeforeClose": "keyboardOnly",
     "workbench.editor.pinnedTabSizing": "compact",
     "workbench.editor.wrapTabs": true,
@@ -69,4 +69,5 @@
     ],
     "window.controlsStyle": "custom",
     "diffEditor.renderSideBySide": false,
+    "workbench.preferredDarkColorTheme": "Catppuccin Mocha",
 }
