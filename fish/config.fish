@@ -1,5 +1,4 @@
 source ~/.config/fish/conf.d/abbr.fish
-source ~/.config/fish/conf.d/keybind.fish
 source ~/.config/fish/conf.d/paths.fish
 source ~/.config/fish/conf.d/rustup.fish
 

@@ -1,0 +1,72 @@
+{
+    "workbench.activityBar.location": "top",
+    "workbench.sideBar.location": "right",
+    "workbench.browser.showInTitleBar": true,
+    "workbench.externalBrowser": "chrome",
+    "workbench.hover.delay": 1000,
+
+    // === THEME & APPEARANCE ===
+    "workbench.iconTheme": "catppuccin-mocha",
+    "workbench.preferredLightColorTheme": "Catppuccin Latte",
+    "catppuccin.accentColor": "pink",
+    "catppuccin.extraBordersEnabled": true,
+
+    // === EDITOR SETTINGS ===
+    "editor.fontFamily": "'JetBrainsMonoNL Nerd Font', 'Droid Sans Mono', monospace",
+    "editor.minimap.enabled": false,
+    "editor.mouseMiddleClickAction": "ctrlLeftClick",
+    "editor.inlineSuggest.enabled": false,
+    "files.autoSave": "onFocusChange",
+
+    // === VIM EXTENSION ===
+    "vim.foldfix": true,
+    "vim.cursorStylePerMode.normal": "block",
+    "vim.cursorStylePerMode.insert": "line",
+    "vim.cursorStylePerMode.visual": "block-outline",
+    "vim.cursorStylePerMode.replace": "underline",
+    "vim.handleKeys": {
+        "<C-p>": false,
+        "<C-f>": false,
+        "<C-a>": false,
+        "<C-b>": false
+    },
+
+    // === INTEGRATED TERMINAL ===
+    "terminal.integrated.defaultProfile.linux": "fish",
+    "terminal.integrated.enablePersistentSessions": false,
+    "terminal.integrated.initialHint": false,
+    "terminal.integrated.commandsToSkipShell": [
+        "kilo-code.new.agentManagerOpen",
+        "kilo-code.new.agentManager.showTerminal"
+    ],
+
+    // === AI & CHAT FEATURES ===
+    "chat.disableAIFeatures": true,
+    "chat.agent.enabled": false,
+
+    // === KILO CODE EXTENSION ===
+    "kilo-code.new.language": "en",
+    "kilo-code.new.browserAutomation.enabled": true,
+    "kilo-code.new.showTaskTimeline": false,
+    "kilo-code.new.claudeCodeCompat": true,
+    "kilo-code.new.autocomplete.enableAutoTrigger": false,
+
+    // === MISCELLANEOUS ===
+    "extensions.ignoreRecommendations": true,
+    "debug.toolBarLocation": "docked",
+    "git.autofetch": true,
+    "extensions.autoUpdate": false,
+    "kilo-code.new.autoApprove.enabled": true,
+    "workbench.colorTheme": "Catppuccin Macchiato",
+    "window.confirmBeforeClose": "keyboardOnly",
+    "workbench.editor.pinnedTabSizing": "compact",
+    "workbench.editor.wrapTabs": true,
+    "catppuccin-icons.hidesExplorerArrows": true,
+    "terminal.integrated.sendKeybindingsToShell": true,
+    "window.autoDetectColorScheme": true,
+    "settingsSync.ignoredExtensions": [
+        "github.copilot-chat"
+    ],
+    "window.controlsStyle": "custom",
+    "diffEditor.renderSideBySide": false,
+}
