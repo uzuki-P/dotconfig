@@ -6,7 +6,7 @@
     "workbench.hover.delay": 1000,
 
     // === THEME & APPEARANCE ===
-    "workbench.iconTheme": "catppuccin-mocha",
+    "workbench.iconTheme": "catppuccin-latte",
     "workbench.preferredLightColorTheme": "Catppuccin Latte",
     "catppuccin.accentColor": "pink",
     "catppuccin.extraBordersEnabled": true,

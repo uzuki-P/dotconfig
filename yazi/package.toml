@@ -1,9 +1,9 @@
 [[plugin.deps]]
 use = "TD-Sky/sudo"
-rev = "af70636"
-hash = "a94dcbe9266512806c677138e8591ddb"
+rev = "afd61ce"
+hash = "d390cd2d8b996939a695411b446f58d0"
 
 [[flavor.deps]]
 use = "yazi-rs/flavors:catppuccin-latte"
-rev = "fd85060"
-hash = ""
+rev = "36c49ac"
+hash = "b8f46853c27707115f25f3423a47bd38"
