@@ -14,20 +14,25 @@ tabbar tabbox {
   margin: 0;
   padding: 0;
   min-height: 8px;
-  /*background-color: #1a1a1a;*/
+  /* Catppuccin Latte Rosewater (Soft Light Pink) */
+  background-color: hsl(10, 57%, 88%); 
   font-family: monospace;
 }
 
 tabbar tabbox tab {
   margin: 0;
   padding: 0;
-  /*color: #9ca3af;*/
-  /*border-right: 1px solid #374151;*/
+  /* Catppuccin Latte Text (Ensures crisp readability over light pink) */
+  color: hsl(234, 16%, 35%);
+  border-right: 1px solid hsla(234, 16%, 35%, 0.2);
 }
 
 tabbar tabbox tab:selected {
-  /* background-color: color-mix(in srgb, @accent_bg_color 90%, white 10%); */
-  /* color: #ffffff; */
+  /* Catppuccin Pink (Vibrant/Shocking structural pastel accent) */
+  /* background-color: hsl(316, 73%, 84%); */
+  background-color: hsl(339, 81%, 66%);
+  /* Darkened text on active selection for accessibility */
+  color: hsl(234, 16%, 25%); 
 }
 
 tabbar tabbox tab label {
