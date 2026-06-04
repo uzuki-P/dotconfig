@@ -1,7 +1,19 @@
 {
+	"diff_view_style": "unified",
+	"preview_tabs": {
+		"enable_preview_from_file_finder": false,
+	},
+	"tabs": {
+		"file_icons": true,
+		"git_status": true,
+	},
 	"cli_default_open_behavior": "existing_window",
-	"buffer_font_family": "JetBrainsMonoNL Nerd Font",
-	"buffer_font_fallbacks": ["Roboto", "Noto Color Emoji"],
+	"buffer_font_family": "Maple Mono NF CN",
+	"buffer_font_fallbacks": [
+		"JetBrainsMonoNL Nerd Font",
+		"Roboto",
+		"Noto Color Emoji",
+	],
 	"message_editor": {
 		"auto_replace_emoji_shortcode": true,
 	},
@@ -28,6 +40,12 @@
 		},
 	},
 	"agent_servers": {
+		"codex-acp": {
+			"default_config_options": {
+				"model": "gpt-5.4-mini",
+			},
+			"type": "registry",
+		},
 		"claude-acp": {
 			"favorite_config_option_values": {
 				"mode": ["bypassPermissions"],
@@ -51,7 +69,7 @@
 	"autosave": "on_focus_change",
 	"format_on_save": "off",
 	"terminal": {
-		"font_family": "JetBrainsMonoNL Nerd Font",
+		"font_family": "Maple Mono NF CN",
 		"dock": "bottom",
 		"shell": {
 			"program": "/usr/bin/fish",
@@ -65,10 +83,12 @@
 		"dock": "right",
 	},
 	"git_panel": {
-		"button": true,
+		"tree_view": true,
+  "button": true,
 		"dock": "right",
 	},
 	"agent": {
+		"sidebar_side": "right",
 		"show_turn_stats": true,
 		"notify_when_agent_waiting": "primary_screen",
 		"favorite_models": [
@@ -103,7 +123,8 @@
 				},
 				"name": "Bypass",
 				"tools": {
-					"copy_path": true,
+					"search_web": true,
+     "copy_path": true,
 					"create_directory": true,
 					"delete_path": true,
 					"diagnostics": true,
@@ -122,7 +143,6 @@
 					"spawn_agent": true,
 					"terminal": true,
 					"thinking": true,
-					"web_search": true,
 				},
 				"enable_all_context_servers": false,
 				"context_servers": {},
@@ -135,12 +155,12 @@
 		},
 		"single_file_review": true,
 		"use_modifier_to_send": false,
-		"dock": "left",
+		"dock": "right",
 		"default_profile": "bypass",
 	},
 	"context_servers": {
 		"posthog": {
-			"enabled": true,
+   "enabled": true,
 			"url": "https://mcp.posthog.com/mcp?features=dashboards,insights,product_analytics,experiments,surveys,annotations,replay,error_tracking,logs,flags,cohorts,events,persons,actions,workspace,docs,alerts,platform_features,search,debug",
 			"headers": {
 				"Authorization": "Bearer undefined",

@@ -23,7 +23,7 @@ if status is-interactive
 
     # abbr --add bun 'bun --bun'
 
-    abbr --add android-emulator '~/Android/Sdk/emulator/emulator -avd Pixel_8a_API_28 -no-boot-anim -noaudio -no-snapshot'
+    #abbr --add android-emulator '~/Android/Sdk/emulator/emulator -avd Pixel_8a_API_28 -no-boot-anim -noaudio -no-snapshot'
 
     abbr --add ccd 'claude --dangerously-skip-permissions'
 

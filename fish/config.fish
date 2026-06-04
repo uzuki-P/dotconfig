@@ -24,6 +24,9 @@ end
 starship init fish | source
 #enable_transience
 
+# mise https://mise.en.dev/
+mise activate fish | source
+
 # zoxide. https://github.com/ajeetdsouza/zoxide
 zoxide init --cmd cd fish | source
 
@@ -50,4 +53,4 @@ fnm env --use-on-cd --shell fish | source
 carapace _carapace | source
 
 # Generated for envman. Do not edit.
-# test -s ~/.config/envman/load.fish; and source ~/.config/envman/load.fish
+#test -s ~/.config/envman/load.fish; and source ~/.config/envman/load.fish
