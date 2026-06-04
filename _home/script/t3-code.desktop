@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=T3 Code
+Comment=T3 Code Editor
+# Exec=/home/uzuki_p/apps/T3-Code.AppImage
+Exec=/home/uzuki_p/script/t3code-w-env.sh
+Icon=/home/uzuki_p/apps/T3-Code.png
+Type=Application
+Categories=Development;IDE;
+Terminal=false
+StartupNotify=true
+StartupWMClass=t3code
