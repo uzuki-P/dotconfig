@@ -8,27 +8,27 @@
 // custom settings, run the `open default settings` command
 // from the command palette or from `Zed` application menu.
 {
+	"show_wrap_guides": true,
+	"wrap_guides": [80, 120],
 	"theme": "Catppuccin Latte",
- "icon_theme": "Catppuccin Latte",
- "diff_view_style": "unified",
- "colorize_brackets": true,
+	"icon_theme": "Catppuccin Latte",
+	"diff_view_style": "unified",
+	"colorize_brackets": true,
 	"code_lens": "on",
 	"toolbar": {
 		"code_actions": true,
 	},
-	"show_signature_help_after_edits": true,
-	"auto_signature_help": true,
-	"redact_private_values": true,
+	"show_signature_help_after_edits": false,
+	"auto_signature_help": false,
+	"redact_private_values": false,
 	"cli_default_open_behavior": "existing_window",
 	"agent_servers": {
-		"kilo": {
-			"type": "registry",
-		},
 		"codex-acp": {
 			"favorite_config_option_values": {
 				"model": ["gpt-5.4-mini"],
 			},
 			"default_config_options": {
+				"mode": "full-access",
 				"model": "gpt-5.4-mini",
 			},
 			"type": "registry",
@@ -60,7 +60,7 @@
 		"Noto Sans Mono",
 	],
 	"show_whitespaces": "all",
-	"show_edit_predictions": true,
+	"show_edit_predictions": false,
 	"hard_tabs": true,
 	"git_panel": {
 		"tree_view": true,
@@ -74,21 +74,23 @@
 		"modal_max_width": "medium",
 	},
 	// NOTE: Change the font family to your preference
-	"buffer_font_family": "Maple Mono NF",
+	"buffer_font_family": "Maple Mono",
 	// Vim mode settings
 	"vim_mode": true,
-	"vim": {},
+	"vim": {
+		"use_system_clipboard": "on_yank",
+	},
 	"which_key": {
 		"delay_ms": 500,
 		"enabled": true,
 	},
 	// use relative line numbers
-	"relative_line_numbers": "enabled",
+	"relative_line_numbers": "wrapped",
 	"tab_bar": {
 		"show": true,
 	},
 	"scrollbar": {
-		"show": "never",
+		"show": "auto",
 	},
 	// Only show error on tab
 	"tabs": {
@@ -104,10 +106,35 @@
 		"left_padding": 0.15,
 		"right_padding": 0.15,
 	},
-	// Use Copilot Chat AI as default
 	"agent": {
+		"profiles": {
+			"bypass": {
+				"name": "Bypass",
+				"tools": {
+					"read_file": true,
+					"grep": true,
+					"terminal": true,
+					"edit_file": true,
+					"write_file": true,
+					"delete_path": true,
+					"move_path": true,
+					"copy_path": true,
+					"create_directory": true,
+					"fetch": true,
+					"skill": true,
+				},
+				"enable_all_context_servers": false,
+				"context_servers": {},
+			},
+		},
+		"default_model": {
+			"provider": "openai-subscribed",
+			"model": "gpt-5.5",
+			"enable_thinking": true,
+			"effort": "medium",
+		},
 		"sidebar_side": "right",
-		"default_profile": "write",
+		"default_profile": "bypass",
 		"dock": "right",
 		"tool_permissions": {
 			"tools": {
@@ -123,7 +150,7 @@
 	},
 	// Inlay hints preconfigured by Zed: Go, Rust, Typescript and Svelte
 	"inlay_hints": {
-		"enabled": true,
+		"enabled": false,
 	},
 	// LSP
 	"lsp": {
@@ -140,17 +167,17 @@
 			"show_whitespaces": "all",
 			"show_edit_predictions": true,
 			"hard_tabs": true,
-			"inlay_hints": {
-				"enabled": true,
-				"show_parameter_hints": false,
-				"show_other_hints": true,
-				"show_type_hints": true,
-			},
+			// "inlay_hints": {
+			// 	"enabled": true,
+			// 	"show_parameter_hints": false,
+			// 	"show_other_hints": true,
+			// 	"show_type_hints": true,
+			// },
 		},
 	},
 	// Use zed commit editor
 	"terminal": {
-		"font_family": "Maple Mono NF CN",
+		"font_family": "Maple Mono NF",
 		"shell": {
 			"program": "fish",
 		},
@@ -209,7 +236,7 @@
 	},
 	"context_servers": {
 		"react-grab-mcp": {
-   "command": "npx",
+			"command": "npx",
 			"args": ["-y", "@react-grab/mcp", "--stdio"],
 			"env": {},
 		},
