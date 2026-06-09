@@ -1,189 +1,249 @@
+// settings.json, generated at Wed May 27 2026 12:34:47 GMT+0800 (Singapore Standard Time)
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run the `open default settings` command
+// from the command palette or from `Zed` application menu.
 {
+	"show_wrap_guides": true,
+	"wrap_guides": [80, 120],
+	"theme": "Catppuccin Latte",
+	"icon_theme": "Catppuccin Latte",
+	"diff_view_style": "unified",
+	"colorize_brackets": true,
+	"code_lens": "on",
+	"toolbar": {
+		"code_actions": true,
+	},
+	"show_signature_help_after_edits": false,
+	"auto_signature_help": false,
+	"redact_private_values": false,
 	"cli_default_open_behavior": "existing_window",
-	"buffer_font_family": "JetBrainsMonoNL Nerd Font",
-	"buffer_font_fallbacks": ["Roboto", "Noto Color Emoji"],
-	"message_editor": {
-		"auto_replace_emoji_shortcode": true,
-	},
-	"language_models": {
-		"openai_compatible": {
-			"GLM 5.1": {
-				"api_url": "https://api.z.ai/api/coding/paas/v4",
-				"available_models": [
-					{
-						"name": "glm-5.1",
-						"max_tokens": 200000,
-						"max_output_tokens": 32000,
-						"max_completion_tokens": 200000,
-						"capabilities": {
-							"tools": true,
-							"images": false,
-							"parallel_tool_calls": false,
-							"prompt_cache_key": false,
-							"chat_completions": true,
-						},
-					},
-				],
-			},
-		},
-	},
 	"agent_servers": {
-		"claude-acp": {
+		"codex-acp": {
 			"favorite_config_option_values": {
-				"mode": ["bypassPermissions"],
+				"model": ["gpt-5.4-mini"],
+			},
+			"default_config_options": {
+				"mode": "full-access",
+				"model": "gpt-5.4-mini",
 			},
 			"type": "registry",
 		},
-	},
-	"middle_click_paste": false,
-	"scrollbar": {
-		"git_diff": true,
-	},
-	"search": {
-		"regex": false,
-		"center_on_match": true,
-	},
-	"base_keymap": "JetBrains",
-	"edit_predictions": {
-		"mode": "subtle",
-	},
-	"confirm_quit": true,
-	"autosave": "on_focus_change",
-	"format_on_save": "off",
-	"terminal": {
-		"font_family": "JetBrainsMonoNL Nerd Font",
-		"dock": "bottom",
-		"shell": {
-			"program": "/usr/bin/fish",
+		"claude-acp": {
+			"type": "registry",
 		},
 	},
-	"collaboration_panel": {
-		"dock": "right",
-		"button": false,
+	"session": {
+		"trust_all_worktrees": true,
 	},
-	"outline_panel": {
-		"dock": "right",
+	"git": {
+		"inline_blame": {
+			"enabled": true,
+		},
 	},
+	"status_bar": {
+		"experimental.show": true,
+	},
+	"gutter": {
+		"line_numbers": true,
+	},
+	"cursor_shape": "bar",
+	"cursor_blink": true,
+	"use_system_window_tabs": true,
+	"buffer_font_fallbacks": [
+		"Maple Mono NF",
+		"JetBrainsMono Nerd Font Mono",
+		"Noto Sans Mono",
+	],
+	"show_whitespaces": "all",
+	"show_edit_predictions": false,
+	"hard_tabs": true,
 	"git_panel": {
-		"button": true,
+		"tree_view": true,
 		"dock": "right",
+	},
+	"base_keymap": "VSCode",
+	// "ui_font_size": 16,
+	"buffer_font_size": 15.0,
+	// Finder modal width
+	"file_finder": {
+		"modal_max_width": "medium",
+	},
+	// NOTE: Change the font family to your preference
+	"buffer_font_family": "Maple Mono",
+	// Vim mode settings
+	"vim_mode": true,
+	"vim": {
+		"use_system_clipboard": "on_yank",
+	},
+	"which_key": {
+		"delay_ms": 500,
+		"enabled": true,
+	},
+	// use relative line numbers
+	"relative_line_numbers": "wrapped",
+	"tab_bar": {
+		"show": true,
+	},
+	"scrollbar": {
+		"show": "auto",
+	},
+	// Only show error on tab
+	"tabs": {
+		"show_diagnostics": "errors",
+	},
+	// Indentation, rainbow indentation
+	"indent_guides": {
+		"enabled": true,
+		"coloring": "indent_aware",
+	},
+	// NOTE: Zen mode, refer https://github.com/zed-industries/zed/issues/4382 when it's resolved
+	"centered_layout": {
+		"left_padding": 0.15,
+		"right_padding": 0.15,
 	},
 	"agent": {
-		"show_turn_stats": true,
-		"notify_when_agent_waiting": "primary_screen",
-		"favorite_models": [
-			{
-				"provider": "GLM 5.1",
-				"model": "glm-5.1",
-				"enable_thinking": false,
-			},
-		],
-		"tool_permissions": {
-			"default": "allow",
-		},
 		"profiles": {
-			"write": {
-				"default_model": {
-					"provider": "GLM",
-					"model": "GLM-4.7",
-					"enable_thinking": false,
-				},
-				"name": "Write",
-				"tools": {
-					"copy_path": true,
-				},
-				"enable_all_context_servers": false,
-				"context_servers": {},
-			},
 			"bypass": {
-				"default_model": {
-					"provider": "GLM",
-					"model": "GLM-4.7",
-					"enable_thinking": true,
-				},
 				"name": "Bypass",
 				"tools": {
+					"read_file": true,
+					"grep": true,
+					"terminal": true,
+					"edit_file": true,
+					"write_file": true,
+					"delete_path": true,
+					"move_path": true,
 					"copy_path": true,
 					"create_directory": true,
-					"delete_path": true,
-					"diagnostics": true,
-					"edit_file": true,
 					"fetch": true,
-					"list_directory": true,
-					"project_notifications": false,
-					"move_path": true,
-					"now": true,
-					"find_path": true,
-					"read_file": true,
-					"restore_file_from_disk": true,
-					"save_file": true,
-					"open": true,
-					"grep": true,
-					"spawn_agent": true,
-					"terminal": true,
-					"thinking": true,
-					"web_search": true,
+					"skill": true,
 				},
 				"enable_all_context_servers": false,
 				"context_servers": {},
 			},
 		},
 		"default_model": {
-			"provider": "GLM 5.1",
-			"model": "glm-5.1",
-			"enable_thinking": false,
+			"provider": "openai-subscribed",
+			"model": "gpt-5.5",
+			"enable_thinking": true,
+			"effort": "medium",
 		},
-		"single_file_review": true,
-		"use_modifier_to_send": false,
-		"dock": "left",
+		"sidebar_side": "right",
 		"default_profile": "bypass",
-	},
-	"context_servers": {
-		"posthog": {
-			"enabled": true,
-			"url": "https://mcp.posthog.com/mcp?features=dashboards,insights,product_analytics,experiments,surveys,annotations,replay,error_tracking,logs,flags,cohorts,events,persons,actions,workspace,docs,alerts,platform_features,search,debug",
-			"headers": {
-				"Authorization": "Bearer undefined",
-			},
-		},
-	},
-	"project_panel": {
-		"default_width": 400,
 		"dock": "right",
-		"entry_spacing": "standard",
-		"show_diagnostics": "all",
-		"hide_root": false,
-	},
-	"preferred_line_length": 80,
-	"show_wrap_guides": true,
-	"wrap_guides": [80, 120],
-	"indent_guides": {
-		"background_coloring": "indent_aware",
-	},
-	"vim_mode": true,
-	"ui_font_size": 16,
-	"buffer_font_size": 15.0,
-	"buffer_font_features": {
-		"calt": false, // Disable ligatures
-	},
-	"vim": {
-		"use_system_clipboard": "on_yank",
-		"use_smartcase_find": true,
-		"toggle_relative_line_numbers": true,
-		"highlight_on_yank_duration": 200,
-	},
-	"tab_size": 2,
-	"hard_tabs": true,
-	"soft_wrap": "editor_width",
-	"lsp": {
-		"vscode-css-language-server": {
-			"settings": {
-				"css": {
-					"lint": {
-						"unknownAtRules": "ignore",
-					},
+		"tool_permissions": {
+			"tools": {
+				"fetch": {
+					"default": "allow",
+				},
+				"terminal": {
+					"default": "allow",
 				},
 			},
+		},
+		"model_parameters": [],
+	},
+	// Inlay hints preconfigured by Zed: Go, Rust, Typescript and Svelte
+	"inlay_hints": {
+		"enabled": false,
+	},
+	// LSP
+	"lsp": {
+		"tailwindcss-language-server": {
+			"settings": {
+				"classAttributes": ["class", "className", "ngClass", "styles"],
+			},
+		},
+	},
+	"languages": {
+		// Refer https://zed.dev/docs/languages/javascript and https://zed.dev/docs/languages/typescript for more info
+		"TypeScript": {
+			// Refer https://github.com/jellydn/ts-inlay-hints for how to setup for Neovim and VSCode
+			"show_whitespaces": "all",
+			"show_edit_predictions": true,
+			"hard_tabs": true,
+			"inlay_hints": {
+				"enabled": true,
+				"show_parameter_hints": false,
+				"show_other_hints": true,
+				"show_type_hints": true,
+			},
+		},
+	},
+	// Use zed commit editor
+	"terminal": {
+		"font_family": "Maple Mono NF",
+		"shell": {
+			"program": "fish",
+		},
+		"show_count_badge": true,
+		"font_size": 15.0,
+		"env": {
+			"EDITOR": "zed --wait",
+		},
+	},
+	// File syntax highlighting
+	"file_types": {
+		"Dockerfile": ["Dockerfile", "Dockerfile.*"],
+		"JSON": ["json", "jsonc", "*.code-snippets"],
+	},
+	// File scan exclusions, hide on the file explorer and search
+	"file_scan_exclusions": [
+		"**/.git",
+		"**/.svn",
+		"**/.hg",
+		"**/CVS",
+		"**/.DS_Store",
+		"**/Thumbs.db",
+		"**/.classpath",
+		"**/.settings",
+		// above is default from Zed
+		"**/out",
+		"**/dist",
+		"**/.husky",
+		"**/.turbo",
+		"**/.vscode-test",
+		"**/.vscode",
+		"**/.next",
+		"**/.storybook",
+		"**/.tap",
+		"**/.nyc_output",
+		"**/report",
+		"**/node_modules",
+	],
+	// Turn off telemetry
+	"telemetry": {
+		"diagnostics": true,
+		"metrics": true,
+	},
+	// Move all panel to the right
+	"project_panel": {
+		"auto_fold_dirs": false,
+		"button": true,
+		"dock": "right",
+		"git_status": true,
+	},
+	"outline_panel": {
+		"dock": "right",
+	},
+	"collaboration_panel": {
+		"dock": "right",
+	},
+	"context_servers": {
+		"react-grab-mcp": {
+			"command": "npx",
+			"args": ["-y", "@react-grab/mcp", "--stdio"],
+			"env": {},
+		},
+	},
+	"autosave": {
+		"after_delay": {
+			"milliseconds": 1000,
 		},
 	},
 }

@@ -6,12 +6,18 @@
 			// Git
 			"space g h d": "editor::ToggleSelectedDiffHunks",
 			"space g s": "git_panel::ToggleFocus",
+			"space g w t": "git::Worktree",
+			"space g g": [
+				"task::Spawn",
+				{
+					"task_name": "Lazy Git",
+					"reveal_target": "center",
+				},
+			],
 			// Toggle inlay hints
 			"space t i": "editor::ToggleInlayHints",
 			// Toggle soft wrap
 			"space u w": "editor::ToggleSoftWrap",
-			// NOTE: Toggle Zen mode, not fully working yet
-			"space c z": "workspace::ToggleCenteredLayout",
 			// Open markdown preview
 			"space m p": "markdown::OpenPreview",
 			"space m P": "markdown::OpenPreviewToTheSide",
@@ -19,12 +25,14 @@
 			"space f p": "projects::OpenRecent",
 			// Search word under cursor
 			"space s w": "pane::DeploySearch",
+			"space s g": "pane::DeploySearch",
 			// Search on current buffer
 			"space s b": "buffer_search::Deploy",
 			// Chat with AI
 			"space a c": "agent::ToggleFocus",
 			// Go to file with `gf`
 			"g f": "editor::OpenExcerpts",
+			"-": "pane::RevealInProjectPanel",
 		},
 	},
 	{
@@ -41,6 +49,7 @@
 			"space c a": "editor::ToggleCodeActions",
 			"space .": "editor::ToggleCodeActions",
 			"space c r": "editor::Rename",
+			"space c f": "editor::Format",
 			"g d": "editor::GoToDefinition",
 			"g D": "editor::GoToDefinitionSplit",
 			"g i": "editor::GoToImplementation",
@@ -102,14 +111,6 @@
 			"g c": "editor::ToggleComments",
 		},
 	},
-	// Better escape
-	{
-		"context": "Editor && vim_mode == insert && !menu",
-		"bindings": {
-			"j j": "vim::NormalBefore", // remap jj in insert mode to escape
-			"j k": "vim::NormalBefore", // remap jk in insert mode to escape
-		},
-	},
 	// Rename
 	{
 		"context": "Editor && vim_operator == c",
@@ -136,10 +137,10 @@
 	{
 		"context": "Terminal",
 		"bindings": {
-			"ctrl-h": "workspace::ActivatePaneLeft",
-			"ctrl-l": "workspace::ActivatePaneRight",
-			"ctrl-k": "workspace::ActivatePaneUp",
-			"ctrl-j": "workspace::ActivatePaneDown",
+			// "ctrl-h": "workspace::ActivatePaneLeft",
+			// "ctrl-l": "workspace::ActivatePaneRight",
+			// "ctrl-k": "workspace::ActivatePaneUp",
+			// "ctrl-j": "workspace::ActivatePaneDown",
 		},
 	},
 	// File panel (netrw)
@@ -153,6 +154,7 @@
 			"x": "project_panel::Cut",
 			"c": "project_panel::Copy",
 			"p": "project_panel::Paste",
+			"H": "project_panel::CollapseAllEntries",
 			// Close project panel as project file panel off the right
 			"q": "workspace::ToggleRightDock",
 			"space e": "workspace::ToggleRightDock",
