@@ -10,13 +10,21 @@
 {
 	"show_wrap_guides": true,
 	"wrap_guides": [80, 120],
-	"theme": "Catppuccin Latte",
-	"icon_theme": "Catppuccin Latte",
+	"theme": {
+		"mode": "dark",
+		"light": "Catppuccin Latte",
+		"dark": "Catppuccin Macchiato"
+	},
+	"icon_theme": {
+		"mode": "dark",
+		"light": "Catppuccin Latte",
+		"dark": "Catppuccin Macchiato"
+	},
 	"diff_view_style": "unified",
 	"colorize_brackets": true,
 	"code_lens": "on",
 	"toolbar": {
-		"code_actions": true,
+		"code_actions": true
 	},
 	"show_signature_help_after_edits": false,
 	"auto_signature_help": false,
@@ -25,86 +33,86 @@
 	"agent_servers": {
 		"codex-acp": {
 			"favorite_config_option_values": {
-				"model": ["gpt-5.4-mini"],
+				"model": ["gpt-5.4-mini"]
 			},
 			"default_config_options": {
 				"mode": "full-access",
-				"model": "gpt-5.4-mini",
+				"model": "gpt-5.4-mini"
 			},
-			"type": "registry",
+			"type": "registry"
 		},
 		"claude-acp": {
-			"type": "registry",
-		},
+			"type": "registry"
+		}
 	},
 	"session": {
-		"trust_all_worktrees": true,
+		"trust_all_worktrees": true
 	},
 	"git": {
 		"inline_blame": {
-			"enabled": true,
-		},
+			"enabled": true
+		}
 	},
 	"status_bar": {
-		"experimental.show": true,
+		"experimental.show": true
 	},
 	"gutter": {
-		"line_numbers": true,
+		"line_numbers": true
 	},
 	"cursor_shape": "bar",
 	"cursor_blink": true,
 	"use_system_window_tabs": true,
 	"buffer_font_fallbacks": [
-		"Maple Mono NF",
+		"Maple Mono NF CN",
 		"JetBrainsMono Nerd Font Mono",
-		"Noto Sans Mono",
+		"Noto Sans Mono"
 	],
 	"show_whitespaces": "all",
 	"show_edit_predictions": false,
 	"hard_tabs": true,
 	"git_panel": {
 		"tree_view": true,
-		"dock": "right",
+		"dock": "right"
 	},
 	"base_keymap": "VSCode",
 	// "ui_font_size": 16,
 	"buffer_font_size": 15.0,
 	// Finder modal width
 	"file_finder": {
-		"modal_max_width": "medium",
+		"modal_max_width": "medium"
 	},
 	// NOTE: Change the font family to your preference
-	"buffer_font_family": "Maple Mono",
+	"buffer_font_family": "Maple Mono NF CN",
 	// Vim mode settings
 	"vim_mode": true,
 	"vim": {
-		"use_system_clipboard": "on_yank",
+		"use_system_clipboard": "on_yank"
 	},
 	"which_key": {
 		"delay_ms": 500,
-		"enabled": true,
+		"enabled": true
 	},
 	// use relative line numbers
 	"relative_line_numbers": "wrapped",
 	"tab_bar": {
-		"show": true,
+		"show": true
 	},
 	"scrollbar": {
-		"show": "auto",
+		"show": "auto"
 	},
 	// Only show error on tab
 	"tabs": {
-		"show_diagnostics": "errors",
+		"show_diagnostics": "errors"
 	},
 	// Indentation, rainbow indentation
 	"indent_guides": {
 		"enabled": true,
-		"coloring": "indent_aware",
+		"coloring": "indent_aware"
 	},
 	// NOTE: Zen mode, refer https://github.com/zed-industries/zed/issues/4382 when it's resolved
 	"centered_layout": {
 		"left_padding": 0.15,
-		"right_padding": 0.15,
+		"right_padding": 0.15
 	},
 	"agent": {
 		"profiles": {
@@ -121,17 +129,17 @@
 					"copy_path": true,
 					"create_directory": true,
 					"fetch": true,
-					"skill": true,
+					"skill": true
 				},
 				"enable_all_context_servers": false,
-				"context_servers": {},
-			},
+				"context_servers": {}
+			}
 		},
 		"default_model": {
 			"provider": "openai-subscribed",
 			"model": "gpt-5.5",
 			"enable_thinking": true,
-			"effort": "medium",
+			"effort": "medium"
 		},
 		"sidebar_side": "right",
 		"default_profile": "bypass",
@@ -139,26 +147,26 @@
 		"tool_permissions": {
 			"tools": {
 				"fetch": {
-					"default": "allow",
+					"default": "allow"
 				},
 				"terminal": {
-					"default": "allow",
-				},
-			},
+					"default": "allow"
+				}
+			}
 		},
-		"model_parameters": [],
+		"model_parameters": []
 	},
 	// Inlay hints preconfigured by Zed: Go, Rust, Typescript and Svelte
 	"inlay_hints": {
-		"enabled": false,
+		"enabled": false
 	},
 	// LSP
 	"lsp": {
 		"tailwindcss-language-server": {
 			"settings": {
-				"classAttributes": ["class", "className", "ngClass", "styles"],
-			},
-		},
+				"classAttributes": ["class", "className", "ngClass", "styles"]
+			}
+		}
 	},
 	"languages": {
 		// Refer https://zed.dev/docs/languages/javascript and https://zed.dev/docs/languages/typescript for more info
@@ -166,31 +174,31 @@
 			// Refer https://github.com/jellydn/ts-inlay-hints for how to setup for Neovim and VSCode
 			"show_whitespaces": "all",
 			"show_edit_predictions": true,
-			"hard_tabs": true,
+			"hard_tabs": true
 			// "inlay_hints": {
 			// 	"enabled": true,
 			// 	"show_parameter_hints": false,
 			// 	"show_other_hints": true,
 			// 	"show_type_hints": true,
 			// },
-		},
+		}
 	},
 	// Use zed commit editor
 	"terminal": {
-		"font_family": "Maple Mono NF",
+		"font_family": "Maple Mono NF CN",
 		"shell": {
-			"program": "fish",
+			"program": "fish"
 		},
 		"show_count_badge": true,
 		"font_size": 15.0,
 		"env": {
-			"EDITOR": "zed --wait",
-		},
+			"EDITOR": "zed --wait"
+		}
 	},
 	// File syntax highlighting
 	"file_types": {
 		"Dockerfile": ["Dockerfile", "Dockerfile.*"],
-		"JSON": ["json", "jsonc", "*.code-snippets"],
+		"JSON": ["json", "jsonc", "*.code-snippets"]
 	},
 	// File scan exclusions, hide on the file explorer and search
 	"file_scan_exclusions": [
@@ -214,36 +222,29 @@
 		"**/.tap",
 		"**/.nyc_output",
 		"**/report",
-		"**/node_modules",
+		"**/node_modules"
 	],
 	// Turn off telemetry
 	"telemetry": {
 		"diagnostics": true,
-		"metrics": true,
+		"metrics": true
 	},
 	// Move all panel to the right
 	"project_panel": {
 		"auto_fold_dirs": false,
 		"button": true,
 		"dock": "right",
-		"git_status": true,
+		"git_status": true
 	},
 	"outline_panel": {
-		"dock": "right",
+		"dock": "right"
 	},
 	"collaboration_panel": {
-		"dock": "right",
-	},
-	"context_servers": {
-		"react-grab-mcp": {
-			"command": "npx",
-			"args": ["-y", "@react-grab/mcp", "--stdio"],
-			"env": {},
-		},
+		"dock": "right"
 	},
 	"autosave": {
 		"after_delay": {
-			"milliseconds": 1000,
-		},
-	},
+			"milliseconds": 1000
+		}
+	}
 }
