@@ -11,12 +11,12 @@
 	"show_wrap_guides": true,
 	"wrap_guides": [80, 120],
 	"theme": {
-		"mode": "dark",
+		"mode": "system",
 		"light": "Catppuccin Latte",
 		"dark": "Catppuccin Macchiato"
 	},
 	"icon_theme": {
-		"mode": "dark",
+		"mode": "system",
 		"light": "Catppuccin Latte",
 		"dark": "Catppuccin Macchiato"
 	},
