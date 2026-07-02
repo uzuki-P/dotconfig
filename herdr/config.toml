@@ -1,0 +1,64 @@
+onboarding = false
+
+[ui.toast]
+delivery = "system"
+
+[ui]
+show_agent_labels_on_pane_borders = true
+agent_panel_sort = "priority"
+prompt_new_tab_name = false
+mouse_scroll_lines = 1
+
+[theme]
+name = "catppuccin-latte"
+auto_switch = false
+
+[theme.custom]
+accent = "#E91E63"
+
+[terminal]
+default_shell = "fish"
+new_cwd = "follow"
+
+[keys]
+# Primary navigation: tabs on h/l, workspaces on j/k.
+previous_tab = ["prefix+h", "ctrl+alt+["]
+next_tab = ["prefix+l", "ctrl+alt+]"]
+previous_workspace = "prefix+k"
+next_workspace = "prefix+j"
+
+# Indexed jumps.
+switch_tab = "prefix+1..9"
+switch_workspace = "prefix+shift+1..9"
+
+# Persistent navigation mode: prefix+w, then the configured key.
+navigate_workspace_up = "k"
+navigate_workspace_down = "j"
+navigate_pane_left = "h"
+navigate_pane_right = "l"
+navigate_pane_up = "ctrl+k"
+navigate_pane_down = "ctrl+j"
+
+# Pane focus remains available without occupying primary prefix bindings.
+focus_pane_left = "ctrl+alt+h"
+focus_pane_down = "ctrl+alt+j"
+focus_pane_up = "ctrl+alt+k"
+focus_pane_right = "ctrl+alt+l"
+
+# Free prefix+shift+j/k for herdr-plus.
+swap_pane_left = ""
+swap_pane_down = ""
+swap_pane_up = ""
+swap_pane_right = ""
+
+[[keys.command]]
+key = "prefix+shift+k"
+type = "plugin_action"
+command = "cloudmanic.herdr-plus.projects"
+description = "herdr-plus: projects"
+
+[[keys.command]]
+key = "prefix+shift+j"
+type = "plugin_action"
+command = "cloudmanic.herdr-plus.quick-actions"
+description = "herdr-plus: quick actions"

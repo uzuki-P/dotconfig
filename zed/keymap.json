@@ -49,6 +49,7 @@
 			// +LSP
 			"space c a": "editor::ToggleCodeActions",
 			"space .": "editor::ToggleCodeActions",
+			"alt-enter": "editor::ToggleCodeActions",
 			"space c r": "editor::Rename",
 			"space c f": "editor::Format",
 			"g d": "editor::GoToDefinition",

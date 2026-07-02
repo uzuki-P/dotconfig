@@ -6,7 +6,7 @@
     - MouseGesture: []
   - Key: [Mouse Gesture Button, pressed]
 - KeyPress:
-  - [Super_R, a]
+  - [Super_R, w]
   - click
 ...
 ---

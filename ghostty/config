@@ -18,29 +18,28 @@ gtk-tabs-location = bottom
 gtk-custom-css = tab-style.css
 window-theme = ghostty
 
-# Approximate the kitty scrollback_lines=8000 setting.
-# Note: This is in bytes, not lines.
-scrollback-limit = 80000000000
+# Effectively unlimited for normal use. This is allocated lazily per surface.
+scrollback-limit = 1000000000
 
 keybind = ctrl+enter=unbind
 keybind = alt+f11=toggle_fullscreen
 keybind = alt+f12=toggle_window_decorations
 
-keybind = ctrl+a>minus=new_split:down
-keybind = ctrl+a>shift+minus=new_split:right
-keybind = ctrl+a>o=goto_split:next
-keybind = ctrl+a>shift+o=goto_split:previous
-keybind = ctrl+a>h=goto_split:left
-keybind = ctrl+a>l=goto_split:right
-keybind = ctrl+a>k=goto_split:top
-keybind = ctrl+a>j=goto_split:bottom
-keybind = ctrl+a>c=new_tab
-keybind = ctrl+a>x=close_surface
-keybind = ctrl+a>ctrl+l=next_tab
-keybind = ctrl+a>ctrl+h=previous_tab
-keybind = ctrl+a>n=new_window
+# keybind = ctrl+a>minus=new_split:down
+# keybind = ctrl+a>shift+minus=new_split:right
+# keybind = ctrl+a>o=goto_split:next
+# keybind = ctrl+a>shift+o=goto_split:previous
+# keybind = ctrl+a>h=goto_split:left
+# keybind = ctrl+a>l=goto_split:right
+# keybind = ctrl+a>k=goto_split:top
+# keybind = ctrl+a>j=goto_split:bottom
+# keybind = ctrl+a>c=new_tab
+# keybind = ctrl+a>x=close_surface
+# keybind = ctrl+a>ctrl+l=next_tab
+# keybind = ctrl+a>ctrl+h=previous_tab
+# keybind = ctrl+a>n=new_window
 
 # libadwaita enabled only
-keybind = ctrl+a>w=toggle_tab_overview
+# keybind = ctrl+a>w=toggle_tab_overview
 
 keybind = shift+enter=text:\x1b\r

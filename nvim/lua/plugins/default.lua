@@ -68,6 +68,20 @@ return {
     },
   },
   {
+    "mfussenegger/nvim-lint",
+    opts = {
+      linters = {
+        ["markdownlint-cli2"] = {
+          args = {
+            "--config",
+            vim.fn.stdpath("config") .. "/markdownlint.json",
+            "-",
+          },
+        },
+      },
+    },
+  },
+  {
     "rcarriga/nvim-dap-ui",
     opts = {
       layouts = {

@@ -47,7 +47,7 @@ if not string match -q -- $PNPM_HOME $PATH
 end
 
 # fnm
-fnm env --use-on-cd --shell fish | source
+#fnm env --use-on-cd --shell fish | source
 
 # carapace. https://github.com/carapace-sh/carapace-bin/releases
 carapace _carapace | source
