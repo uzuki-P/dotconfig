@@ -11,7 +11,9 @@ mouse_scroll_lines = 1
 
 [theme]
 name = "catppuccin-latte"
-auto_switch = false
+auto_switch = true
+light_name = "catppuccin-latte"
+dark_name = "catppuccin"
 
 [theme.custom]
 accent = "#E91E63"
