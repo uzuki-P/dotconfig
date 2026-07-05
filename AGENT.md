@@ -32,3 +32,7 @@ For Herdr configuration changes, reload a running server with:
 ```sh
 herdr server reload-config
 ```
+
+## Herdr Reference
+
+Before changing or operating Herdr, consult `docs/herdr/README.md`. The pinned upstream documentation is under `docs/herdr/upstream/`, and help output from the installed binary is in `docs/herdr/cli-help.txt`. Prefer the captured CLI help when it differs from general or newer online documentation.

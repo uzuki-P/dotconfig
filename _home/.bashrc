@@ -54,6 +54,9 @@ export PATH
 # export SYSTEMD_PAGER=
 
 # User specific aliases and functions
+# herdr new tab
+alias hnt='herdr tab create --cwd "$PWD" --focus && herdr'
+
 if [ -d ~/.bashrc.d ]; then
     for rc in ~/.bashrc.d/*; do
         if [ -f "$rc" ]; then

@@ -1,0 +1,209 @@
+Herdr CLI help snapshot
+Version: herdr 0.7.1
+Captured: 2026-07-05
+
+===== herdr --help =====
+herdr — terminal workspace manager for AI coding agents
+
+Usage: herdr [options]
+       herdr --session <name> [options]
+       herdr --remote <ssh-target> [--session <name>]
+       herdr session attach <name>
+       herdr update [--handoff]
+       herdr channel set <stable|preview>
+       herdr server stop
+       herdr server reload-config
+       herdr config <subcommand> ...
+       herdr channel <subcommand> ...
+       herdr workspace <subcommand> ...
+       herdr worktree <subcommand> ...
+       herdr tab <subcommand> ...
+       herdr notification <subcommand> ...
+       herdr agent <subcommand> ...
+       herdr pane <subcommand> ...
+       herdr wait <subcommand> ...
+       herdr session <subcommand> ...
+       herdr integration <subcommand> ...
+
+Common commands:
+  herdr                            Launch or attach to the persistent session
+  herdr status [server|client]     Show local client and running server status
+  herdr update                     Download and install the latest version
+  herdr server stop                Stop the running server via the API socket
+  herdr channel set <stable|preview> Choose the stable or preview update channel
+  herdr server reload-config       Reload config.toml in the running server
+  herdr config reset-keys          Back up config.toml and remove custom keybindings
+  herdr channel <subcommand>       Manage the stable or preview update channel
+  herdr workspace <subcommand>     Workspace helpers over the socket API
+  herdr worktree <subcommand>      Git worktree helpers over the socket API
+  herdr tab <subcommand>           Tab helpers over the socket API
+  herdr notification <subcommand>  Notification helpers over the socket API
+  herdr agent <subcommand>         Agent/terminal helpers over the socket API
+  herdr pane <subcommand>          Pane control helpers over the socket API
+  herdr wait <subcommand>          Blocking wait helpers over the socket API
+  herdr session <subcommand>       Manage named persistent sessions
+  herdr integration <subcommand>   Manage built-in agent integrations
+
+Advanced commands:
+  herdr server                     Run as headless server
+
+Options:
+  --no-session        Run monolithically (no server/client, escape hatch)
+  --session <name>    Use or create a named persistent session
+  --remote <target>   Attach through SSH to a remote Herdr server
+  --remote-keybindings <local|server>
+                      Keybindings for --remote app attach (default: local)
+  --handoff           Opt into live handoff for update or remote attach
+  --default-config    Print default configuration and exit
+  --version, -V       Print version and exit
+  --help, -h          Show this help
+
+Config: /home/uzuki_p/.config/herdr/config.toml
+Logs:   /home/uzuki_p/.config/herdr/herdr.log (plus herdr-client.log, herdr-server.log)
+Env:    HERDR_CONFIG_PATH overrides config file path
+Home:   https://herdr.dev
+
+===== herdr config --help =====
+herdr config commands:
+  herdr config reset-keys  back up config.toml and remove custom keybindings
+
+===== herdr channel --help =====
+herdr channel commands:
+  herdr channel show                  print the configured update channel
+  herdr channel set <stable|preview>  choose the update channel
+
+===== herdr workspace --help =====
+herdr workspace commands:
+  herdr workspace list
+  herdr workspace create [--cwd PATH] [--label TEXT] [--env KEY=VALUE] [--focus] [--no-focus]
+  herdr workspace get <workspace_id>
+  herdr workspace focus <workspace_id>
+  herdr workspace rename <workspace_id> <label>
+  herdr workspace close <workspace_id>
+
+===== herdr worktree --help =====
+herdr worktree commands:
+  herdr worktree list [--workspace ID | --cwd PATH] [--json]
+  herdr worktree create [--workspace ID | --cwd PATH] [--branch NAME] [--base REF] [--path PATH] [--label TEXT] [--focus] [--no-focus] [--json]
+  herdr worktree open [--workspace ID | --cwd PATH] (--path PATH | --branch NAME) [--label TEXT] [--focus] [--no-focus] [--json]
+  herdr worktree remove --workspace ID [--force] [--json]
+
+===== herdr tab --help =====
+herdr tab commands:
+  herdr tab list [--workspace <workspace_id>]
+  herdr tab create [--workspace <workspace_id>] [--cwd PATH] [--label TEXT] [--env KEY=VALUE] [--focus] [--no-focus]
+  herdr tab get <tab_id>
+  herdr tab focus <tab_id>
+  herdr tab rename <tab_id> <label>
+  herdr tab close <tab_id>
+
+===== herdr notification --help =====
+herdr notification commands:
+  herdr notification show <title> [--body TEXT] [--position top-left|top-right|bottom-left|bottom-right] [--sound none|done|request]
+
+===== herdr agent --help =====
+herdr agent commands:
+  herdr agent list
+  herdr agent get <target>
+  herdr agent read <target> [--source visible|recent|recent-unwrapped] [--lines N] [--format text|ansi] [--ansi]
+  herdr agent send <target> <text>
+  herdr agent rename <target> <name>|--clear
+  herdr agent focus <target>
+  herdr agent wait <target> --status <idle|working|blocked|unknown> [--timeout MS]
+  herdr agent attach <target> [--takeover]
+  herdr agent start <name> [--cwd PATH] [--workspace ID] [--tab ID] [--split right|down] [--env KEY=VALUE] [--focus|--no-focus] -- <argv...>
+  herdr agent explain <target> [--json]
+  herdr agent explain --file PATH --agent LABEL [--json]
+  targets accept terminal ids, unique agent names, detected/reported agent labels, and legacy pane ids
+  agent send writes literal text; use pane run when you want command text plus Enter
+
+===== herdr pane --help =====
+herdr pane commands:
+  herdr pane list [--workspace <workspace_id>]
+  herdr pane current [--pane ID|--current]
+  herdr pane get <pane_id>
+  herdr pane layout [--pane ID|--current]
+  herdr pane process-info [--pane ID|--current]
+  herdr pane neighbor --direction left|right|up|down [--pane ID|--current]
+  herdr pane edges [--pane ID|--current]
+  herdr pane focus --direction left|right|up|down [--pane ID|--current]
+  herdr pane resize --direction left|right|up|down [--amount FLOAT] [--pane ID|--current]
+  herdr pane zoom [<pane_id>|--pane ID|--current] [--toggle|--on|--off]
+  herdr pane rename <pane_id> <label>|--clear
+  herdr pane read <pane_id> [--source visible|recent|recent-unwrapped] [--lines N] [--format text|ansi] [--ansi]
+  herdr pane split [<pane_id>|--pane ID|--current] --direction right|down [--ratio FLOAT] [--cwd PATH] [--env KEY=VALUE] [--focus] [--no-focus]
+  herdr pane swap --direction left|right|up|down [--pane ID|--current]
+  herdr pane swap --source-pane ID --target-pane ID
+  herdr pane move <pane_id> --tab <tab_id> --split right|down [--target-pane ID] [--ratio FLOAT] [--focus|--no-focus]
+  herdr pane move <pane_id> --new-tab [--workspace ID] [--label TEXT] [--focus|--no-focus]
+  herdr pane move <pane_id> --new-workspace [--label TEXT] [--tab-label TEXT] [--focus|--no-focus]
+  herdr pane close <pane_id>
+  herdr pane send-text <pane_id> <text>
+  herdr pane send-keys <pane_id> <key> [key ...]
+  herdr pane report-agent <pane_id> --source ID --agent LABEL --state idle|working|blocked|unknown [--message TEXT] [--custom-status TEXT] [--seq N] [--agent-session-id ID] [--agent-session-path PATH]
+  herdr pane report-agent-session <pane_id> --source ID --agent LABEL [--seq N] [--agent-session-id ID] [--agent-session-path PATH]
+  herdr pane release-agent <pane_id> --source ID --agent LABEL [--seq N]
+  herdr pane report-metadata <pane_id> --source ID [--agent LABEL] [--applies-to-source ID] [--title TEXT|--clear-title] [--display-agent TEXT|--clear-display-agent] [--custom-status TEXT|--clear-custom-status] [--state-label STATUS=TEXT] [--clear-state-labels] [--seq N] [--ttl-ms N]
+  herdr pane run <pane_id> <command>
+
+===== herdr wait --help =====
+herdr wait commands:
+  herdr wait output <pane_id> --match <text> [--source visible|recent|recent-unwrapped] [--lines N] [--timeout MS] [--regex] [--raw]
+  herdr wait agent-status <pane_id> --status <idle|working|blocked|done|unknown> [--timeout MS]
+
+===== herdr session --help =====
+herdr session commands:
+  herdr session list [--json]
+  herdr session attach <name>
+  herdr session stop <name> [--json]
+  herdr session delete <name> [--json]
+  use 'default' as <name> to target the default session for stop
+
+===== herdr integration --help =====
+herdr integration commands:
+  herdr integration install pi
+  herdr integration install omp
+  herdr integration install claude
+  herdr integration install codex
+  herdr integration install copilot
+  herdr integration install devin
+  herdr integration install droid
+  herdr integration install kimi
+  herdr integration install opencode
+  herdr integration install kilo
+  herdr integration install hermes
+  herdr integration install qodercli
+  herdr integration install cursor
+  herdr integration uninstall pi
+  herdr integration uninstall omp
+  herdr integration uninstall claude
+  herdr integration uninstall codex
+  herdr integration uninstall copilot
+  herdr integration uninstall devin
+  herdr integration uninstall droid
+  herdr integration uninstall kimi
+  herdr integration uninstall opencode
+  herdr integration uninstall kilo
+  herdr integration uninstall hermes
+  herdr integration uninstall qodercli
+  herdr integration uninstall cursor
+  herdr integration status [--outdated-only]
+
+===== herdr server --help =====
+herdr server commands:
+  herdr server                run as headless server
+  herdr server stop           stop the running server via the API socket
+  herdr server live-handoff   hand off live panes to a new local server
+  herdr server reload-config  reload config.toml in the running server
+  herdr server agent-manifests [--json]  show agent detection manifest status
+  herdr server update-agent-manifests [--json]  fetch and reload agent detection manifests
+  herdr server reload-agent-manifests  reload agent detection manifests in the running server
+
+===== herdr status --help =====
+herdr status commands:
+  herdr status [--json]         show local client and running server status
+  herdr status server [--json]  show running server status
+  herdr status client [--json]  show local client binary status
+
+===== herdr update --help =====
+usage: herdr update [--handoff]

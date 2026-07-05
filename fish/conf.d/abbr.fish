@@ -29,6 +29,9 @@ if status is-interactive
 
     abbr --add ubuntu-db 'distrobox enter ubuntu -- fish'
 
+    # herdr new tab
+    abbr --add hnt 'herdr tab create --cwd $PWD --focus; and herdr'
+
     # git
     abbr --add gss 'git status --short'
     abbr --add gc 'git commit'
