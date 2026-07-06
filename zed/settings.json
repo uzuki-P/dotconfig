@@ -93,7 +93,7 @@
 		"enabled": true
 	},
 	// use relative line numbers
-	"relative_line_numbers": "wrapped",
+	"relative_line_numbers": "disabled",
 	"tab_bar": {
 		"show": true
 	},
