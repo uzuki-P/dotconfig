@@ -1,0 +1,12 @@
+# Environment files (secrets — never commit)
+.env
+.env.*
+!.env.example
+
+# Podman/Docker runtime data
+.data/
+
+# OS / editor
+.DS_Store
+*.swp
+*~

@@ -1,0 +1,43 @@
+{
+	acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+}
+
+*.ts.example.com {
+	bind 127.0.0.1
+
+	@t3 host t3.ts.example.com
+	handle @t3 {
+		reverse_proxy 127.0.0.1:3773
+	}
+
+	@ttyd host ttyd.ts.example.com
+	handle @ttyd {
+		reverse_proxy 127.0.0.1:7681
+	}
+
+	# IssueLane web application
+	@issuelane host il.ts.example.com
+	handle @issuelane {
+		reverse_proxy 127.0.0.1:3000
+	}
+
+	# IssueLane API
+	@issuelane_api host il-api.ts.example.com
+	handle @issuelane_api {
+		reverse_proxy 127.0.0.1:3220
+	}
+
+	# IssueLane public site
+	@issuelane_site host il-site.ts.example.com
+	handle @issuelane_site {
+		reverse_proxy 127.0.0.1:3221
+	}
+
+	# IssueLane dashboard
+	@issuelane_dash host il-dash.ts.example.com
+	handle @issuelane_dash {
+		reverse_proxy 127.0.0.1:6792
+	}
+
+	respond 404
+}
