@@ -37,7 +37,7 @@
 			},
 			"default_config_options": {
 				"mode": "full-access",
-				"model": "gpt-5.4-mini"
+				"model": "gpt-5.6-terra"
 			},
 			"type": "registry"
 		},
@@ -240,7 +240,8 @@
 		"dock": "right"
 	},
 	"collaboration_panel": {
-		"dock": "right"
+		"button": false,
+  "dock": "right"
 	},
 	"autosave": {
 		"after_delay": {

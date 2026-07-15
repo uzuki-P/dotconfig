@@ -1,0 +1,23 @@
+[Unit]
+Description=Writable web terminal over Tailscale
+After=network-online.target
+
+[Service]
+Type=simple
+
+# A ttyd service managed from inside Herdr must still create an outer shell.
+# This affects only this service and its children, not the local shell or Herdr.
+UnsetEnvironment=HERDR_ENV HERDR_SOCKET_PATH HERDR_BIN_PATH HERDR_SESSION
+UnsetEnvironment=HERDR_WORKSPACE_ID HERDR_TAB_ID HERDR_PANE_ID
+UnsetEnvironment=HERDR_ACTIVE_WORKSPACE_ID HERDR_ACTIVE_TAB_ID HERDR_ACTIVE_PANE_ID HERDR_ACTIVE_PANE_CWD
+UnsetEnvironment=HERDR_PLUGIN_ID HERDR_PLUGIN_ROOT HERDR_PLUGIN_CONFIG_DIR HERDR_PLUGIN_STATE_DIR
+UnsetEnvironment=HERDR_PLUGIN_CONTEXT_JSON HERDR_PLUGIN_ENTRYPOINT_ID HERDR_PLUGIN_ACTION_ID HERDR_PLUGIN_EVENT HERDR_PLUGIN_EVENT_JSON
+
+ExecStart=%h/script/ttyd-run
+Restart=on-failure
+RestartSec=3s
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Manage the ttyd user service installed by this dotfiles repository.
+
+set -euo pipefail
+
+SERVICE="ttyd.service"
+
+usage() {
+    cat <<EOF
+Usage: ttyd-serve <command>
+
+Commands:
+  start       Start ttyd
+  stop        Stop ttyd
+  restart     Restart ttyd (also starts it when currently stopped)
+  status      Show service status and access URLs
+  logs [N]    Show the last N journal entries (default: 50)
+EOF
+}
+
+print_urls() {
+    local ip name
+    ip="$(tailscale ip -4 2>/dev/null | head -1 || true)"
+    name="$(tailscale status --self --json 2>/dev/null \
+        | sed -nE 's/.*"DNSName"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/p' \
+        | head -1 | sed 's/\.$//' || true)"
+
+    printf '  http://%s:7681/\n' "${ip:-<tailscale-ip>}"
+    [[ -n "$name" ]] && printf '  http://%s:7681/  (MagicDNS)\n' "$name"
+}
+
+case "${1:-}" in
+    start)
+        systemctl --user start "$SERVICE"
+        echo "Started $SERVICE."
+        print_urls
+        ;;
+    stop)
+        systemctl --user stop "$SERVICE"
+        echo "Stopped $SERVICE."
+        ;;
+    restart)
+        systemctl --user restart "$SERVICE"
+        echo "Restarted $SERVICE."
+        print_urls
+        ;;
+    status)
+        systemctl --user status "$SERVICE" --no-pager
+        print_urls
+        ;;
+    logs)
+        lines="${2:-50}"
+        [[ "$lines" =~ ^[0-9]+$ ]] || {
+            echo "Log line count must be a non-negative integer." >&2
+            exit 2
+        }
+        journalctl --user -u "$SERVICE" -n "$lines" --no-pager
+        ;;
+    -h|--help|help|"")
+        usage
+        ;;
+    *)
+        echo "Unknown command: $1" >&2
+        usage >&2
+        exit 2
+        ;;
+esac
