@@ -9,6 +9,7 @@ agent_panel_sort = "priority"
 prompt_new_tab_name = false
 mouse_scroll_lines = 1
 mouse_capture = true
+copy_on_select = true
 
 [theme]
 name = "catppuccin-latte"
