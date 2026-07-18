@@ -8,11 +8,18 @@ INTERFACE="${TTYD_INTERFACE:-tailscale0}"
 MAX_CLIENTS="${TTYD_MAX_CLIENTS:-1}"
 FONT_FAMILY="${TTYD_FONT_FAMILY:-Maple Mono NF CN}"
 FONT_SIZE="${TTYD_FONT_SIZE:-16}"
+INDEX_PATH="${TTYD_INDEX_PATH:-$HOME/.local/share/ttyd/index.html}"
 
 command -v ttyd >/dev/null || {
   echo "ttyd not found in PATH." >&2
   exit 1
 }
+
+if [[ ! -r "$INDEX_PATH" ]]; then
+  echo "Custom ttyd client not found at '$INDEX_PATH'." >&2
+  echo "Build it with: ~/script/ttyd-build-index" >&2
+  exit 1
+fi
 
 if ! ip link show "$INTERFACE" >/dev/null 2>&1; then
   echo "Network interface '$INTERFACE' is not available." >&2
@@ -28,6 +35,8 @@ exec ttyd \
   -O \
   -W \
   -m "$MAX_CLIENTS" \
+  -I "$INDEX_PATH" \
+  -t "rendererType=canvas" \
   -t "fontFamily=$FONT_FAMILY" \
   -t "fontSize=$FONT_SIZE" \
   -s 1 \

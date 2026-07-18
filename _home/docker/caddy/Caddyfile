@@ -1,0 +1,28 @@
+{
+	acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+}
+
+(service) {
+	@{args[0]} host {args[0]}.{$CADDY_TS_BASE_DOMAIN:ts.example.com}
+	handle @{args[0]} {
+		reverse_proxy {args[1]}
+	}
+}
+
+*.{$CADDY_TS_BASE_DOMAIN:ts.example.com} {
+	bind {$CADDY_TS_IP:127.0.0.1}
+
+	import service t3      127.0.0.1:3773
+	import service ttyd    {$CADDY_TS_IP:127.0.0.1}:7681
+
+	# IssueLane web application
+	import service il      [::1]:3000
+	# IssueLane API
+	import service il-api  127.0.0.1:3220
+	# IssueLane public site
+	import service il-site 127.0.0.1:3221
+	# IssueLane dashboard
+	import service il-dash 127.0.0.1:6792
+
+	respond 404
+}

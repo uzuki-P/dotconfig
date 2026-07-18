@@ -11,8 +11,11 @@ the credentials or terminal traffic.
 ## Files
 
 - `~/script/ttyd-run` is the foreground ttyd launcher used by systemd.
-- `~/script/ttyd-serve` provides `start`, `stop`, `restart`, `status`, and
-  `logs` commands.
+- `~/script/ttyd-build-index` builds the custom ttyd 1.7.7 browser client into
+  `~/.local/share/ttyd/index.html`. It follows the browser's system theme using
+  Catppuccin Mocha in dark mode and Latte in light mode, with a Material Pink
+  500 cursor. The launcher uses xterm.js's Canvas renderer to avoid WebGL glyph
+  atlas corruption in terminal UIs with dense tab decorations.
 - `~/.config/systemd/user/ttyd.service` supervises the launcher.
 
 The unit removes Herdr's pane environment variables only from ttyd and its
@@ -32,11 +35,16 @@ systemctl --user daemon-reload
 systemctl --user enable --now ttyd.service
 ```
 
-Check the service and logs with either systemd or the wrapper:
+Build the custom browser client before starting or restarting ttyd:
+
+```bash
+~/script/ttyd-build-index
+```
+
+Check the service and logs with systemd:
 
 ```sh
-ttyd-serve status
-ttyd-serve logs
+systemctl --user status ttyd.service
 journalctl --user -u ttyd.service -f
 ```
 

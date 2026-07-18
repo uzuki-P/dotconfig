@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Build ttyd 1.7.7's web client with a system-aware Catppuccin theme.
+
+set -euo pipefail
+
+TTyd_VERSION="1.7.7"
+OUTPUT="${TTYD_INDEX_PATH:-$HOME/.local/share/ttyd/index.html}"
+BUILD_DIR="$(mktemp -d)"
+trap 'rm -rf "$BUILD_DIR"' EXIT
+
+git clone --quiet --depth 1 --branch "$TTyd_VERSION" https://github.com/tsl0922/ttyd.git "$BUILD_DIR/ttyd"
+
+cd "$BUILD_DIR/ttyd"
+apply_patch <<'PATCH'
+*** Begin Patch
+*** Update File: html/src/components/terminal/xterm/index.ts
+@@
+ import '@xterm/xterm/css/xterm.css';
++
++const cursor = '#e91e63'; // Material 2 Pink 500
++const mochaTheme = {
++    foreground: '#cdd6f4',
++    background: '#1e1e2e',
++    cursor,
++    cursorAccent: '#1e1e2e',
++    selectionBackground: '#585b70',
++    black: '#45475a', red: '#f38ba8', green: '#a6e3a1', yellow: '#f9e2af',
++    blue: '#89b4fa', magenta: '#f5c2e7', cyan: '#94e2d5', white: '#bac2de',
++    brightBlack: '#585b70', brightRed: '#f38ba8', brightGreen: '#a6e3a1', brightYellow: '#f9e2af',
++    brightBlue: '#89b4fa', brightMagenta: '#f5c2e7', brightCyan: '#94e2d5', brightWhite: '#a6adc8',
++};
++const latteTheme = {
++    foreground: '#4c4f69',
++    background: '#eff1f5',
++    cursor,
++    cursorAccent: '#eff1f5',
++    selectionBackground: '#acb0be',
++    black: '#5c5f77', red: '#d20f39', green: '#40a02b', yellow: '#df8e1d',
++    blue: '#1e66f5', magenta: '#ea76cb', cyan: '#179299', white: '#acb0be',
++    brightBlack: '#6c6f85', brightRed: '#d20f39', brightGreen: '#40a02b', brightYellow: '#df8e1d',
++    brightBlue: '#1e66f5', brightMagenta: '#ea76cb', brightCyan: '#179299', brightWhite: '#bcc0cc',
++};
++const colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
++const systemTheme = () => (colorScheme.matches ? mochaTheme : latteTheme);
+@@
+     public open(parent: HTMLElement) {
+-        this.terminal = new Terminal(this.options.termOptions);
++        this.terminal = new Terminal({...this.options.termOptions, theme: systemTheme()});
+         const { terminal, fitAddon, overlayAddon } = this;
++        const onColorSchemeChange = () => {
++            terminal.options.theme = systemTheme();
++        };
++        colorScheme.addEventListener('change', onColorSchemeChange);
++        this.register(toDisposable(() => colorScheme.removeEventListener('change', onColorSchemeChange)));
+*** End Patch
+PATCH
+
+cd html
+YARN_ENABLE_IMMUTABLE_INSTALLS=false corepack yarn@3.6.3 install
+corepack yarn@3.6.3 fix
+corepack yarn@3.6.3 inline
+install -Dm644 "$BUILD_DIR/ttyd/html/dist/inline.html" "$OUTPUT"
+echo "Built $OUTPUT"
