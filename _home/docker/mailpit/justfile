@@ -1,0 +1,23 @@
+# List the available Mailpit commands.
+default:
+    @just --list
+
+# Start or update Mailpit.
+setup:
+    podman compose --file compose.yml up --detach
+
+# Validate the fully resolved Compose configuration.
+validate:
+    podman compose --file compose.yml config --quiet
+
+# Show Mailpit container status.
+status:
+    podman compose --file compose.yml ps
+
+# Follow recent Mailpit logs.
+logs:
+    podman compose --file compose.yml logs --follow --tail 100
+
+# Stop Mailpit while preserving captured messages.
+stop:
+    podman compose --file compose.yml down

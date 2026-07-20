@@ -31,6 +31,8 @@
 	import service draw 127.0.0.1:5180
 	# Penpot design platform
 	import service penpot 127.0.0.1:9001
+	# Mailpit development email inbox
+	import service mailpit 127.0.0.1:8025
 	# Quant-UX prototyping platform
 	import service quant 127.0.0.1:8082
 	# Quant-UX collaboration WebSocket server

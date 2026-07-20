@@ -1,5 +1,5 @@
 x-penpot-flags: &penpot-flags
-  PENPOT_FLAGS: enable-log-emails enable-prepl-server enable-mcp
+  PENPOT_FLAGS: enable-smtp enable-prepl-server enable-mcp
 
 x-penpot-public-uri: &penpot-public-uri
   PENPOT_PUBLIC_URI: ${PENPOT_PUBLIC_URI:?set PENPOT_PUBLIC_URI in .env}
@@ -40,6 +40,7 @@ services:
         condition: service_healthy
     networks:
       - penpot
+      - mailpit
     environment:
       <<: [*penpot-flags, *penpot-public-uri, *penpot-body-size, *penpot-secret]
       PENPOT_DATABASE_URI: postgresql://penpot-postgres/penpot
@@ -49,6 +50,11 @@ services:
       PENPOT_OBJECTS_STORAGE_BACKEND: fs
       PENPOT_OBJECTS_STORAGE_FS_DIRECTORY: /opt/data/assets
       PENPOT_TELEMETRY_ENABLED: "false"
+      PENPOT_SMTP_HOST: ${PENPOT_SMTP_HOST:-mailpit}
+      PENPOT_SMTP_PORT: ${PENPOT_SMTP_PORT:-1025}
+      PENPOT_SMTP_TLS: ${PENPOT_SMTP_TLS:-false}
+      PENPOT_SMTP_DEFAULT_FROM: ${PENPOT_SMTP_DEFAULT_FROM:-Penpot <penpot@localhost>}
+      PENPOT_SMTP_DEFAULT_REPLY_TO: ${PENPOT_SMTP_DEFAULT_REPLY_TO:-Penpot <penpot@localhost>}
 
   penpot-mcp:
     image: penpotapp/mcp:${PENPOT_VERSION:-2.16}
@@ -105,6 +111,9 @@ services:
 
 networks:
   penpot:
+  mailpit:
+    external: true
+    name: mailpit
 
 volumes:
   penpot_postgres_v15:

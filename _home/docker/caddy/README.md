@@ -14,6 +14,7 @@ hostnames or IPs are committed.
 | `compose.yaml` | Runs Caddy with host networking and persistent data |
 | `Dockerfile` | Builds Caddy with the Cloudflare DNS module |
 | `caddy.sh` | Manages the rootful Podman deployment |
+| `justfile` | Lists and wraps the supported Caddy operations |
 | `.env.example` | Documents the required env vars (Cloudflare token, tailnet IP, base domain) |
 | `subdomain-access-summary.md` | DNS, access-control, and routing details |
 
@@ -52,18 +53,18 @@ After changing only `Caddyfile`, validate and reload Caddy without rebuilding or
 restarting the container:
 
 ```bash
-./caddy.sh reload
+just reload
 ```
 
 Other available commands are:
 
 ```bash
-./caddy.sh validate
-./caddy.sh status
-./caddy.sh logs
+just validate
+just status
+just logs
 ```
 
-Run `./caddy.sh setup` again after changing the Dockerfile, Compose file, or
+Run `just setup` again after changing the Dockerfile, Compose file, or
 dependencies.
 
 Do not commit `.env`; it contains the Cloudflare API token.

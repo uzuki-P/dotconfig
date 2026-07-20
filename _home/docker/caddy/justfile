@@ -1,0 +1,23 @@
+# List the available Caddy commands.
+default:
+    @just --list
+
+# Build and start or update the rootful Caddy service.
+setup:
+    ./caddy.sh setup
+
+# Validate the active Caddy configuration.
+validate:
+    ./caddy.sh validate
+
+# Validate and reload the active Caddy configuration.
+reload:
+    ./caddy.sh reload
+
+# Show Caddy container status.
+status:
+    ./caddy.sh status
+
+# Follow recent Caddy logs.
+logs:
+    ./caddy.sh logs

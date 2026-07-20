@@ -1,0 +1,29 @@
+set dotenv-load := true
+
+# List the available database commands.
+default:
+    @just --list
+
+# Start or update PostgreSQL and Redis.
+setup:
+    podman compose --file compose.yaml up --detach
+
+# Validate the fully resolved Compose configuration.
+validate:
+    podman compose --file compose.yaml config --quiet
+
+# Show the state of the database containers.
+status:
+    podman compose --file compose.yaml ps
+
+# Follow recent logs from PostgreSQL and Redis.
+logs:
+    podman compose --file compose.yaml logs --follow --tail 100
+
+# Back up PostgreSQL and request a Redis snapshot.
+backup:
+    ./scripts/backup.sh
+
+# Stop the stack while preserving all database data.
+stop:
+    podman compose --file compose.yaml down

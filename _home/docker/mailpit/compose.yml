@@ -1,0 +1,25 @@
+name: mailpit
+
+services:
+  mailpit:
+    image: docker.io/axllent/mailpit:latest
+    container_name: mailpit
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+    environment:
+      MP_DATABASE: /data/mailpit.db
+      MP_SEND_API_AUTH_ACCEPT_ANY: "true"
+    volumes:
+      - mailpit-data:/data:Z
+    networks:
+      - mailpit
+
+networks:
+  mailpit:
+    name: mailpit
+
+volumes:
+  mailpit-data:
+    name: mailpit-data

@@ -30,8 +30,18 @@ From `_home/docker/caddy`, activate the tracked route:
 ./caddy.sh reload
 ```
 
-Open the URL from `PENPOT_PUBLIC_URI` and register the first account. Email is
-logged by the backend because this private deployment has no SMTP service.
+Start the repo-managed Mailpit service before registering an account:
+
+```bash
+cd ../mailpit
+just setup
+```
+
+Mailpit creates the external `mailpit` Podman network required by the Penpot
+backend, so keep this startup order on a fresh machine.
+
+Open the URL from `PENPOT_PUBLIC_URI` and register the first account. Penpot
+sends verification email to Mailpit; open it at `http://127.0.0.1:8025`.
 
 ## Operations
 
