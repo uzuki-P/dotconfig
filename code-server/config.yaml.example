@@ -1,0 +1,20 @@
+# code-server configuration template.
+#
+# Copy this file to ~/.config/code-server/config.yaml BEFORE starting
+# code-server for the first time:
+#
+#   mkdir -p ~/.config/code-server
+#   cp ~/.config/code-server/config.yaml.example ~/.config/code-server/config.yaml
+#
+# Do NOT stow this as the live config: code-server's installer auto-runs
+# `systemctl enable --now code-server@$USER` at the end of install, which
+# happens before stow gets a chance to put the symlink in place; code-server
+# will then write a default config (with a randomly generated password) at
+# the path, and stow --adopt will pull that contaminated file into the tree.
+# Keeping the live config as a regular untracked file avoids that race.
+
+bind-addr: 127.0.0.1:4444
+auth: none
+cert: false
+disable-telemetry: true
+disable-update-check: true

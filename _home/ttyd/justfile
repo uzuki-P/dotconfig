@@ -1,0 +1,27 @@
+# Show the available repository commands.
+default:
+	@just --list
+
+# Install and start the tracked ttyd user service.
+ttyd-install:
+	@mkdir -p "${HOME}/.config/systemd/user"
+	@ln -sfn "{{justfile_directory()}}/ttyd.service" "${HOME}/.config/systemd/user/ttyd.service"
+	systemctl --user daemon-reload
+	systemctl --user enable --now ttyd.service
+
+# Build the custom ttyd browser client.
+ttyd-build:
+	"{{justfile_directory()}}/ttyd-build-index"
+
+# Show the current ttyd user-service status.
+ttyd-status:
+	systemctl --user status ttyd.service --no-pager
+
+# Follow logs from the ttyd user service.
+ttyd-logs:
+	journalctl --user -u ttyd.service -f
+
+# Restart the ttyd user service after configuration changes.
+ttyd-restart:
+	systemctl --user daemon-reload
+	systemctl --user restart ttyd.service

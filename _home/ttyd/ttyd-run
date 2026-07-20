@@ -17,7 +17,7 @@ command -v ttyd >/dev/null || {
 
 if [[ ! -r "$INDEX_PATH" ]]; then
   echo "Custom ttyd client not found at '$INDEX_PATH'." >&2
-  echo "Build it with: ~/script/ttyd-build-index" >&2
+  echo "Build it with: cd ~/ttyd && just ttyd-build" >&2
   exit 1
 fi
 

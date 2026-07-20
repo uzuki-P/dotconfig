@@ -17,6 +17,8 @@ This repository stores personal dotfiles managed with GNU Stow.
 - Do not add generated files, caches, credentials, machine-specific state, or plugin downloads.
 - Validate changed configuration with the owning application's checker or reload command when available.
 - Do not run `stow --adopt`, `git reset --hard`, or other destructive commands unless explicitly requested.
+- Before creating any script that contains a `sudo` invocation (or otherwise elevates privileges), always inform the user first and state the reason `sudo` is required — what the privileged command does, why it cannot be done as the current user, and which system resource it touches. Wait for acknowledgement before writing or running such a script.
+- After adding or modifying a subdomain in `_home/docker/caddy/Caddyfile` (e.g. a new `import service <name> <upstream>` line), always remind the user to validate and apply the change with `./caddy.sh validate` followed by `./caddy.sh reload` from the caddy directory, so the new route actually takes effect.
 
 ## Privacy and Secrets
 

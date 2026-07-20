@@ -1,0 +1,29 @@
+set dotenv-load := true
+
+# List the available Penpot commands.
+default:
+    @just --list
+
+# Start or update the rootless Penpot stack.
+setup:
+    podman compose --file compose.yaml up --detach
+
+# Validate the fully resolved Compose configuration.
+validate:
+    podman compose --file compose.yaml config --quiet
+
+# Show the state of every Penpot container.
+status:
+    podman compose --file compose.yaml ps
+
+# Follow recent logs from all Penpot containers.
+logs:
+    podman compose --file compose.yaml logs --follow --tail 100
+
+# Pull the pinned Penpot images.
+pull:
+    podman compose --file compose.yaml pull
+
+# Stop the stack while preserving its database and asset volumes.
+stop:
+    podman compose --file compose.yaml down

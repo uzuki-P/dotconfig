@@ -62,7 +62,7 @@
     "workbench.editor.pinnedTabSizing": "compact",
     "workbench.editor.wrapTabs": true,
     "catppuccin-icons.hidesExplorerArrows": true,
-    "terminal.integrated.sendKeybindingsToShell": true,
+    "terminal.integrated.sendKeybindingsToShell": false,
     "window.autoDetectColorScheme": true,
     "settingsSync.ignoredExtensions": [
         "github.copilot-chat"

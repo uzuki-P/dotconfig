@@ -14,6 +14,9 @@
 
 	import service t3      127.0.0.1:3773
 	import service ttyd    {$CADDY_TS_IP:127.0.0.1}:7681
+	import service code    127.0.0.1:4444
+	# Cockpit system and Podman management
+	import service cockpit 127.0.0.1:9090
 
 	# IssueLane web application
 	import service il      [::1]:3000
@@ -23,6 +26,15 @@
 	import service il-site 127.0.0.1:3221
 	# IssueLane dashboard
 	import service il-dash 127.0.0.1:6792
+
+	# draw - local-only tldraw whiteboard
+	import service draw 127.0.0.1:5180
+	# Penpot design platform
+	import service penpot 127.0.0.1:9001
+	# Quant-UX prototyping platform
+	import service quant 127.0.0.1:8082
+	# Quant-UX collaboration WebSocket server
+	import service quant-ws 127.0.0.1:8086
 
 	respond 404
 }

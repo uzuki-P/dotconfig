@@ -22,6 +22,7 @@ variables and `Caddyfile` for how they are substituted.
 | --- | --- | --- |
 | `t3.<CADDY_TS_BASE_DOMAIN>` | T3 | `127.0.0.1:3773` |
 | `ttyd.<CADDY_TS_BASE_DOMAIN>` | ttyd | `<CADDY_TS_IP>:7681` |
+| `code.<CADDY_TS_BASE_DOMAIN>` | code-server | `127.0.0.1:4444` |
 | `il.<CADDY_TS_BASE_DOMAIN>` | IssueLane web application | `[::1]:3000` |
 | `il-api.<CADDY_TS_BASE_DOMAIN>` | IssueLane API | `127.0.0.1:3220` |
 | `il-site.<CADDY_TS_BASE_DOMAIN>` | IssueLane public site | `127.0.0.1:3221` |
@@ -62,6 +63,7 @@ curl -I https://il.<CADDY_TS_BASE_DOMAIN>
 curl -I https://il-api.<CADDY_TS_BASE_DOMAIN>
 curl -I https://il-site.<CADDY_TS_BASE_DOMAIN>
 curl -I https://il-dash.<CADDY_TS_BASE_DOMAIN>
+curl -I https://code.<CADDY_TS_BASE_DOMAIN>
 ```
 
 An unconfigured hostname should return 404:

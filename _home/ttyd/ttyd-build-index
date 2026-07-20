@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build ttyd 1.7.7's web client with a system-aware Catppuccin theme.
+# Build ttyd 1.7.7's custom web client.
 
 set -euo pipefail
 
@@ -14,6 +14,10 @@ cd "$BUILD_DIR/ttyd"
 apply_patch <<'PATCH'
 *** Begin Patch
 *** Update File: html/src/components/terminal/xterm/index.ts
+@@
+ import { CanvasAddon } from '@xterm/addon-canvas';
++import { ClipboardAddon } from '@xterm/addon-clipboard';
+ import { WebglAddon } from '@xterm/addon-webgl';
 @@
  import '@xterm/xterm/css/xterm.css';
 +
@@ -52,6 +56,27 @@ apply_patch <<'PATCH'
 +        };
 +        colorScheme.addEventListener('change', onColorSchemeChange);
 +        this.register(toDisposable(() => colorScheme.removeEventListener('change', onColorSchemeChange)));
+@@
+     private overlayAddon = new OverlayAddon();
++    private clipboardAddon = new ClipboardAddon();
+     private webglAddon?: WebglAddon;
+@@
+         terminal.loadAddon(new WebLinksAddon());
+ 
++        terminal.loadAddon(this.clipboardAddon);
++
+         terminal.open(parent);
+         fitAddon.fit();
+*** End Patch
+PATCH
+
+apply_patch <<'PATCH'
+*** Begin Patch
+*** Update File: html/package.json
+@@
+     "@xterm/addon-canvas": "^0.6.0",
++    "@xterm/addon-clipboard": "^0.2.0",
+     "@xterm/addon-fit": "^0.9.0",
 *** End Patch
 PATCH
 

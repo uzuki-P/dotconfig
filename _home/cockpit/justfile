@@ -1,0 +1,31 @@
+set dotenv-load
+
+# Show the available Cockpit setup commands.
+default:
+    @just --list
+
+# Render the Cockpit configuration using the local environment file.
+render:
+    @test -n "${COCKPIT_BASE_DOMAIN:-}" || { echo "COCKPIT_BASE_DOMAIN is required in .env" >&2; exit 1; }
+    sed "s|@COCKPIT_BASE_DOMAIN@|${COCKPIT_BASE_DOMAIN}|g" cockpit.conf.example > cockpit.conf
+
+# Install Cockpit's Podman extension and the tracked reverse-proxy configuration.
+install: render
+    sudo install -D -m 0644 cockpit.conf /etc/cockpit/cockpit.conf
+    sudo install -D -m 0644 listen.conf /etc/systemd/system/cockpit.socket.d/listen.conf
+    sudo systemctl daemon-reload
+    sudo systemctl restart cockpit.socket
+
+# Show the Cockpit socket status and listening address.
+status:
+    systemctl status cockpit.socket --no-pager
+    ss -ltn '( sport = :9090 )'
+
+# Reload the rootful Caddy container after validating its configuration.
+caddy-reload:
+    ../docker/caddy/caddy.sh reload
+
+# Remove direct firewalld access to Cockpit after proxy access is verified.
+close-direct-firewall:
+    sudo firewall-cmd --remove-service=cockpit
+    sudo firewall-cmd --permanent --remove-service=cockpit
