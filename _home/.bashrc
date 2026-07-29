@@ -54,6 +54,8 @@ export PATH
 # export SYSTEMD_PAGER=
 
 # User specific aliases and functions
+alias tm='tmux new -As main'
+
 # herdr new tab
 alias hnt='herdr tab create --cwd "$PWD" --focus && herdr'
 
