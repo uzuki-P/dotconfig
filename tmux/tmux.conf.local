@@ -445,9 +445,9 @@ tmux_conf_uninstall_plugins_on_reload=false
 # visit https://github.com/tmux-plugins for available plugins
 #set -g @plugin 'tmux-plugins/tmux-copycat'
 #set -g @plugin 'tmux-plugins/tmux-cpu'
-#set -g @plugin 'tmux-plugins/tmux-resurrect'
-#set -g @plugin 'tmux-plugins/tmux-continuum'
-#set -g @continuum-restore 'on'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'tmux-plugins/tmux-continuum'
+set -g @continuum-restore 'on'
 
 
 # -- custom variables ----------------------------------------------------------
@@ -518,6 +518,102 @@ unbind -n C-l
 
 # don't exit from tmux when closing a session
 set -g detach-on-destroy off
+
+# Herdr defaults with native tmux equivalents.
+# Herdr workspaces map to tmux sessions; Herdr tabs map to tmux windows.
+bind -N 'Show prefix and direct shortcuts' '?' list-keys -N #!important
+bind -N 'Open tmux settings' s customize-mode -Z #!important
+bind -N 'Detach from tmux' q detach-client #!important
+bind -N 'Reload tmux configuration' R source-file '/home/uzuki_p/.config/tmux/tmux.conf' \; display-message 'tmux configuration reloaded' #!important
+bind -N 'Choose a session or window' g choose-tree -Zw #!important
+bind -N 'Create a named session' N command-prompt -I '#{s/^\$//:next_session_id}' -p 'new-session name' 'new-session -s "%%" -c "#{pane_current_path}"' #!important
+bind -N 'Rename current session' W command-prompt -I '#S' -p 'rename-session' 'rename-session "%%"' #!important
+bind -N 'Close current session' D confirm-before -p 'kill-session #S? (y/n)' kill-session #!important
+
+bind -N 'Create a window' c new-window -c '#{pane_current_path}' #!important
+bind -N 'Rename current window' T command-prompt -I '#W' -p 'rename-window' 'rename-window "%%"' #!important
+bind -N 'Select previous window' p previous-window #!important
+bind -N 'Select next window' n next-window #!important
+bind -N 'Close current window' X confirm-before -p 'kill-window #W? (y/n)' kill-window #!important
+bind -N 'Rename current pane' P command-prompt -I '#T' -p 'rename-pane' 'select-pane -T "%%"' #!important
+bind -N 'Enter scrollback mode' e copy-mode #!important
+bind -N 'Select next pane' Tab select-pane -t ':.+' #!important
+bind -N 'Select previous pane' BTab select-pane -t ':.-' #!important
+bind -N 'Split pane vertically' v split-window -h -c '#{pane_current_path}' #!important
+bind -N 'Split pane horizontally' - split-window -v -c '#{pane_current_path}' #!important
+bind -N 'Close current pane' x confirm-before -p 'kill-pane #P? (y/n)' kill-pane #!important
+bind -N 'Toggle pane zoom' z resize-pane -Z #!important
+
+# These Herdr defaults need Herdr-specific UI or custom scripts. Unbind any
+# unrelated tmux actions on the same keys so their meaning stays predictable.
+unbind o
+unbind b
+
+# Herdr-style navigation.
+# Herdr tabs map to tmux windows; Herdr workspaces map to tmux sessions.
+unbind h
+unbind j
+unbind k
+unbind l
+bind -r -N 'Select previous window (custom)' h previous-window
+bind -r -N 'Select next window (custom)' l next-window
+bind -r -N 'Select previous session (custom)' k switch-client -p
+bind -r -N 'Select next session (custom)' j switch-client -n
+bind -n -N 'Select previous window directly' C-M-[ previous-window
+bind -n -N 'Select next window directly' C-M-] next-window
+
+# Herdr's prefix+1..9 window jumps are already tmux defaults. Map its
+# prefix+Shift+1..9 workspace jumps to tmux sessions in list order.
+bind -N 'Select session 1' '!' run-shell 'tmux switch-client -t "$(tmux list-sessions -F "##{session_id}" | sed -n "1p")"'
+bind -N 'Select session 2' '@' run-shell 'tmux switch-client -t "$(tmux list-sessions -F "##{session_id}" | sed -n "2p")"'
+bind -N 'Select session 3' '#' run-shell 'tmux switch-client -t "$(tmux list-sessions -F "##{session_id}" | sed -n "3p")"'
+bind -N 'Select session 4' '$' run-shell 'tmux switch-client -t "$(tmux list-sessions -F "##{session_id}" | sed -n "4p")"'
+bind -N 'Select session 5' '%' run-shell 'tmux switch-client -t "$(tmux list-sessions -F "##{session_id}" | sed -n "5p")"'
+bind -N 'Select session 6' '^' run-shell 'tmux switch-client -t "$(tmux list-sessions -F "##{session_id}" | sed -n "6p")"'
+bind -N 'Select session 7' '&' run-shell 'tmux switch-client -t "$(tmux list-sessions -F "##{session_id}" | sed -n "7p")"'
+bind -N 'Select session 8' '*' run-shell 'tmux switch-client -t "$(tmux list-sessions -F "##{session_id}" | sed -n "8p")"'
+bind -N 'Select session 9' '(' run-shell 'tmux switch-client -t "$(tmux list-sessions -F "##{session_id}" | sed -n "9p")"'
+
+# Persistent Herdr-style navigation mode: prefix+w, then:
+#   h/l       pane left/right
+#   Ctrl-j/k  pane down/up
+#   j/k       next/previous session
+# Escape, Enter, q, or prefix+w exits the mode.
+bind -N 'Enter persistent navigation mode' w switch-client -T herdr-nav
+bind -T herdr-nav -N 'Navigation: focus pane left' h select-pane -L \; switch-client -T herdr-nav
+bind -T herdr-nav -N 'Navigation: focus pane right' l select-pane -R \; switch-client -T herdr-nav
+bind -T herdr-nav -N 'Navigation: focus pane down' C-j select-pane -D \; switch-client -T herdr-nav
+bind -T herdr-nav -N 'Navigation: focus pane up' C-k select-pane -U \; switch-client -T herdr-nav
+bind -T herdr-nav -N 'Navigation: select next session' j switch-client -n \; switch-client -T herdr-nav
+bind -T herdr-nav -N 'Navigation: select previous session' k switch-client -p \; switch-client -T herdr-nav
+bind -T herdr-nav -N 'Navigation: exit mode' Escape switch-client -T root
+bind -T herdr-nav -N 'Navigation: exit mode' Enter switch-client -T root
+bind -T herdr-nav -N 'Navigation: exit mode' q switch-client -T root
+bind -T herdr-nav -N 'Navigation: exit mode' w switch-client -T root
+bind -T herdr-nav -N 'Navigation: show mode shortcuts' '?' list-keys -N -T herdr-nav
+
+# Herdr-style resize mode: prefix+r, then h/j/k/l or arrow keys. The mode
+# remains active until Escape, Enter, q, or r.
+bind -N 'Enter persistent resize mode' r switch-client -T herdr-resize #!important
+bind -r -T herdr-resize -N 'Resize: move border left' h resize-pane -L \; switch-client -T herdr-resize
+bind -r -T herdr-resize -N 'Resize: move border down' j resize-pane -D \; switch-client -T herdr-resize
+bind -r -T herdr-resize -N 'Resize: move border up' k resize-pane -U \; switch-client -T herdr-resize
+bind -r -T herdr-resize -N 'Resize: move border right' l resize-pane -R \; switch-client -T herdr-resize
+bind -r -T herdr-resize -N 'Resize: move border left' Left resize-pane -L \; switch-client -T herdr-resize
+bind -r -T herdr-resize -N 'Resize: move border down' Down resize-pane -D \; switch-client -T herdr-resize
+bind -r -T herdr-resize -N 'Resize: move border up' Up resize-pane -U \; switch-client -T herdr-resize
+bind -r -T herdr-resize -N 'Resize: move border right' Right resize-pane -R \; switch-client -T herdr-resize
+bind -T herdr-resize -N 'Resize: exit mode' Escape switch-client -T root
+bind -T herdr-resize -N 'Resize: exit mode' Enter switch-client -T root
+bind -T herdr-resize -N 'Resize: exit mode' q switch-client -T root
+bind -T herdr-resize -N 'Resize: exit mode' r switch-client -T root
+bind -T herdr-resize -N 'Resize: show mode shortcuts' '?' list-keys -N -T herdr-resize
+
+# Direct pane focus, matching Herdr's Ctrl+Alt+h/j/k/l bindings.
+bind -n -N 'Focus pane left directly' C-M-h select-pane -L
+bind -n -N 'Focus pane down directly' C-M-j select-pane -D
+bind -n -N 'Focus pane up directly' C-M-k select-pane -U
+bind -n -N 'Focus pane right directly' C-M-l select-pane -R
 
 # https://github.com/gpakosz/.tmux/issues/776#issuecomment-2594954852
 set -g extended-keys off #!important

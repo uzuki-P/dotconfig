@@ -17,6 +17,15 @@ function fish_greeting
     end
 end
 
+# A fresh tmux client queries ttyd/xterm.js for terminal capabilities. On the
+# last-session-to-new-server transition, its late Device Attributes reply can
+# reach fish as keyboard input. Consume that reply and repaint the prompt.
+function fish_user_key_bindings
+    set -l ttyd_device_attributes (string unescape '\e[?61;4;6;7;14;21;22;23;24;28;32;42;52c')
+    bind $ttyd_device_attributes repaint
+end
+fish_user_key_bindings
+
 # starship. https://starship.rs/
 function starship_transient_rprompt_func
     starship module time

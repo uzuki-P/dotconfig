@@ -167,22 +167,22 @@
     {
         "key": "space space",
         "command": "workbench.action.quickOpen",
-        "when": "!editorIsOpen && !inputFocus"
+        "when": "!editorIsOpen && !inputFocus && !terminalFocus"
     },
     {
         "key": "space f n",
         "command": "workbench.action.files.newUntitledFile",
-        "when": "!editorIsOpen && !inputFocus"
+        "when": "!editorIsOpen && !inputFocus && !terminalFocus"
     },
     {
         "key": "space f p",
         "command": "workbench.action.openRecent",
-        "when": "!editorIsOpen && !inputFocus"
+        "when": "!editorIsOpen && !inputFocus && !terminalFocus"
     },
     {
         "key": "space s g",
         "command": "workbench.action.findInFiles",
-        "when": "!editorIsOpen && !inputFocus"
+        "when": "!editorIsOpen && !inputFocus && !terminalFocus"
     },
     // ==========================================
     // EDITOR & VIM NORMAL MODE MAPPINGS (Space Leader)
