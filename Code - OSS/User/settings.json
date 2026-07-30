@@ -24,6 +24,19 @@
     "vim.cursorStylePerMode.insert": "line",
     "vim.cursorStylePerMode.visual": "block-outline",
     "vim.cursorStylePerMode.replace": "underline",
+    "vim.leader": "<space>",
+    "vim.normalModeKeyBindingsNonRecursive": [
+        {
+            "before": ["<leader>"],
+            "commands": ["whichkey.show"]
+        }
+    ],
+    "vim.visualModeKeyBindingsNonRecursive": [
+        {
+            "before": ["<leader>"],
+            "commands": ["whichkey.show"]
+        }
+    ],
 
     "vim.handleKeys": {
         "<C-p>": false,

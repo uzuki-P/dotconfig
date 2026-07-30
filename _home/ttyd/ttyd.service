@@ -17,7 +17,7 @@ ExecStart=%h/ttyd/ttyd-run
 Restart=on-failure
 RestartSec=3s
 NoNewPrivileges=yes
-PrivateTmp=yes
+PrivateTmp=no
 
 [Install]
 WantedBy=default.target

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+awk -v charge="${1:-0}" 'BEGIN {
+  if (charge < 0.30) {
+    printf "#[fg=#d70000]"
+  } else if (charge < 0.60) {
+    printf "#[fg=#ffff00]"
+  } else {
+    printf "#[fg=#5fff00]"
+  }
+}'

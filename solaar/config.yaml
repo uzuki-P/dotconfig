@@ -10,7 +10,7 @@
     logivoice-nr-state, logivoice-ng-state, logivoice-comp-state, logivoice-deesser-state, logivoice-depopper-state, logivoice-limiter-state, logivoice-hpf-state,
     scroll-ratchet-torque, onboard_profiles, multiplatform, dpi_extended]
   _battery: 4100
-  _config_cookie: [29, 243]
+  _config_cookie: [98, 184]
   _modelId: B03400000000
   _sensitive: {change-host: false, divert-keys: false, dpi: true, hires-scroll-mode: ignore, hires-smooth-invert: ignore, hires-smooth-resolution: ignore,
     reprogrammable-keys: false, smart-shift: false, thumb-scroll-invert: false, thumb-scroll-mode: false}
