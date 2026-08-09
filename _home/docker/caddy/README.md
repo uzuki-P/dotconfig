@@ -78,3 +78,8 @@ label and the subdomain prefix under `<CADDY_TS_BASE_DOMAIN>`. Read
 a route") before adding or changing routes. Always run `./caddy.sh validate`
 after edits, and never hardcode real IPs or domains — go through the
 `CADDY_TS_IP` / `CADDY_TS_BASE_DOMAIN` env placeholders.
+
+Generated `dev-<random>` hosts are the exception: Caddy imports their generated
+fragment from the sibling `dev-router` registry, whose `dev-route` CLI applies
+changes through Caddy's loopback admin API. Do not add generated hosts as
+static imports.

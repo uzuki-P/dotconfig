@@ -1,0 +1,4 @@
+interface:
+  display_name: "Publish Dev Route"
+  short_description: "Publish local dev ports through private Caddy URLs"
+  default_prompt: "Use $publish-dev-route to publish my local development server through the private Tailscale dev router and return its URL."

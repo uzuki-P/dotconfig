@@ -7,6 +7,7 @@ services:
     network_mode: host
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro,Z
+      - ../dev-router/.data:/etc/caddy/dev-routes:ro,Z
       - caddy_data:/data
       - caddy_config:/config
     env_file:

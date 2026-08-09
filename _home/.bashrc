@@ -55,6 +55,7 @@ export PATH
 
 # User specific aliases and functions
 alias tm='tmux new -As main'
+alias lg='lazygit'
 
 # herdr new tab
 alias hnt='herdr tab create --cwd "$PWD" --focus && herdr'
@@ -67,3 +68,6 @@ if [ -d ~/.bashrc.d ]; then
     done
 fi
 unset rc
+
+# Vite+ bin (https://viteplus.dev)
+. "$HOME/.vite-plus/env"

@@ -13,6 +13,7 @@
    "close_on_focus_loss": false,
    "pop_to_root_on_close": true,
    "font": {
+      "rendering": "qt",
       "normal": {
          "family": "Outfit",
          "size": 11
@@ -54,12 +55,21 @@
             ]
          }
       },
+      "calculator": {
+         "preferences": {
+            "backend": "qalculate",
+            "refreshRatesOnStartup": true
+         }
+      },
       "clipboard": {
          "preferences": {
-            "monitoring": true
+            "monitoring": true,
+            "eraseOnStartup": false,
+            "ignorePasswords": false
          },
          "entrypoints": {
             "history": {
+               "alias": "clip",
                "preferences": {
                   "defaultAction": "copy"
                }
@@ -117,6 +127,13 @@
       },
       "raycast-compat": {
          "enabled": true
+      },
+      "system": {
+         "entrypoints": {
+            "run": {
+               "enabled": true
+            }
+         }
       }
    }
 }
