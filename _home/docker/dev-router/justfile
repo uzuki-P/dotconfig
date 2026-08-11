@@ -6,6 +6,22 @@ default:
 setup:
     ./dev-router.sh setup
 
+# Publish a random dev-<hex> route for a localhost port or URL.
+random target:
+    ./dev-router.sh random {{target}}
+
+# Set a persistent named localhost route through Caddy's admin API.
+specific name target:
+    ./dev-router.sh specific {{name}} {{target}}
+
+# List persistent named localhost routes.
+list-named:
+    ./dev-router.sh list-named
+
+# Remove a persistent named localhost route through Caddy's admin API.
+remove-specific name:
+    ./dev-router.sh remove-specific {{name}}
+
 # Validate route state and the generated Caddy fragment.
 validate:
     ./dev-router.sh validate

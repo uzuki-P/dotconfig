@@ -12,6 +12,10 @@ Usage: ./dev-router.sh <command>
 
 Commands:
   setup      Initialize routes from Caddy's environment and apply them
+  random     Publish a random dev-<hex> route for a localhost port or URL
+  specific   Set a persistent named route through Caddy's admin API
+  list-named List persistent named routes
+  remove-specific  Remove a persistent named route through Caddy's admin API
   validate   Validate the registry and generated Caddy fragment
   apply      Reapply persistent routes to the running Caddy instance
   status     Show currently published routes
@@ -26,6 +30,30 @@ case "${1:-help}" in
 		else
 			"${ROUTE_CLI}" init
 		fi
+		;;
+	random)
+		if [[ $# -ne 2 ]]; then
+			echo "Usage: ./dev-router.sh random <port-or-http(s)-url>" >&2
+			exit 2
+		fi
+		"${ROUTE_CLI}" publish "$2"
+		;;
+	specific)
+		if [[ $# -ne 3 ]]; then
+			echo "Usage: ./dev-router.sh specific <name> <port-or-http(s)-url>" >&2
+			exit 2
+		fi
+		"${ROUTE_CLI}" set "$2" "$3"
+		;;
+	list-named)
+		"${ROUTE_CLI}" list-named
+		;;
+	remove-specific)
+		if [[ $# -ne 2 ]]; then
+			echo "Usage: ./dev-router.sh remove-specific <name>" >&2
+			exit 2
+		fi
+		"${ROUTE_CLI}" remove-named "$2"
 		;;
 	validate)
 		"${ROUTE_CLI}" validate

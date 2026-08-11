@@ -79,7 +79,8 @@ a route") before adding or changing routes. Always run `./caddy.sh validate`
 after edits, and never hardcode real IPs or domains — go through the
 `CADDY_TS_IP` / `CADDY_TS_BASE_DOMAIN` env placeholders.
 
-Generated `dev-<random>` hosts are the exception: Caddy imports their generated
-fragment from the sibling `dev-router` registry, whose `dev-route` CLI applies
-changes through Caddy's loopback admin API. Do not add generated hosts as
-static imports.
+Development hostnames are the exception: Caddy imports both random
+`dev-<random>` and stable named routes from the sibling `dev-router` registry.
+The `dev-route` CLI applies fragment changes through Caddy's loopback admin API
+without reloading the container. Add an `import service` line here only for a
+service that needs a static route or an advanced Caddy handler.

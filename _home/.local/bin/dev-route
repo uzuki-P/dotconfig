@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Manage private, random tailnet hostnames for localhost development servers."""
+"""Manage private tailnet routes for localhost development servers.
+
+Both random dev-<hex> hostnames and stable named routes live in the
+dev-router registry. Caddy loads their generated fragment through its
+loopback admin API, without a container reload.
+"""
 
 from __future__ import annotations
 
@@ -18,6 +23,7 @@ from urllib.parse import urlparse
 
 
 ID_PATTERN = re.compile(r"^dev-[a-f0-9]{8}$")
+NAME_PATTERN = re.compile(r"^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$")
 DOMAIN_PATTERN = re.compile(
     r"^(?=.{1,253}\.?$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+"
     r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$"
@@ -190,6 +196,33 @@ def normalize_target(raw: str) -> str:
     return f"{parsed.scheme}://{rendered_host}:{port}"
 
 
+def normalize_name(value: str) -> str:
+    name = value.strip().lower()
+    if not NAME_PATTERN.fullmatch(name):
+        raise ValueError("route name must be a lowercase DNS label (letters, digits, and hyphens)")
+    if name.startswith("dev-"):
+        raise ValueError("route names beginning with dev- are reserved for random routes")
+    return name
+
+
+def is_random_route(route_name: str) -> bool:
+    return ID_PATTERN.fullmatch(route_name) is not None
+
+
+def static_route_names() -> set[str]:
+    caddyfile = caddyfile_path()
+    if not caddyfile.is_file():
+        raise RuntimeError(f"Caddyfile not found: {caddyfile}")
+    return {
+        match.group(1)
+        for match in re.finditer(
+            r"^\s*import service ([^\s]+)\s+.+$",
+            caddyfile.read_text(encoding="utf-8"),
+            flags=re.MULTILINE,
+        )
+    }
+
+
 def route_id_from(value: str, base_domain: str) -> str:
     candidate = value.strip().lower().rstrip("/")
     if "://" in candidate:
@@ -200,6 +233,16 @@ def route_id_from(value: str, base_domain: str) -> str:
     if not ID_PATTERN.fullmatch(candidate):
         raise ValueError(f"expected dev-<8 hex characters>, got {value!r}")
     return candidate
+
+
+def route_name_from(value: str, base_domain: str) -> str:
+    candidate = value.strip().lower().rstrip("/")
+    if "://" in candidate:
+        candidate = urlparse(candidate).hostname or ""
+    suffix = f".{base_domain}"
+    if candidate.endswith(suffix):
+        candidate = candidate[: -len(suffix)]
+    return candidate if is_random_route(candidate) else normalize_name(candidate)
 
 
 def command_init(args: argparse.Namespace) -> None:
@@ -226,11 +269,50 @@ def command_publish(args: argparse.Namespace) -> None:
         raise RuntimeError("could not allocate a unique route id")
     routes[route_id] = {
         "target": target,
+        "kind": "random",
         "created_at": dt.datetime.now(dt.timezone.utc).isoformat(),
         "cwd": str(Path.cwd()),
     }
     persist_and_apply(routes, no_apply=args.no_apply)
     print(f"https://{route_id}.{settings['base_domain']}")
+
+
+def command_set(args: argparse.Namespace) -> None:
+    settings = load_settings()
+    name = normalize_name(args.name)
+    target = normalize_target(args.target)
+    if name in static_route_names():
+        raise ValueError(f"route name already exists in Caddyfile: {name}")
+    routes = load_routes()
+    routes[name] = {
+        "target": target,
+        "kind": "named",
+        "created_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "cwd": str(Path.cwd()),
+    }
+    persist_and_apply(routes, no_apply=args.no_apply)
+    print(f"https://{name}.{settings['base_domain']}")
+
+
+def command_list_named(_args: argparse.Namespace) -> None:
+    settings = load_settings()
+    routes = {name: route for name, route in load_routes().items() if not is_random_route(name)}
+    if not routes:
+        print("No named dev routes.")
+        return
+    for name, route in sorted(routes.items()):
+        print(f"https://{name}.{settings['base_domain']}\t{route['target']}\t{route.get('cwd', '-')}")
+
+
+def command_remove_named(args: argparse.Namespace) -> None:
+    settings = load_settings()
+    name = normalize_name(args.name)
+    routes = load_routes()
+    if name not in routes:
+        raise KeyError(f"unknown named route: {name}")
+    target = routes.pop(name)
+    persist_and_apply(routes, no_apply=args.no_apply)
+    print(f"Removed https://{name}.{settings['base_domain']} -> {target['target']}")
 
 
 def command_list(_args: argparse.Namespace) -> None:
@@ -245,7 +327,7 @@ def command_list(_args: argparse.Namespace) -> None:
 
 def command_resolve(args: argparse.Namespace) -> None:
     settings = load_settings()
-    route_id = route_id_from(args.route, settings["base_domain"])
+    route_id = route_name_from(args.route, settings["base_domain"])
     routes = load_routes()
     if route_id not in routes:
         raise KeyError(f"unknown route: {route_id}")
@@ -278,8 +360,8 @@ def command_validate(_args: argparse.Namespace) -> None:
     settings = load_settings()
     routes = load_routes()
     for route_id, route in routes.items():
-        if not ID_PATTERN.fullmatch(route_id):
-            raise ValueError(f"invalid route id in registry: {route_id!r}")
+        if not is_random_route(route_id):
+            normalize_name(route_id)
         normalize_target(route["target"])
     _, _, fragment_path = paths()
     actual = fragment_path.read_text(encoding="utf-8") if fragment_path.exists() else None
@@ -300,10 +382,21 @@ def build_parser() -> argparse.ArgumentParser:
     init.add_argument("--from-env-file")
     add_no_apply(init)
     init.set_defaults(handler=command_init)
-    publish = commands.add_parser("publish", help="publish a localhost port or URL")
+    publish = commands.add_parser("publish", help="publish a localhost port or URL with a random hostname")
     publish.add_argument("target", help="port, or http(s)://localhost:port")
     add_no_apply(publish)
     publish.set_defaults(handler=command_publish)
+    named = commands.add_parser("set", help="set a persistent named localhost route")
+    named.add_argument("name", help="subdomain name, such as myapp")
+    named.add_argument("target", help="port, or http(s)://localhost:port")
+    add_no_apply(named)
+    named.set_defaults(handler=command_set)
+    list_named = commands.add_parser("list-named", help="list persistent named routes")
+    list_named.set_defaults(handler=command_list_named)
+    remove_named = commands.add_parser("remove-named", help="remove a persistent named route")
+    remove_named.add_argument("name", help="subdomain name")
+    add_no_apply(remove_named)
+    remove_named.set_defaults(handler=command_remove_named)
     listing = commands.add_parser("list", help="list published routes")
     listing.set_defaults(handler=command_list)
     resolve = commands.add_parser("resolve", help="show one route as JSON")
