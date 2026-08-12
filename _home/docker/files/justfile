@@ -1,0 +1,47 @@
+# List the available Gokapi service commands.
+default:
+    @just --list
+
+# Validate scripts, the Quadlet source, and secret hygiene without real credentials.
+validate:
+    bash -n bin/share
+    @grep -q '^Image=docker.io/f0rc3/gokapi:v[0-9]' deploy/gokapi.container
+    @grep -q '^PublishPort=127.0.0.1:53842:53842$' deploy/gokapi.container
+    @test ! -e .env || test -f .env
+    @echo "Static validation passed."
+
+# Install the rootless user Quadlet and prepare persistent directories.
+install:
+    install -d -m 0700 data config secrets "${HOME}/.config/containers/systemd"
+    install -m 0644 deploy/gokapi.container "${HOME}/.config/containers/systemd/gokapi.container"
+    systemctl --user daemon-reload
+
+# Start the installed Gokapi user service.
+start:
+    systemctl --user start gokapi.service
+
+# Show Gokapi user-service and loopback-listener status.
+status:
+    systemctl --user --no-pager --full status gokapi.service
+    @ss -ltn '( sport = :53842 )' || true
+
+# Follow the Gokapi user-service logs.
+logs:
+    journalctl --user-unit gokapi.service --follow --lines=100
+
+# Stop Gokapi without removing its state.
+stop:
+    systemctl --user stop gokapi.service
+
+# Create or refresh the persistent private files dev-router route.
+route:
+    cd ../dev-router && just specific files 53842
+
+# Upload a file or run another bin/share subcommand.
+share *args:
+    ./bin/share {{args}}
+
+# Pull the pinned image and restart after reviewing release notes and taking a backup.
+update:
+    podman pull docker.io/f0rc3/gokapi:v2.2.4
+    systemctl --user restart gokapi.service

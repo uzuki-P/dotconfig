@@ -1,0 +1,24 @@
+[Unit]
+Description=Private Gokapi artifact sharing service
+Wants=network-online.target
+After=network-online.target
+
+[Container]
+Image=docker.io/f0rc3/gokapi:v2.2.4
+ContainerName=gokapi-files
+PublishPort=127.0.0.1:53842:53842
+Volume=%h/docker/files/data:/app/data:Z
+Volume=%h/docker/files/config:/app/config:Z
+Environment=TZ=Asia/Jakarta
+Environment=GOKAPI_LOG_STDOUT=true
+Environment=GOKAPI_TRUSTED_PROXIES=127.0.0.1
+NoNewPrivileges=true
+DropCapability=all
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+TimeoutStartSec=180
+
+[Install]
+WantedBy=default.target

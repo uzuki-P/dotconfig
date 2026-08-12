@@ -19,6 +19,7 @@ list-named:
     ./dev-router.sh list-named
 
 # Remove a persistent named localhost route through Caddy's admin API.
+[confirm("Remove persistent route '" + name + "'?")]
 remove-specific name:
     ./dev-router.sh remove-specific {{name}}
 

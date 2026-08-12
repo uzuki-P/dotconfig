@@ -55,10 +55,35 @@ export PATH
 
 # User specific aliases and functions
 alias tm='tmux new -As main'
+alias cb='xclip -selection clipboard'
+alias ll='eza -lg --git --header'
+alias la='eza -lag --git --header'
+alias lt='eza -lagT -L=2 --git --header'
+
+alias nm-on='nordvpn set meshnet on'
+alias nm-off='nordvpn set meshnet off'
+alias n-d='nordvpn d'
+
+alias n='nvim'
 alias lg='lazygit'
+alias ccd='claude --dangerously-skip-permissions'
+alias ubuntu-db='distrobox enter ubuntu -- fish'
 
 # herdr new tab
 alias hnt='herdr tab create --cwd "$PWD" --focus && herdr'
+
+# git
+alias gss='git status --short'
+alias gc='git commit'
+alias gco='git checkout'
+alias gaa='git add -A'
+alias gpr='git pull --rebase'
+alias gpnr='git pull --no-rebase'
+alias gfap='git fetch -ap'
+alias gp='git push'
+alias gdiff='git diff --color-words'
+alias glog='git log --graph --oneline --all --decorate'
+alias glogo='glog `git reflog | cut -c1-7`'
 
 if [ -d ~/.bashrc.d ]; then
     for rc in ~/.bashrc.d/*; do
@@ -71,3 +96,6 @@ unset rc
 
 # Vite+ bin (https://viteplus.dev)
 . "$HOME/.vite-plus/env"
+
+# Added by codebase-memory-mcp install
+export PATH="/home/uzuki_p/.local/bin:$PATH"

@@ -1,0 +1,208 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+readonly PROJECT_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
+
+die() {
+	printf 'share: %s\n' "$*" >&2
+	exit 1
+}
+
+usage() {
+	cat <<'EOF'
+Usage:
+  share FILE [--days DAYS] [--downloads COUNT]
+  share upload FILE [--days DAYS] [--downloads COUNT]
+  share delete FILE_ID
+  share help
+
+Uploads expire after 7 days and allow unlimited downloads by default.
+Set GOKAPI_API_KEY, or put the key in secrets/api-key (mode 0600).
+GOKAPI_PUBLIC_URL must be set in .env or the environment.
+EOF
+}
+
+load_environment() {
+	local env_file="${GOKAPI_ENV_FILE:-${PROJECT_DIR}/.env}"
+	if [[ -f "${env_file}" ]]; then
+		set -a
+		# This is a local, user-owned shell environment file. Do not use an untrusted file.
+		# shellcheck disable=SC1090
+		source "${env_file}"
+		set +a
+	fi
+
+	GOKAPI_API_URL="${GOKAPI_API_URL:-http://127.0.0.1:53842}"
+	GOKAPI_PUBLIC_URL="${GOKAPI_PUBLIC_URL:-}"
+	GOKAPI_API_KEY_FILE="${GOKAPI_API_KEY_FILE:-${PROJECT_DIR}/secrets/api-key}"
+
+	GOKAPI_API_URL="${GOKAPI_API_URL%/}"
+	GOKAPI_PUBLIC_URL="${GOKAPI_PUBLIC_URL%/}"
+	[[ -n "${GOKAPI_PUBLIC_URL}" ]] || die "GOKAPI_PUBLIC_URL is not set; copy .env.example to .env and set the private files URL"
+
+	if [[ -z "${GOKAPI_API_KEY:-}" ]]; then
+		[[ -r "${GOKAPI_API_KEY_FILE}" ]] || die "API key not found in GOKAPI_API_KEY or ${GOKAPI_API_KEY_FILE}"
+		local key_mode
+		key_mode="$(stat -L -c '%a' "${GOKAPI_API_KEY_FILE}")" || die "cannot inspect API key file permissions"
+		if (( (8#${key_mode}) & 077 )); then
+			die "API key file must not be accessible by group or others: chmod 600 ${GOKAPI_API_KEY_FILE}"
+		fi
+		GOKAPI_API_KEY="$(<"${GOKAPI_API_KEY_FILE}")"
+	fi
+	GOKAPI_API_KEY="${GOKAPI_API_KEY//$'\r'/}"
+	GOKAPI_API_KEY="${GOKAPI_API_KEY//$'\n'/}"
+	[[ -n "${GOKAPI_API_KEY}" ]] || die "API key is empty"
+}
+
+require_commands() {
+	local command_name
+	for command_name in curl jq mktemp; do
+		command -v "${command_name}" >/dev/null 2>&1 || die "required command not found: ${command_name}"
+	done
+}
+
+validate_nonnegative_integer() {
+	local label="$1" value="$2"
+	[[ "${value}" =~ ^[0-9]+$ ]] || die "${label} must be a non-negative integer"
+}
+
+request() {
+	local method="$1" url="$2" output_file="$3"
+	shift 3
+	local status auth_header_file
+	auth_header_file="$(mktemp)"
+	chmod 0600 "${auth_header_file}"
+	printf 'apikey: %s\n' "${GOKAPI_API_KEY}" >"${auth_header_file}"
+	status="$(curl --silent --show-error \
+		--connect-timeout 10 \
+		--max-time 3600 \
+		--request "${method}" \
+		--header "accept: application/json" \
+		--header "@${auth_header_file}" \
+		--output "${output_file}" \
+		--write-out '%{http_code}' \
+		"$@" \
+		"${url}")" || {
+		rm -f -- "${auth_header_file}"
+		die "request to ${url} failed"
+	}
+	rm -f -- "${auth_header_file}"
+
+	if [[ ! "${status}" =~ ^2[0-9][0-9]$ ]]; then
+		printf 'share: Gokapi returned HTTP %s\n' "${status}" >&2
+		if [[ -s "${output_file}" ]]; then
+			jq . "${output_file}" 2>/dev/null >&2 || sed -n '1,20p' "${output_file}" >&2
+		fi
+		exit 1
+	fi
+}
+
+upload_file() {
+	local file_path="" expiry_days=7 allowed_downloads=0
+	while [[ $# -gt 0 ]]; do
+		case "$1" in
+			--days)
+				[[ $# -ge 2 ]] || die "--days requires a value"
+				expiry_days="$2"
+				shift 2
+				;;
+			--downloads)
+				[[ $# -ge 2 ]] || die "--downloads requires a value"
+				allowed_downloads="$2"
+				shift 2
+				;;
+			--*) die "unknown upload option: $1" ;;
+			*)
+				[[ -z "${file_path}" ]] || die "only one file may be uploaded at a time"
+				file_path="$1"
+				shift
+				;;
+		esac
+	done
+
+	[[ -n "${file_path}" ]] || die "missing file path"
+	[[ -f "${file_path}" ]] || die "not a regular file: ${file_path}"
+	[[ -r "${file_path}" ]] || die "file is not readable: ${file_path}"
+	validate_nonnegative_integer "days" "${expiry_days}"
+	validate_nonnegative_integer "downloads" "${allowed_downloads}"
+
+	local response_file
+	response_file="$(mktemp)"
+	trap "rm -f -- $(printf '%q' "${response_file}")" EXIT
+	request POST "${GOKAPI_API_URL}/api/files/add" "${response_file}" \
+		--form "allowedDownloads=${allowed_downloads}" \
+		--form "expiryDays=${expiry_days}" \
+		--form 'password=' \
+		--form "file=@${file_path}"
+
+	jq -e '.Result == "OK" and (.FileInfo.Id | type == "string")' "${response_file}" >/dev/null \
+		|| die "unexpected upload response"
+
+	local file_id filename content_type hotlink_id download_url hotlink_url markdown
+	file_id="$(jq -r '.FileInfo.Id' "${response_file}")"
+	filename="$(jq -r '.FileInfo.Name // "file"' "${response_file}")"
+	content_type="$(jq -r '.FileInfo.ContentType // ""' "${response_file}")"
+	download_url="${GOKAPI_PUBLIC_URL}/d?id=${file_id}"
+	hotlink_id="$(jq -r '.FileInfo.HotlinkId // ""' "${response_file}")"
+	hotlink_url=""
+	if [[ -n "${hotlink_id}" ]]; then
+		hotlink_url="${GOKAPI_PUBLIC_URL}/h/${hotlink_id}"
+	fi
+
+	jq --arg download_url "${download_url}" --arg hotlink_url "${hotlink_url}" \
+		'.FileInfo.UrlDownload = $download_url
+		 | .FileInfo.UrlHotlink = (if $hotlink_url == "" then null else $hotlink_url end)' \
+		"${response_file}"
+
+	local alt_text="${filename//]/\\]}"
+	if [[ "${content_type}" == image/* && -n "${hotlink_url}" ]]; then
+		markdown="![${alt_text}](${hotlink_url})"
+	else
+		markdown="[${alt_text}](${download_url})"
+	fi
+	printf '\n%s\n' "${markdown}"
+	rm -f -- "${response_file}"
+	trap - EXIT
+}
+
+delete_file() {
+	[[ $# -eq 1 ]] || die "delete requires exactly one file ID"
+	local file_id="$1"
+	[[ "${file_id}" =~ ^[A-Za-z0-9_-]+$ ]] || die "invalid file ID"
+
+	local response_file
+	response_file="$(mktemp)"
+	trap "rm -f -- $(printf '%q' "${response_file}")" EXIT
+	request DELETE "${GOKAPI_API_URL}/api/files/delete" "${response_file}" \
+		--header "id: ${file_id}"
+	jq -n --arg id "${file_id}" '{Result:"OK", DeletedId:$id}'
+	rm -f -- "${response_file}"
+	trap - EXIT
+}
+
+main() {
+	require_commands
+	case "${1:-help}" in
+		help|-h|--help)
+			usage
+			;;
+		upload)
+			shift
+			load_environment
+			upload_file "$@"
+			;;
+		delete)
+			shift
+			load_environment
+			delete_file "$@"
+			;;
+		*)
+			load_environment
+			upload_file "$@"
+			;;
+	esac
+}
+
+main "$@"

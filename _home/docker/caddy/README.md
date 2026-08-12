@@ -10,7 +10,7 @@ hostnames or IPs are committed.
 
 | File | Purpose |
 | --- | --- |
-| `Caddyfile` | Host routing and upstream definitions |
+| `Caddyfile` | TLS setup, generated-route import, and advanced handlers |
 | `compose.yaml` | Runs Caddy with host networking and persistent data |
 | `Dockerfile` | Builds Caddy with the Cloudflare DNS module |
 | `caddy.sh` | Manages the rootful Podman deployment |
@@ -69,18 +69,14 @@ dependencies.
 
 Do not commit `.env`; it contains the Cloudflare API token.
 
-## Editing the Caddyfile
+## Editing routes
 
-Routes are defined through the `(service)` snippet — each entry is one
-`import service <name> <upstream>` line, and `<name>` doubles as the matcher
-label and the subdomain prefix under `<CADDY_TS_BASE_DOMAIN>`. Read
-`subdomain-access-summary.md` (especially "Caddyfile conventions" and "Adding
-a route") before adding or changing routes. Always run `./caddy.sh validate`
-after edits, and never hardcode real IPs or domains — go through the
-`CADDY_TS_IP` / `CADDY_TS_BASE_DOMAIN` env placeholders.
+Ordinary loopback routes belong in the sibling dev-router registry. Use
+`cd ../dev-router && just specific <name> <port>` instead of adding another
+static entry here. Caddy imports both random `dev-<random>` and stable named
+routes from the generated registry, and the CLI applies changes through
+Caddy's loopback admin API without reloading the container.
 
-Development hostnames are the exception: Caddy imports both random
-`dev-<random>` and stable named routes from the sibling `dev-router` registry.
-The `dev-route` CLI applies fragment changes through Caddy's loopback admin API
-without reloading the container. Add an `import service` line here only for a
-service that needs a static route or an advanced Caddy handler.
+Keep only routes that need a non-loopback upstream, redirect, or custom matcher
+in `Caddyfile`. Read `subdomain-access-summary.md` before changing those
+handlers, then run `./caddy.sh validate` and `./caddy.sh reload`.

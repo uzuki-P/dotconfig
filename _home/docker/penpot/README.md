@@ -37,8 +37,8 @@ cd ../mailpit
 just setup
 ```
 
-Mailpit creates the external `mailpit` Podman network required by the Penpot
-backend, so keep this startup order on a fresh machine.
+Mailpit's network Quadlet creates the external `mailpit` Podman network required
+by the Penpot backend, so keep this startup order on a fresh machine.
 
 Open the URL from `PENPOT_PUBLIC_URI` and register the first account. Penpot
 sends verification email to Mailpit; open it at `http://127.0.0.1:8025`.

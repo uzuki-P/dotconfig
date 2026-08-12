@@ -1,5 +1,6 @@
 --target=~/.config
 --ignore=.stowrc
+--ignore=favicon.svg
 --ignore=_home
 --ignore=docs
 --ignore=setup.sh

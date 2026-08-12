@@ -1,0 +1,23 @@
+{
+	admin off
+	auto_https off
+}
+
+:8080 {
+	root * /srv
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy no-referrer
+		X-Frame-Options SAMEORIGIN
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+	}
+
+	@health path /healthz
+	respond @health "ok" 200
+
+	@root path /
+	respond @root "HTML preview service" 200
+
+	file_server
+}

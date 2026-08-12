@@ -1,0 +1,22 @@
+[Unit]
+Description=Mailpit development SMTP catcher
+Wants=network-online.target
+After=network-online.target
+
+[Container]
+Image=docker.io/axllent/mailpit:latest
+ContainerName=mailpit
+PublishPort=127.0.0.1:1025:1025
+PublishPort=127.0.0.1:8025:8025
+Environment=MP_DATABASE=/data/mailpit.db
+Environment=MP_SEND_API_AUTH_ACCEPT_ANY=true
+Volume=mailpit-data.volume:/data:Z
+Network=mailpit.network
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+TimeoutStartSec=180
+
+[Install]
+WantedBy=default.target

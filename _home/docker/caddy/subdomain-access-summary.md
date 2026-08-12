@@ -35,8 +35,8 @@ running on the host.
 
 ## Caddyfile conventions
 
-- Each route is one `import service <name> <upstream>` line. `<name>` becomes both the matcher label (`@<name>`) and the subdomain prefix (`<name>.<CADDY_TS_BASE_DOMAIN>`).
-- The `(service)` snippet near the top of `Caddyfile` defines the matcher and `reverse_proxy` handler once. Edit it to change the matcher/handler shape for every route at the same time.
+- Generated routes are managed with `dev-route set <name> <target>` and stored in the sibling dev-router's ignored `.data/` registry.
+- The `(service)` snippet near the top of `Caddyfile` defines the matcher and `reverse_proxy` handler used by generated and advanced proxy routes.
 - Env vars use the parse-time form `{$VAR:default}` so the file validates on a fresh checkout without leaking anything:
   - `CADDY_TS_BASE_DOMAIN` (default `ts.example.com`) — base domain for the wildcard cert and every host matcher.
   - `CADDY_TS_IP` (default `127.0.0.1`) — address Caddy binds to, and the host ttyd is reached through.
@@ -46,27 +46,22 @@ running on the host.
 
 ## Adding a route
 
-Add one `import service` line inside the `*.{$CADDY_TS_BASE_DOMAIN:ts.example.com}` block, before the final `respond 404`:
-
-```caddyfile
-import service myapp 127.0.0.1:8000
-```
-
-This expands to a host matcher for `myapp.<CADDY_TS_BASE_DOMAIN>` proxying to `127.0.0.1:8000`. If the upstream is the tailnet node itself rather than loopback, use `{$CADDY_TS_IP:127.0.0.1}:<port>` (see the `ttyd` line). No additional DNS record is needed while the wildcard record remains in place.
-
-After editing, update the Routes table above and run `./caddy.sh validate` then `./caddy.sh reload` (see `README.md`).
-
-For a simple persistent localhost development route, use the sibling
-dev-router wrapper. It writes the generated fragment and applies it through
-Caddy's loopback admin API, so Caddyfile is unchanged:
+Add an ordinary loopback route through the dev-router registry:
 
 ```bash
 cd ../dev-router
-just specific myapp 5173
+just specific myapp 8000
 ```
 
-Use a direct `import service` entry when the route needs a non-loopback
-upstream, redirect, or custom Caddy handler.
+This creates a host matcher for `myapp.<CADDY_TS_BASE_DOMAIN>` proxying to
+`127.0.0.1:8000`, writes it to the ignored `.data/` registry, and applies it
+through Caddy's loopback admin API. No additional DNS record is needed while
+the wildcard record remains in place.
+
+Use a direct Caddyfile handler only when the route needs a non-loopback
+upstream, redirect, or custom matcher. After changing an advanced handler,
+update the Routes table above and run `./caddy.sh validate` then
+`./caddy.sh reload`.
 
 ## Testing
 

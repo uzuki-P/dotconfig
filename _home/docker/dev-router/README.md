@@ -68,5 +68,5 @@ just specific myapp 5173
 The above creates `https://myapp.<CADDY_TS_BASE_DOMAIN>` pointing to
 `http://127.0.0.1:5173`. `just list-named` and `just remove-specific myapp`
 inspect and change the generated registry. The command accepts only loopback
-HTTP(S) upstreams with explicit ports; use a static Caddyfile route when a
-service needs an advanced upstream, redirect, or Caddy matcher.
+HTTP(S) upstreams with explicit ports; use a compact static Caddyfile handler
+when a service needs an advanced upstream, redirect, or Caddy matcher.

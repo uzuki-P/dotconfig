@@ -2,22 +2,41 @@
 default:
     @just --list
 
-# Start or update Mailpit.
-setup:
-    podman compose --file compose.yml up --detach
+# Install the rootless Quadlets and start Mailpit.
+setup: install
+    systemctl --user start mailpit.service
 
-# Validate the fully resolved Compose configuration.
+# Validate the tracked Quadlet definitions.
 validate:
-    podman compose --file compose.yml config --quiet
+    @grep -q '^Image=docker.io/axllent/mailpit:latest$' deploy/mailpit.container
+    @grep -q '^PublishPort=127.0.0.1:1025:1025$' deploy/mailpit.container
+    @grep -q '^PublishPort=127.0.0.1:8025:8025$' deploy/mailpit.container
+    @grep -q '^NetworkName=mailpit$' deploy/mailpit.network
+    @grep -q '^VolumeName=mailpit-data$' deploy/mailpit-data.volume
+    @echo "Static validation passed."
+
+# Install the rootless user Quadlets and reload user systemd.
+install:
+    install -d -m 0700 "${HOME}/.config/containers/systemd"
+    install -m 0644 deploy/mailpit.container "${HOME}/.config/containers/systemd/mailpit.container"
+    install -m 0644 deploy/mailpit.network "${HOME}/.config/containers/systemd/mailpit.network"
+    install -m 0644 deploy/mailpit-data.volume "${HOME}/.config/containers/systemd/mailpit-data.volume"
+    systemctl --user daemon-reload
 
 # Show Mailpit container status.
 status:
-    podman compose --file compose.yml ps
+    systemctl --user --no-pager --full status mailpit.service
+    @ss -ltn '( sport = :1025 or sport = :8025 )' || true
 
 # Follow recent Mailpit logs.
 logs:
-    podman compose --file compose.yml logs --follow --tail 100
+    journalctl --user-unit mailpit.service --follow --lines=100
 
 # Stop Mailpit while preserving captured messages.
 stop:
-    podman compose --file compose.yml down
+    systemctl --user stop mailpit.service
+
+# Pull the current image and restart Mailpit.
+update:
+    podman pull docker.io/axllent/mailpit:latest
+    systemctl --user restart mailpit.service

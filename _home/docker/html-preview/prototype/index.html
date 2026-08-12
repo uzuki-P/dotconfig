@@ -1,0 +1,1491 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <title>HTML response template prototype</title>
+  <!-- PROTOTYPE: three HTML response directions, switchable with ?variant=a|b|c. -->
+  <style>
+    @font-face {
+      font-family: "Maple Mono";
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url("https://cdn.jsdelivr.net/fontsource/fonts/maple-mono@5.3.0/latin-400-normal.woff2") format("woff2");
+    }
+
+    :root {
+      color-scheme: light;
+      --page: #f8f7f8;
+      --surface: #f1eff1;
+      --surface-raised: #fcfafb;
+      --ink: #272326;
+      --muted: #706970;
+      --line: #ded9dd;
+      --line-strong: #c7c0c5;
+      --pink: #d32672;
+      --pink-ink: #fff7fa;
+      --pink-soft: #f8dbe8;
+      --code: #211e20;
+      --code-ink: #eee9ec;
+      --syntax-keyword: #ff78b3;
+      --syntax-string: #88d6b3;
+      --syntax-number: #f5bd72;
+      --syntax-type: #8fc7ff;
+      --syntax-comment: #91868d;
+      --syntax-meta: #c9a5ef;
+      --shadow: 0 18px 50px rgb(79 53 68 / 0.12);
+      --radius: 14px;
+      --content: 74rem;
+      --reading: 46rem;
+    }
+
+    html[data-resolved-theme="dark"] {
+      color-scheme: dark;
+      --page: #171416;
+      --surface: #211d20;
+      --surface-raised: #282327;
+      --ink: #eee9ec;
+      --muted: #aaa1a7;
+      --line: #393238;
+      --line-strong: #51464d;
+      --pink: #e66a9e;
+      --pink-ink: #241018;
+      --pink-soft: #442333;
+      --code: #100e0f;
+      --code-ink: #eee9ec;
+      --syntax-keyword: #ff82ba;
+      --syntax-string: #8fdeb9;
+      --syntax-number: #ffc477;
+      --syntax-type: #91caff;
+      --syntax-comment: #998d95;
+      --syntax-meta: #d0aaf5;
+      --shadow: 0 20px 60px rgb(0 0 0 / 0.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      background: var(--page);
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-width: 20rem;
+      min-height: 100dvh;
+      margin: 0;
+      overflow-x: hidden;
+      background: var(--page);
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      text-rendering: optimizeLegibility;
+    }
+
+    button, a { -webkit-tap-highlight-color: transparent; }
+
+    button {
+      border: 0;
+      font: inherit;
+    }
+
+    button:focus-visible,
+    a:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--pink) 65%, transparent);
+      outline-offset: 3px;
+    }
+
+    .page {
+      width: min(calc(100% - 2rem), var(--content));
+      margin-inline: auto;
+      padding: clamp(4.5rem, 9vw, 8rem) 0 9rem;
+    }
+
+    .reading { max-width: var(--reading); }
+
+    .kicker {
+      margin: 0 0 1.25rem;
+      color: var(--pink);
+      font-family: "Maple Mono", ui-monospace, monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      max-width: 14ch;
+      margin-bottom: 1.35rem;
+      font-size: clamp(2.75rem, 8vw, 6.5rem);
+      font-weight: 650;
+      letter-spacing: -0.065em;
+      line-height: 0.96;
+    }
+
+    h2 {
+      margin-bottom: 1rem;
+      font-size: clamp(1.75rem, 4vw, 3rem);
+      font-weight: 620;
+      letter-spacing: -0.045em;
+      line-height: 1.04;
+    }
+
+    h3 {
+      margin-bottom: 0.65rem;
+      font-size: 1rem;
+      font-weight: 650;
+    }
+
+    p {
+      max-width: 65ch;
+      color: var(--muted);
+      font-size: clamp(1rem, 1.5vw, 1.12rem);
+      line-height: 1.72;
+    }
+
+    .lede {
+      max-width: 48ch;
+      margin-bottom: 0;
+      font-size: clamp(1.08rem, 2vw, 1.35rem);
+    }
+
+    .hero {
+      min-height: min(72dvh, 46rem);
+      display: grid;
+      align-content: center;
+    }
+
+    .section {
+      padding-block: clamp(4rem, 9vw, 8rem);
+    }
+
+    .hairline {
+      border-top: 1px solid var(--line);
+    }
+
+    .callout {
+      max-width: var(--reading);
+      padding: 1.2rem 1.35rem;
+      border-left: 3px solid var(--pink);
+      background: var(--pink-soft);
+      color: var(--ink);
+      font-size: 0.98rem;
+      line-height: 1.65;
+    }
+
+    .callout strong { color: var(--pink); }
+
+    .code-block {
+      position: relative;
+      overflow: auto;
+      border: 1px solid color-mix(in srgb, var(--code-ink) 12%, transparent);
+      border-radius: var(--radius);
+      background: var(--code);
+      box-shadow: var(--shadow);
+      color: var(--code-ink);
+    }
+
+    pre {
+      margin: 0;
+      padding: 1.5rem;
+      font-family: "Maple Mono", "Maple Mono NF CN", ui-monospace, monospace;
+      font-size: 0.84rem;
+      line-height: 1.75;
+      tab-size: 2;
+    }
+
+    code { font-family: "Maple Mono", "Maple Mono NF CN", ui-monospace, monospace; }
+
+    .hljs-keyword,
+    .hljs-selector-tag,
+    .hljs-literal,
+    .hljs-built_in { color: var(--syntax-keyword); }
+
+    .hljs-string,
+    .hljs-regexp,
+    .hljs-template-tag,
+    .hljs-template-variable { color: var(--syntax-string); }
+
+    .hljs-number,
+    .hljs-symbol,
+    .hljs-bullet { color: var(--syntax-number); }
+
+    .hljs-title,
+    .hljs-title.class_,
+    .hljs-title.function_,
+    .hljs-type,
+    .hljs-variable.language_ { color: var(--syntax-type); }
+
+    .hljs-comment,
+    .hljs-quote { color: var(--syntax-comment); font-style: italic; }
+
+    .hljs-meta,
+    .hljs-attr,
+    .hljs-attribute,
+    .hljs-property { color: var(--syntax-meta); }
+
+    .hljs-punctuation,
+    .hljs-params,
+    .hljs-variable { color: var(--code-ink); }
+
+    .copy-code {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      z-index: 2;
+      min-width: 4.5rem;
+      padding: 0.48rem 0.72rem;
+      border: 1px solid rgb(255 255 255 / 0.15);
+      border-radius: 8px;
+      background: rgb(255 255 255 / 0.08);
+      color: var(--code-ink);
+      font-family: "Maple Mono", ui-monospace, monospace;
+      font-size: 0.72rem;
+      cursor: pointer;
+    }
+
+    .copy-code:active { transform: translateY(1px); }
+
+    .diagram-block { margin-top: 2rem; }
+
+    .diagram-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .diagram-heading h3 { margin: 0; }
+
+    .diagram-hint {
+      margin: 0;
+      font-family: "Maple Mono", ui-monospace, monospace;
+      font-size: 0.7rem;
+      line-height: 1.4;
+    }
+
+    .diagram-shell {
+      position: relative;
+      overflow: hidden;
+      min-height: 29rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background-color: var(--surface-raised);
+      background-image: radial-gradient(var(--line) 0.7px, transparent 0.7px);
+      background-size: 18px 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .diagram-canvas {
+      width: 100%;
+      height: 29rem;
+      overflow: hidden;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .diagram-canvas.dragging { cursor: grabbing; }
+
+    .diagram-canvas svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      max-width: none !important;
+    }
+
+    .diagram-tools {
+      position: absolute;
+      right: 0.8rem;
+      bottom: 0.8rem;
+      z-index: 3;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: end;
+      gap: 0.35rem;
+      max-width: calc(100% - 1.6rem);
+      padding: 0.35rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--surface-raised) 92%, transparent);
+      box-shadow: 0 8px 24px rgb(50 33 43 / 0.1);
+      backdrop-filter: blur(12px);
+    }
+
+    .tool-button {
+      min-height: 2.25rem;
+      padding: 0.4rem 0.7rem;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--ink);
+      font-family: "Maple Mono", ui-monospace, monospace;
+      font-size: 0.72rem;
+      cursor: pointer;
+    }
+
+    .tool-button:hover { background: var(--surface); }
+    .tool-button:active { transform: translateY(1px); }
+    .tool-button.primary { background: var(--pink); color: var(--pink-ink); }
+
+    .diagram-error {
+      display: grid;
+      min-height: 29rem;
+      place-items: center;
+      padding: 2rem;
+      color: var(--pink);
+      font-family: "Maple Mono", ui-monospace, monospace;
+      text-align: center;
+    }
+
+    .theme-picker {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 20;
+      display: flex;
+      gap: 0.25rem;
+      padding: 0.3rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: color-mix(in srgb, var(--surface-raised) 90%, transparent);
+      box-shadow: 0 8px 24px rgb(50 33 43 / 0.1);
+      backdrop-filter: blur(14px);
+    }
+
+    .theme-picker button {
+      display: grid;
+      width: 2.15rem;
+      height: 2.15rem;
+      padding: 0;
+      place-items: center;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .theme-picker button:hover {
+      background: var(--surface);
+      color: var(--ink);
+    }
+
+    .theme-picker svg {
+      width: 1.05rem;
+      height: 1.05rem;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.8;
+    }
+
+    .theme-picker button[aria-pressed="true"] {
+      background: var(--pink);
+      color: var(--pink-ink);
+    }
+
+    .prototype-switcher {
+      position: fixed;
+      left: 50%;
+      bottom: 1rem;
+      z-index: 30;
+      display: grid;
+      grid-template-columns: 2.6rem minmax(12rem, auto) 2.6rem;
+      align-items: center;
+      padding: 0.35rem;
+      border: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+      border-radius: 999px;
+      background: var(--ink);
+      box-shadow: 0 14px 36px rgb(22 16 20 / 0.25);
+      color: var(--page);
+      transform: translateX(-50%);
+    }
+
+    .prototype-switcher button {
+      width: 2.35rem;
+      height: 2.35rem;
+      border-radius: 999px;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    .prototype-switcher button:hover { background: rgb(255 255 255 / 0.12); }
+
+    .variant-label {
+      padding-inline: 0.7rem;
+      font-family: "Maple Mono", ui-monospace, monospace;
+      font-size: 0.72rem;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    dialog {
+      width: calc(100vw - 2rem);
+      max-width: none;
+      height: calc(100dvh - 2rem);
+      max-height: none;
+      padding: 0;
+      overflow: hidden;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: var(--surface-raised);
+      color: var(--ink);
+    }
+
+    dialog::backdrop { background: rgb(15 11 14 / 0.72); backdrop-filter: blur(5px); }
+
+    .dialog-stage,
+    .dialog-stage .diagram-shell,
+    .dialog-stage .diagram-canvas { width: 100%; height: 100%; }
+
+    .dialog-stage .diagram-shell { min-height: 100%; border: 0; border-radius: 0; box-shadow: none; }
+
+    .dialog-close {
+      position: fixed;
+      top: 1.8rem;
+      right: 1.8rem;
+      z-index: 5;
+      padding: 0.55rem 0.8rem;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-raised);
+      color: var(--ink);
+      font-family: "Maple Mono", ui-monospace, monospace;
+      font-size: 0.72rem;
+      cursor: pointer;
+    }
+
+    .variant-a .narrative { margin-left: clamp(0rem, 8vw, 9rem); }
+    .variant-a .diagram-block { width: min(86vw, 70rem); margin-left: min(8vw, 9rem); }
+
+    .variant-b .hero {
+      min-height: auto;
+      padding: clamp(4rem, 9vw, 8rem) 0 clamp(2rem, 4vw, 4rem);
+    }
+
+    .variant-b .split {
+      display: grid;
+      grid-template-columns: minmax(15rem, 0.8fr) minmax(0, 1.5fr);
+      gap: clamp(2rem, 6vw, 7rem);
+      align-items: start;
+      padding-block: clamp(3rem, 6vw, 6rem);
+      border-top: 1px solid var(--line);
+    }
+
+    .variant-b .split-copy { position: sticky; top: 6rem; }
+    .variant-b .split .diagram-block { margin-top: 0; }
+
+    .facts {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1px;
+      margin-top: 2rem;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--line);
+    }
+
+    .fact { padding: 1rem; background: var(--surface-raised); }
+    .fact span { display: block; color: var(--muted); font-size: 0.78rem; }
+    .fact strong { display: block; margin-top: 0.3rem; font-family: "Maple Mono", ui-monospace, monospace; font-size: 0.9rem; }
+
+    .variant-c { --content: 82rem; }
+
+    .variant-c .hero {
+      min-height: auto;
+      max-width: 58rem;
+      padding-block: clamp(5rem, 11vw, 10rem) clamp(3rem, 6vw, 6rem);
+    }
+
+    .notebook {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.9fr);
+      gap: 1.25rem;
+      align-items: stretch;
+    }
+
+    .notebook > * { min-width: 0; }
+
+    .note-panel {
+      padding: clamp(1.3rem, 3vw, 2.25rem);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-raised);
+    }
+
+    .note-panel p:last-child { margin-bottom: 0; }
+    .variant-c .diagram-block { margin: 1.25rem 0 0; }
+    .variant-c .code-block { height: 100%; min-height: 29rem; box-shadow: none; }
+
+    @media (max-width: 800px) {
+      .page { width: min(calc(100% - 1.25rem), var(--content)); padding-top: 5.5rem; }
+      .hero { min-height: 62dvh; }
+      .variant-a .narrative,
+      .variant-a .diagram-block { width: auto; margin-left: 0; }
+      .variant-b .split,
+      .notebook { grid-template-columns: 1fr; }
+      .variant-b .split-copy { position: static; }
+      .diagram-heading { align-items: start; flex-direction: column; }
+      .diagram-shell, .diagram-canvas { min-height: 23rem; height: 23rem; }
+      .theme-picker { right: 0.65rem; top: 0.65rem; }
+      .prototype-switcher { bottom: 0.65rem; grid-template-columns: 2.5rem minmax(9.5rem, auto) 2.5rem; }
+      .variant-label { font-size: 0.65rem; padding-inline: 0.35rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    }
+
+    /* Dense decision-document prototype overrides. */
+    .dense-doc.page {
+      width: min(calc(100% - 2rem), 82rem);
+      padding: 2.5rem 0 6rem;
+    }
+
+    .dense-doc .hero {
+      min-height: 0;
+      padding: 0 0 1.25rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .dense-doc h1 {
+      max-width: 24ch;
+      margin-bottom: 0.65rem;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      letter-spacing: -0.045em;
+      line-height: 1;
+    }
+
+    .dense-doc h2 {
+      margin-bottom: 0.65rem;
+      font-size: clamp(1.25rem, 2vw, 1.65rem);
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+    }
+
+    .dense-doc h3 { margin-bottom: 0.45rem; font-size: 0.98rem; }
+    .dense-doc p, .dense-doc li { font-size: 0.98rem; line-height: 1.66; }
+    .dense-doc p {
+      max-width: none;
+      margin-bottom: 0.9rem;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-align: justify;
+      text-justify: inter-word;
+    }
+    .dense-doc .lede { max-width: 92ch; font-size: 1.08rem; line-height: 1.62; }
+    .dense-doc .kicker { margin-bottom: 0.65rem; font-size: 0.67rem; }
+
+    .dense-doc .kicker,
+    .dense-doc .section-head p,
+    .dense-doc .model-note,
+    .dense-doc .diagram-hint,
+    .dense-doc .code-caption p,
+    .dense-doc .pull-quote { text-align: left; }
+
+    .dense-section {
+      padding: 1.4rem 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .dense-section:last-child { border-bottom: 0; }
+
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .section-head h2, .section-head p { margin-bottom: 0; }
+    .section-head p { max-width: 56ch; font-size: 0.76rem; text-align: right; }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1px;
+      margin-top: 1rem;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--line);
+    }
+
+    .summary-item {
+      min-width: 0;
+      padding: 0.85rem;
+      background: var(--surface-raised);
+    }
+
+    .summary-item span {
+      display: block;
+      color: var(--muted);
+      font-family: "Maple Mono", ui-monospace, monospace;
+      font-size: 0.65rem;
+      line-height: 1.35;
+    }
+
+    .summary-item strong {
+      display: block;
+      margin-top: 0.3rem;
+      color: var(--ink);
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .summary-item strong.pink { color: var(--pink); }
+
+    .dense-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      align-items: start;
+    }
+
+    .dense-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .compact-panel {
+      min-width: 0;
+      padding: 0.9rem 1rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-raised);
+    }
+
+    .compact-panel p:last-child, .compact-panel ul:last-child { margin-bottom: 0; }
+
+    .table-wrap {
+      width: 100%;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-raised);
+    }
+
+    table {
+      width: 100%;
+      min-width: 47rem;
+      border-collapse: collapse;
+      font-variant-numeric: tabular-nums;
+    }
+
+    th, td {
+      padding: 0.58rem 0.65rem;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.75rem;
+      line-height: 1.35;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--surface);
+      color: var(--ink);
+      font-family: "Maple Mono", ui-monospace, monospace;
+      font-size: 0.67rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+    tbody tr:hover td { background: color-mix(in srgb, var(--pink-soft) 28%, transparent); }
+    td.numeric, th.numeric { text-align: right; white-space: nowrap; }
+    td.emphasis { color: var(--ink); font-weight: 650; }
+    td.recommend { color: var(--pink); font-weight: 650; }
+
+    .model-note {
+      margin-top: 0.55rem;
+      padding-left: 0.8rem;
+      border-left: 2px solid var(--pink);
+      color: var(--muted);
+      font-size: 0.72rem !important;
+    }
+
+    .dense-list {
+      display: grid;
+      gap: 0.45rem;
+      margin: 0;
+      padding-left: 1.1rem;
+      color: var(--muted);
+    }
+
+    .verdict {
+      padding: 1rem 1.1rem;
+      border: 1px solid color-mix(in srgb, var(--pink) 36%, var(--line));
+      border-radius: var(--radius);
+      background: var(--pink-soft);
+    }
+
+    .verdict p { color: var(--ink); }
+    .verdict p:last-child { margin-bottom: 0; }
+
+    .source-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.45rem 1rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .source-list a {
+      color: var(--pink);
+      font-size: 0.74rem;
+      text-decoration-color: color-mix(in srgb, var(--pink) 36%, transparent);
+      text-underline-offset: 0.18em;
+    }
+
+    .dense-doc .diagram-block { width: auto; margin: 0; }
+    .dense-doc .diagram-shell, .dense-doc .diagram-canvas { min-height: 20rem; height: 20rem; }
+    .dense-doc .diagram-heading { margin-bottom: 0.55rem; }
+    .dense-doc .diagram-hint { font-size: 0.65rem; }
+
+    .prose-flow {
+      display: grid;
+      gap: 1rem;
+      max-width: none;
+    }
+
+    .prose-flow.wide { max-width: none; }
+    .prose-flow p { margin: 0; }
+    .prose-flow strong { color: var(--ink); }
+
+    .text-columns {
+      columns: 2 22rem;
+      column-gap: 2.25rem;
+    }
+
+    .text-columns p { break-inside: avoid; }
+    .text-columns .prose-flow { display: block; }
+    .text-columns .prose-flow p { margin-bottom: 1rem; }
+
+    .pull-quote {
+      max-width: 48ch;
+      margin: 1.2rem 0;
+      padding: 0.2rem 0 0.2rem 1rem;
+      border-left: 3px solid var(--pink);
+      color: var(--ink);
+      font-size: clamp(1rem, 1.8vw, 1.25rem);
+      font-weight: 620;
+      letter-spacing: -0.02em;
+      line-height: 1.45;
+    }
+
+    .chart-shell {
+      padding: 0.9rem 1rem 0.7rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-raised);
+    }
+
+    .chart-shell svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 18rem;
+      overflow: visible;
+    }
+
+    .chart-grid { stroke: var(--line); stroke-width: 1; }
+    .chart-axis { fill: var(--muted); font-family: "Maple Mono", ui-monospace, monospace; font-size: 11px; }
+    .chart-cloud { fill: none; stroke: var(--pink); stroke-width: 3; }
+    .chart-infra { fill: none; stroke: var(--ink); stroke-width: 2; stroke-dasharray: 7 6; }
+    .chart-tco { fill: none; stroke: var(--muted); stroke-width: 2; stroke-dasharray: 2 5; }
+    .chart-dot-cloud { fill: var(--pink); }
+    .chart-dot-infra { fill: var(--ink); }
+    .chart-dot-tco { fill: var(--muted); }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem 1rem;
+      margin-top: 0.45rem;
+      color: var(--muted);
+      font-family: "Maple Mono", ui-monospace, monospace;
+      font-size: 0.66rem;
+    }
+
+    .legend-key::before {
+      content: "";
+      display: inline-block;
+      width: 1.25rem;
+      height: 2px;
+      margin-right: 0.4rem;
+      background: currentColor;
+      vertical-align: middle;
+    }
+
+    .legend-key.cloud { color: var(--pink); }
+    .legend-key.infra { color: var(--ink); }
+
+    .code-stack { display: grid; gap: 1rem; }
+
+    .code-caption {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .code-caption h3, .code-caption p { margin: 0; }
+    .code-caption p { font-size: 0.7rem; }
+
+    .code-doc .code-block { box-shadow: none; }
+    .code-doc pre { max-height: 31rem; }
+
+    .numbered-analysis {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.1rem 1.5rem;
+      counter-reset: analysis;
+    }
+
+    .analysis-item { counter-increment: analysis; }
+    .analysis-item h3::before {
+      content: counter(analysis, decimal-leading-zero) " ";
+      color: var(--pink);
+      font-family: "Maple Mono", ui-monospace, monospace;
+      font-weight: 400;
+    }
+
+    .narrative-doc { --reading: 72rem; }
+    .narrative-doc .story { max-width: 72rem; margin-inline: auto; }
+    .narrative-doc .story .dense-section { padding-block: 2rem; }
+    .narrative-doc .story p { max-width: none; font-size: 1rem; line-height: 1.72; }
+
+    .aside-note {
+      float: right;
+      width: min(19rem, 42%);
+      margin: 0.2rem 0 1rem 1.5rem;
+      padding: 0.8rem 0.9rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-raised);
+      color: var(--muted);
+      font-size: 0.75rem;
+      line-height: 1.55;
+    }
+
+    .ledger-lead {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(16rem, 0.8fr);
+      gap: 1rem;
+      align-items: stretch;
+    }
+
+    .scale-stack { display: grid; gap: 0.55rem; }
+
+    .scale-row {
+      display: grid;
+      grid-template-columns: 4.5rem 1fr auto;
+      gap: 0.7rem;
+      align-items: center;
+      padding: 0.65rem 0.75rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-raised);
+    }
+
+    .scale-row strong { font-family: "Maple Mono", ui-monospace, monospace; font-size: 0.75rem; }
+    .scale-row span { color: var(--muted); font-size: 0.74rem; }
+    .scale-row b { color: var(--pink); font-size: 0.82rem; }
+
+    @media (max-width: 880px) {
+      .dense-doc.page { width: min(calc(100% - 1rem), 82rem); padding-top: 4.4rem; }
+      .dense-doc .hero { padding-right: 0; }
+      .summary-grid, .dense-grid.three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .dense-grid, .ledger-lead { grid-template-columns: 1fr; }
+      .numbered-analysis { grid-template-columns: 1fr; }
+      .source-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .section-head { display: block; }
+      .section-head p { text-align: left; }
+    }
+
+    @media (max-width: 520px) {
+      .summary-grid, .dense-grid.three, .source-list { grid-template-columns: 1fr; }
+      .theme-picker button { width: 2rem; height: 2rem; }
+      .scale-row { grid-template-columns: 3.8rem 1fr; }
+      .scale-row b { grid-column: 2; }
+      .aside-note { float: none; width: auto; margin: 1rem 0; }
+    }
+  </style>
+</head>
+<body>
+  <main id="app"></main>
+
+  <div class="theme-picker" aria-label="Color theme">
+    <button type="button" data-theme="system" aria-label="Use system theme" title="System theme">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"></rect><path d="M8 21h8M12 17v4"></path></svg>
+    </button>
+    <button type="button" data-theme="light" aria-label="Use light theme" title="Light theme">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"></path></svg>
+    </button>
+    <button type="button" data-theme="dark" aria-label="Use dark theme" title="Dark theme">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.4 15.5A9 9 0 0 1 8.5 3.6 9 9 0 1 0 20.4 15.5Z"></path></svg>
+    </button>
+  </div>
+
+  <div class="prototype-switcher" aria-label="Prototype variants">
+    <button type="button" id="previous-variant" aria-label="Previous variant">←</button>
+    <div class="variant-label" id="variant-label"></div>
+    <button type="button" id="next-variant" aria-label="Next variant">→</button>
+  </div>
+
+  <dialog id="diagram-dialog" aria-label="Fullscreen diagram">
+    <button class="dialog-close" id="dialog-close" type="button">Close</button>
+    <div class="dialog-stage"></div>
+  </dialog>
+
+  <script type="module">
+    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+    import hljs from "https://cdn.jsdelivr.net/npm/highlight.js@11/+esm";
+
+    const diagramSource = `flowchart LR
+      A[Agent browsers] --> L[TLS ingress]
+      W[Channel webhooks] --> L
+      L --> C[Convex backend]
+      C --> P[(PostgreSQL primary)]
+      P --> H[(HA standby)]
+      C --> S[(Five S3 or R2 buckets)]
+      C --> O[Logs metrics and alerts]
+      R[Backup and restore drills] --> P
+      R --> S`;
+
+    const codeSample = `calls = agents * 8 hours * 3600 * 22 days * updatesPerSecond
+cloud = developerSeats + usageOverages
+selfHosted = compute + database + objectStorage + operations`;
+
+    const variants = [
+      { key: "a", label: "A / Decision memo" },
+      { key: "b", label: "B / Visual cost story" },
+      { key: "c", label: "C / Architecture narrative" },
+      { key: "d", label: "D / Code analysis" },
+      { key: "e", label: "E / Long-form brief" }
+    ];
+
+    const app = document.querySelector("#app");
+    const dialog = document.querySelector("#diagram-dialog");
+    const dialogStage = dialog.querySelector(".dialog-stage");
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    let restoreTarget = null;
+
+    function query() {
+      return new URLSearchParams(location.search);
+    }
+
+    function selectedVariant() {
+      const key = query().get("variant") || "b";
+      return variants.find((variant) => variant.key === key) || variants[0];
+    }
+
+    function selectedTheme() {
+      const value = query().get("theme") || "system";
+      return ["system", "light", "dark"].includes(value) ? value : "system";
+    }
+
+    function resolvedTheme() {
+      const chosen = selectedTheme();
+      return chosen === "system" ? (media.matches ? "dark" : "light") : chosen;
+    }
+
+    function setQuery(key, value) {
+      const url = new URL(location.href);
+      url.searchParams.set(key, value);
+      history.replaceState({}, "", url);
+      render();
+    }
+
+    function diagramMarkup() {
+      return `
+        <section class="diagram-block">
+          <div class="diagram-heading">
+            <h3>Production self-host shape</h3>
+            <p class="diagram-hint">Drag to pan. Wheel or controls to zoom.</p>
+          </div>
+          <div class="diagram-home"></div>
+          <div class="diagram-shell">
+            <div class="diagram-canvas" role="img" aria-label="Self-hosted Convex architecture with PostgreSQL and S3-compatible storage"></div>
+            <div class="diagram-tools" aria-label="Diagram controls">
+              <button class="tool-button" type="button" data-action="out" aria-label="Zoom out">−</button>
+              <button class="tool-button" type="button" data-action="in" aria-label="Zoom in">+</button>
+              <button class="tool-button" type="button" data-action="reset">1:1</button>
+              <button class="tool-button primary" type="button" data-action="fullscreen">Fullscreen</button>
+            </div>
+          </div>
+        </section>`;
+    }
+
+    function summaryStrip() {
+      return `<div class="summary-grid" aria-label="Decision summary">
+        <div class="summary-item"><span>30 agents / Cloud Pro</span><strong>$133/mo</strong></div>
+        <div class="summary-item"><span>300 agents / Cloud Pro</span><strong>$633/mo</strong></div>
+        <div class="summary-item"><span>1,000 agents / Cloud Pro</span><strong>$2,078/mo</strong></div>
+        <div class="summary-item"><span>Default decision</span><strong class="pink">Cloud Pro</strong></div>
+      </div>`;
+    }
+
+    function cloudCostTable() {
+      return `<div class="table-wrap"><table>
+        <thead><tr><th>Concurrent agents</th><th class="numeric">Calls/mo</th><th class="numeric">5-dev base</th><th class="numeric">Call overage</th><th class="numeric">Other usage</th><th class="numeric">Cloud Pro total</th><th>Recommendation</th></tr></thead>
+        <tbody>
+          <tr><td class="emphasis">30</td><td class="numeric">19.01M</td><td class="numeric">$125</td><td class="numeric">$0</td><td class="numeric">$8</td><td class="numeric emphasis">$133</td><td class="recommend">Professional</td></tr>
+          <tr><td class="emphasis">100</td><td class="numeric">63.36M</td><td class="numeric">$125</td><td class="numeric">$77</td><td class="numeric">$46</td><td class="numeric emphasis">$247</td><td class="recommend">Professional</td></tr>
+          <tr><td class="emphasis">300</td><td class="numeric">190.08M</td><td class="numeric">$125</td><td class="numeric">$330</td><td class="numeric">$178</td><td class="numeric emphasis">$633</td><td class="recommend">Professional</td></tr>
+          <tr><td class="emphasis">1,000</td><td class="numeric">633.60M</td><td class="numeric">$125</td><td class="numeric">$1,217</td><td class="numeric">$736</td><td class="numeric emphasis">$2,078</td><td class="recommend">Pro, evaluate Business</td></tr>
+        </tbody>
+      </table></div>`;
+    }
+
+    function selfHostTable() {
+      return `<div class="table-wrap"><table>
+        <thead><tr><th>Concurrent agents</th><th class="numeric">Backend</th><th class="numeric">HA database</th><th class="numeric">Other infra</th><th class="numeric">Infra subtotal</th><th class="numeric">Ops allocation</th><th class="numeric">Modeled TCO</th></tr></thead>
+        <tbody>
+          <tr><td class="emphasis">30</td><td class="numeric">$88</td><td class="numeric">$120</td><td class="numeric">$53</td><td class="numeric emphasis">$261</td><td class="numeric">0.10 FTE</td><td class="numeric emphasis">$1,461</td></tr>
+          <tr><td class="emphasis">100</td><td class="numeric">$168</td><td class="numeric">$230</td><td class="numeric">$91</td><td class="numeric emphasis">$489</td><td class="numeric">0.15 FTE</td><td class="numeric emphasis">$2,289</td></tr>
+          <tr><td class="emphasis">300</td><td class="numeric">$328</td><td class="numeric">$490</td><td class="numeric">$161</td><td class="numeric emphasis">$979</td><td class="numeric">0.25 FTE</td><td class="numeric emphasis">$3,979</td></tr>
+          <tr><td class="emphasis">1,000</td><td class="numeric">$768</td><td class="numeric">$980</td><td class="numeric">$393</td><td class="numeric emphasis">$2,141</td><td class="numeric">0.50 FTE</td><td class="numeric emphasis">$8,141</td></tr>
+        </tbody>
+      </table></div>`;
+    }
+
+    function officialRateTable() {
+      return `<div class="table-wrap"><table>
+        <thead><tr><th>US meter</th><th class="numeric">Starter included</th><th class="numeric">Starter overage</th><th class="numeric">Professional included</th><th class="numeric">Professional overage</th></tr></thead>
+        <tbody>
+          <tr><td class="emphasis">Function calls</td><td class="numeric">1M</td><td class="numeric">$2.20/M</td><td class="numeric">25M</td><td class="numeric">$2/M</td></tr>
+          <tr><td class="emphasis">Action compute</td><td class="numeric">20 GB-h</td><td class="numeric">$0.33/GB-h</td><td class="numeric">250 GB-h</td><td class="numeric">$0.30/GB-h</td></tr>
+          <tr><td class="emphasis">Database storage</td><td class="numeric">0.5 GB</td><td class="numeric">$0.22/GB-mo</td><td class="numeric">50 GB</td><td class="numeric">$0.20/GB-mo</td></tr>
+          <tr><td class="emphasis">Database I/O</td><td class="numeric">1 GB</td><td class="numeric">$0.22/GB</td><td class="numeric">50 GB</td><td class="numeric">$0.20/GB</td></tr>
+          <tr><td class="emphasis">File storage</td><td class="numeric">1 GB</td><td class="numeric">$0.033/GB-mo</td><td class="numeric">100 GB</td><td class="numeric">$0.03/GB-mo</td></tr>
+          <tr><td class="emphasis">Search storage</td><td class="numeric">0.5 GB</td><td class="numeric">$0.55/GB-mo</td><td class="numeric">1 GB</td><td class="numeric">$0.50/GB-mo</td></tr>
+          <tr><td class="emphasis">Data egress</td><td class="numeric">1 GB</td><td class="numeric">$0.132/GB</td><td class="numeric">50 GB</td><td class="numeric">$0.12/GB</td></tr>
+        </tbody>
+      </table></div>`;
+    }
+
+    function capacityTable() {
+      return `<div class="table-wrap"><table>
+        <thead><tr><th>Class</th><th>Available plans</th><th class="numeric">Sessions</th><th class="numeric">Queries</th><th class="numeric">Mutations</th><th class="numeric">HTTP actions</th><th class="numeric">Max dataset</th></tr></thead>
+        <tbody>
+          <tr><td class="emphasis">S16</td><td>Free, Starter, Business</td><td class="numeric">1,000</td><td class="numeric">16</td><td class="numeric">16</td><td class="numeric">64</td><td class="numeric">1 TB</td></tr>
+          <tr><td class="emphasis">S256</td><td>Professional, Business</td><td class="numeric">10,000</td><td class="numeric">256</td><td class="numeric">256</td><td class="numeric">512</td><td class="numeric">1 TB</td></tr>
+          <tr><td class="emphasis">D1024</td><td>Business, Enterprise</td><td class="numeric">100,000</td><td class="numeric">1,024</td><td class="numeric">512</td><td class="numeric">1,024</td><td class="numeric">4 TB</td></tr>
+          <tr><td class="emphasis">D2048</td><td>Business, Enterprise</td><td class="numeric">200,000</td><td class="numeric">2,048</td><td class="numeric">1,024</td><td class="numeric">2,048</td><td class="numeric">8 TB</td></tr>
+        </tbody>
+      </table></div>`;
+    }
+
+    function decisionTable() {
+      return `<div class="table-wrap"><table>
+        <thead><tr><th>Criterion</th><th>Cloud Professional</th><th>Cloud Business</th><th>Self-host + PostgreSQL + S3</th></tr></thead>
+        <tbody>
+          <tr><td class="emphasis">Base price</td><td>$25/developer/mo</td><td>$2,500/mo minimum</td><td>No stated Convex license fee; infra and labor apply</td></tr>
+          <tr><td class="emphasis">Service SLA</td><td>No contractual SLA in plan matrix</td><td>99.9% serverless; 99.95% dedicated</td><td>Operator-defined and provider-dependent</td></tr>
+          <tr><td class="emphasis">Regions</td><td>Virginia or Ireland</td><td>Virginia or Ireland; BYOC on Enterprise</td><td>Operator-selected, including Jakarta or Singapore</td></tr>
+          <tr><td class="emphasis">Backups</td><td>Daily backups included</td><td>Logical or physical by class</td><td>DB backup, Convex export, retention, and drills are yours</td></tr>
+          <tr><td class="emphasis">Scale evidence</td><td>Published S256 limits</td><td>Published serverless/dedicated limits</td><td>No machine-to-tier mapping; benchmark required</td></tr>
+          <tr><td class="emphasis">Operations</td><td>Managed upgrades and platform</td><td>Managed plus enterprise support options</td><td>Upgrades, TLS, HA, observability, incidents, restores</td></tr>
+        </tbody>
+      </table></div>`;
+    }
+
+    function assumptionTable() {
+      return `<div class="table-wrap"><table>
+        <thead><tr><th>Modeled input per active agent</th><th class="numeric">Value</th><th>Interpretation</th></tr></thead>
+        <tbody>
+          <tr><td class="emphasis">Active time</td><td class="numeric">8 h/day, 22 days</td><td>Staffed contact-center month</td></tr>
+          <tr><td class="emphasis">Subscription updates</td><td class="numeric">1/second aggregate</td><td>Inbox, assignment, presence, customer, and SLA invalidations</td></tr>
+          <tr><td class="emphasis">Calls</td><td class="numeric">633,600/month</td><td>Calculated from active time and update rate</td></tr>
+          <tr><td class="emphasis">Database I/O</td><td class="numeric">0.5 GB/month</td><td>Indexed CRM reads and writes after caching</td></tr>
+          <tr><td class="emphasis">Retained DB / files</td><td class="numeric">0.2 GB / 2 GB</td><td>Conversation state plus channel attachments</td></tr>
+          <tr><td class="emphasis">Egress / action compute</td><td class="numeric">4 GB / 0.5 GB-h</td><td>Files, exports, connector calls, workflows</td></tr>
+        </tbody>
+      </table></div>`;
+    }
+
+    function sensitivityTable() {
+      return `<div class="table-wrap"><table>
+        <thead><tr><th>Updates per active agent-second</th><th class="numeric">30 agents calls/mo</th><th class="numeric">300 agents calls/mo</th><th class="numeric">1,000 agents calls/mo</th><th class="numeric">1,000-agent Pro call charge</th></tr></thead>
+        <tbody>
+          <tr><td class="emphasis">0.25</td><td class="numeric">4.75M</td><td class="numeric">47.52M</td><td class="numeric">158.40M</td><td class="numeric">$267</td></tr>
+          <tr><td class="emphasis">1.00 base</td><td class="numeric">19.01M</td><td class="numeric">190.08M</td><td class="numeric">633.60M</td><td class="numeric">$1,217</td></tr>
+          <tr><td class="emphasis">4.00</td><td class="numeric">76.03M</td><td class="numeric">760.32M</td><td class="numeric">2,534.40M</td><td class="numeric">$5,019</td></tr>
+        </tbody>
+      </table></div>`;
+    }
+
+    function sourceList() {
+      return `<ul class="source-list">
+        <li><a href="https://www.convex.dev/pricing" target="_blank" rel="noreferrer">Convex public pricing</a></li>
+        <li><a href="https://www.convex.dev/enterprise/pricing" target="_blank" rel="noreferrer">Business pricing and classes</a></li>
+        <li><a href="https://docs.convex.dev/production/state/limits" target="_blank" rel="noreferrer">Limits and deployment classes</a></li>
+        <li><a href="https://docs.convex.dev/production/regions" target="_blank" rel="noreferrer">Available cloud regions</a></li>
+        <li><a href="https://github.com/get-convex/convex-backend/blob/main/self-hosted/README.md" target="_blank" rel="noreferrer">Self-host guide</a></li>
+        <li><a href="https://github.com/get-convex/convex-backend/blob/main/self-hosted/advanced/postgres_or_mysql.md" target="_blank" rel="noreferrer">PostgreSQL and MySQL</a></li>
+        <li><a href="https://github.com/get-convex/convex-backend/blob/main/self-hosted/advanced/s3_storage.md" target="_blank" rel="noreferrer">S3-compatible storage</a></li>
+        <li><a href="https://github.com/get-convex/convex-backend/blob/main/self-hosted/advanced/upgrading.md" target="_blank" rel="noreferrer">Self-host upgrades</a></li>
+        <li><a href="https://developers.cloudflare.com/r2/pricing/" target="_blank" rel="noreferrer">R2 official pricing</a></li>
+      </ul>`;
+    }
+
+    function lineChartMarkup() {
+      return `<div class="chart-shell" role="img" aria-label="Monthly cost comparison across 30, 100, 300, and 1000 active agents">
+        <svg viewBox="0 0 760 360" aria-hidden="true">
+          <line class="chart-grid" x1="74" y1="300" x2="730" y2="300"></line>
+          <line class="chart-grid" x1="74" y1="240" x2="730" y2="240"></line>
+          <line class="chart-grid" x1="74" y1="180" x2="730" y2="180"></line>
+          <line class="chart-grid" x1="74" y1="120" x2="730" y2="120"></line>
+          <line class="chart-grid" x1="74" y1="60" x2="730" y2="60"></line>
+          <text class="chart-axis" x="16" y="304">$0</text>
+          <text class="chart-axis" x="8" y="244">$2k</text>
+          <text class="chart-axis" x="8" y="184">$4k</text>
+          <text class="chart-axis" x="8" y="124">$6k</text>
+          <text class="chart-axis" x="8" y="64">$8k</text>
+          <text class="chart-axis" x="95" y="330">30 agents</text>
+          <text class="chart-axis" x="276" y="330">100 agents</text>
+          <text class="chart-axis" x="455" y="330">300 agents</text>
+          <text class="chart-axis" x="635" y="330">1,000 agents</text>
+          <polyline class="chart-cloud" points="120,296 300,293 480,281 675,238"></polyline>
+          <polyline class="chart-infra" points="120,292 300,285 480,271 675,236"></polyline>
+          <polyline class="chart-tco" points="120,256 300,231 480,181 675,56"></polyline>
+          <circle class="chart-dot-cloud" cx="120" cy="296" r="5"></circle><circle class="chart-dot-cloud" cx="300" cy="293" r="5"></circle><circle class="chart-dot-cloud" cx="480" cy="281" r="5"></circle><circle class="chart-dot-cloud" cx="675" cy="238" r="5"></circle>
+          <circle class="chart-dot-infra" cx="120" cy="292" r="4"></circle><circle class="chart-dot-infra" cx="300" cy="285" r="4"></circle><circle class="chart-dot-infra" cx="480" cy="271" r="4"></circle><circle class="chart-dot-infra" cx="675" cy="236" r="4"></circle>
+          <circle class="chart-dot-tco" cx="120" cy="256" r="4"></circle><circle class="chart-dot-tco" cx="300" cy="231" r="4"></circle><circle class="chart-dot-tco" cx="480" cy="181" r="4"></circle><circle class="chart-dot-tco" cx="675" cy="56" r="4"></circle>
+        </svg>
+        <div class="chart-legend"><span class="legend-key cloud">Cloud Professional</span><span class="legend-key infra">Self-host infrastructure</span><span class="legend-key">Self-host including labor</span></div>
+      </div>`;
+    }
+
+    function highlightedCode(code, language) {
+      try {
+        return hljs.highlight(code, { language }).value;
+      } catch {
+        return escapeHtml(code);
+      }
+    }
+
+    function codeBlock(title, note, code, language) {
+      return `<section><div class="code-caption"><h3>${title}</h3><p>${note} · ${language}</p></div><div class="code-block"><button class="copy-code" type="button">Copy</button><pre><code class="language-${language}">${highlightedCode(code, language)}</code></pre></div></section>`;
+    }
+
+    function economicsNarrative() {
+      return `<div class="prose-flow wide">
+        <p><strong>The cloud bill is driven by behavior, not seats.</strong> Convex does not charge the 30 to 1,000 support agents as developers. The important meter is the number of function calls caused by explicit actions, scheduled work, file access, and realtime subscription updates. A CRM that invalidates one narrowly scoped inbox subscription is a different economic system from one that refreshes a broad queue, presence roster, SLA board, and customer summary for every message.</p>
+        <p>The base scenario assumes each active agent produces one aggregate billable subscription update per second over an eight-hour shift, twenty-two days each month. That is deliberately visible rather than presented as a benchmark. At one quarter of that update rate, the 1,000-agent call charge is roughly $267. At four updates per second, it becomes roughly $5,019 before other usage. The application data model and subscription boundaries can therefore matter more than the nominal number of users.</p>
+        <p>Cloud Professional also bundles 25 million calls, 250 GB-hours of action compute, 50 GB of database storage and I/O, 100 GB of file storage, and 50 GB of egress. At smaller scales, those included amounts suppress most variable charges. Self-hosting begins with paid compute, an HA database, routing, monitoring, and recovery machinery even when the CRM is quiet.</p>
+      </div>`;
+    }
+
+    function operationsNarrative() {
+      return `<div class="prose-flow wide">
+        <p><strong>Object storage is the cheapest and least controversial part of the self-hosted design.</strong> S3-compatible storage receives exports, imports, modules, user files, and search indexes. Transactional CRM state still lives in SQLite, PostgreSQL, or MySQL. A serious production deployment therefore needs database capacity, low-latency placement, point-in-time recovery, and a tested failover story in addition to five object-store buckets.</p>
+        <p>The official self-host guide does not map a machine size to the S16 or S256 cloud classes. It points operators to load testing and tuning. The infrastructure ranges in this prototype are planning envelopes, not capacity promises. Two backend instances appear in the cost model for resilience budgeting, but the model does not assert that those containers form a supported active-active cluster. That topology must be proven before it becomes part of an availability claim.</p>
+        <p>Labor is the main economic uncertainty. An existing platform team may absorb the service with little incremental staffing, which makes the infrastructure subtotal relevant. A product team without that capability must own upgrades, security patches, monitoring, incidents, database restores, bucket policy, credentials, and capacity planning. At 1,000 active agents, a half-time platform allocation may still be optimistic if the CRM carries strict response-time or uptime commitments.</p>
+      </div>`;
+    }
+
+    function latencyNarrative() {
+      return `<div class="prose-flow wide">
+        <p><strong>Indonesia makes latency a legitimate reason to investigate self-hosting.</strong> Convex currently lists Virginia and Ireland for its managed product. Realtime systems often feel latency in repeated small interactions rather than one large page load: opening a conversation, assigning ownership, typing notes, changing presence, and observing queue updates. A Jakarta or Singapore deployment could shorten those paths, provided the Convex backend and SQL database remain close to each other.</p>
+        <p>That does not make self-hosting the automatic winner. The decision should come from measurements taken from the actual agent locations against both cloud regions, then compared with a production-shaped regional self-host. Record p50, p95, and p99 query and mutation latency, reconnect time, subscription catch-up, webhook processing delay, and attachment download behavior. A few synthetic API calls from a nearby CI runner will miss the user experience that matters.</p>
+      </div>`;
+    }
+
+    function variantA() {
+      return `<article class="page dense-doc">
+        <section class="hero">
+          <p class="kicker">Decision memo / researched 12 Aug 2026</p>
+          <h1>Convex Cloud or self-hosted Convex for omnichannel CRM?</h1>
+          <p class="lede">Comparison for 30 to 1,000 concurrently active support agents. Official prices are separated from workload estimates.</p>
+          ${summaryStrip()}
+        </section>
+        <section class="dense-section">
+          <div class="verdict"><h3>Short answer</h3><p>Choose Convex Cloud Professional for 30 to 300 agents. At 1,000 agents, Professional remains inside its 10,000-session limit, but benchmark subscription fanout and evaluate Business if contractual SLA, SSO, or dedicated capacity matters. Self-host for residency, latency, or infrastructure control, not because S3 looks cheap.</p></div>
+        </section>
+        <section class="dense-section"><h2>How to read the estimate</h2>${economicsNarrative()}</section>
+        <section class="dense-section"><div class="section-head"><h2>Modeled Cloud Professional bill</h2><p>Five developers, US pricing, one aggregate subscription update per active agent-second.</p></div>${cloudCostTable()}<p class="model-note">Calculated scenario, not a Convex quote. Channel vendor, telephony, SMS, email, LLM, frontend, and warehouse costs are excluded from both options.</p></section>
+        <section class="dense-section dense-grid">
+          <div><h2>Why S3 is not the comparison</h2><p>Self-hosted Convex keeps primary transactional state in SQLite, PostgreSQL, or MySQL. S3-compatible storage is used for exports, snapshot imports, modules, files, and search indexes. Production guidance favors managed PostgreSQL or MySQL when uptime matters.</p><p>The backend and SQL database should be co-located because database latency affects query performance. S3 savings do not remove database, compute, failover, backup, monitoring, or upgrade costs.</p><p>Put differently, “Convex with S3” names only one edge of the system. The database remains the durability center, the backend remains the realtime execution engine, and the operator remains responsible for the failure modes between them.</p></div>
+          <div class="compact-panel"><h3>Five required object-store buckets</h3><ul class="dense-list"><li>Snapshot exports</li><li>Snapshot imports</li><li>Deployed modules</li><li>User files and attachments</li><li>Search indexes</li></ul></div>
+        </section>
+        <section class="dense-section"><div class="section-head"><h2>Cost curve</h2><p>Monthly modeled cost. Labor uses an explicit $12,000 loaded engineer-month.</p></div>${lineChartMarkup()}<p class="model-note">Cloud and self-host infrastructure approach each other near 1,000 agents in this scenario. The operations allocation prevents that from becoming TCO parity.</p></section>
+        <section class="dense-section"><div class="section-head"><h2>Illustrative self-host TCO</h2><p>Public infrastructure bundles plus an explicit $12,000/month loaded platform-engineer assumption.</p></div>${selfHostTable()}<p class="model-note">Two backend instances are budgeted for resilience, but this is not a claim that self-hosted Convex supports active-active clustering. Topology and failover must be validated.</p></section>
+        <section class="dense-section"><h2>What the operations line contains</h2>${operationsNarrative()}</section>
+        <section class="dense-section dense-grid"><div>${diagramMarkup()}</div><div><h2>Risks that move the decision</h2><ul class="dense-list"><li>Starter S16 has exactly 1,000 sessions, leaving no headroom at the largest target.</li><li>Professional has no contractual SLA; Business begins at $2,500/month.</li><li>Cloud regions are Virginia and Ireland, so Indonesian latency needs measurement.</li><li>Self-host supports free-tier features and is not assigned a published S256-equivalent machine.</li><li>Export/import fallback during upgrades can require downtime.</li><li>Realtime subscription invalidation rate dominates Cloud call charges.</li></ul></div></section>
+        <section class="dense-section"><h2>Regional latency is a separate gate</h2>${latencyNarrative()}</section>
+        <section class="dense-section"><h2>Primary sources</h2>${sourceList()}</section>
+      </article>`;
+    }
+
+    function variantB() {
+      return `<article class="page dense-doc">
+        <section class="hero"><p class="kicker">Visual cost story / USD per month</p><h1>What changes with 30, 100, 300, and 1,000 agents</h1><p class="lede">A chart-led explanation of the cost curve, with two compact tables retained for exact values.</p>${summaryStrip()}</section>
+        <section class="dense-section ledger-lead"><div><div class="section-head"><h2>Cloud Professional calculation</h2><p>Base plus metered overage.</p></div>${cloudCostTable()}</div><div class="scale-stack"><div class="scale-row"><strong>30</strong><span>Cloud saves vs infra</span><b>$128/mo</b></div><div class="scale-row"><strong>100</strong><span>Cloud saves vs infra</span><b>$242/mo</b></div><div class="scale-row"><strong>300</strong><span>Cloud saves vs infra</span><b>$346/mo</b></div><div class="scale-row"><strong>1,000</strong><span>Infra nearly equal</span><b>labor decides</b></div></div></section>
+        <section class="dense-section"><div class="section-head"><h2>Three curves, three meanings</h2><p>Exact values appear above and below; the graph exposes their relationship.</p></div>${lineChartMarkup()}</section>
+        <section class="dense-section"><h2>The bend in the cloud line</h2><div class="text-columns">${economicsNarrative()}</div><p class="pull-quote">The crossover is not a seat threshold. It is a workload-behavior threshold controlled by subscription fanout, file access, and action compute.</p></section>
+        <section class="dense-section"><div class="section-head"><h2>Self-hosted infrastructure and labor</h2><p>R2 object storage is a small line item; database, compute, and operations dominate.</p></div>${selfHostTable()}</section>
+        <section class="dense-section"><h2>Why the self-host line rises sooner</h2>${operationsNarrative()}</section>
+        <section class="dense-section dense-grid three"><div class="compact-panel"><h3>30-100 agents</h3><p>Professional costs less than even modeled infrastructure and includes managed backups, upgrades, logs, and exception reporting. The included usage absorbs much of the early workload.</p></div><div class="compact-panel"><h3>300 agents</h3><p>Cloud remains cheaper in the base case. Business only makes sense when SLA, SSO, or dedicated options have enough risk value to justify its $2,500 floor.</p></div><div class="compact-panel"><h3>1,000 agents</h3><p>Cloud usage and self-host infrastructure converge. The result is fragile: subscription rate can push cloud upward, while operational rigor can push self-host TCO much higher.</p></div></section>
+        <section class="dense-section"><h2>Before accepting the graph</h2><div class="numbered-analysis"><div class="analysis-item"><h3>Measure invalidations</h3><p>Count actual subscription reruns during a conversation burst, not merely websocket connections.</p></div><div class="analysis-item"><h3>Measure attachment paths</h3><p>Media-heavy WhatsApp traffic changes retained storage, file access, and egress.</p></div><div class="analysis-item"><h3>Price reliability</h3><p>Decide whether Professional's managed platform without a contractual SLA is enough, or Business is required.</p></div><div class="analysis-item"><h3>Price regional latency</h3><p>Test from agent locations before valuing a Jakarta or Singapore deployment.</p></div></div></section>
+        <section class="dense-section"><h2>Primary sources</h2>${sourceList()}</section>
+      </article>`;
+    }
+
+    function variantC() {
+      return `<article class="page dense-doc">
+        <section class="hero"><p class="kicker">Architecture narrative / system boundaries</p><h1>Can self-hosted Convex carry the CRM workload?</h1><p class="lede">There is no published self-host hardware equivalent to S16 or S256. Architecture and recovery evidence come before cost.</p>${summaryStrip()}</section>
+        <section class="dense-section dense-grid"><div>${diagramMarkup()}</div><div><div class="verdict"><h3>Architecture correction</h3><p>S3 is not Convex's primary database. Use PostgreSQL or MySQL for production state and five S3-compatible buckets for object-like data.</p></div><h3 style="margin-top: 1rem">Operator-owned surfaces</h3><ul class="dense-list"><li>TLS, routing, WAF, secrets, IAM, and network policy</li><li>Database HA, point-in-time recovery, restore testing</li><li>Logs, metrics, tracing, alerting, retention, incident response</li><li>Capacity tuning, load testing, version migration, rollback</li><li>Bucket encryption, replication, lifecycle, malware handling</li></ul></div></section>
+        <section class="dense-section"><h2>Reading the system from left to right</h2>${operationsNarrative()}</section>
+        <section class="dense-section"><div class="section-head"><h2>Published cloud capacity</h2><p>Sessions are connected clients, not simultaneously executing queries.</p></div>${capacityTable()}<p class="model-note">At 1,000 active agents, S16 has zero session headroom. S256 leaves room for multiple tabs, supervisors, customer sessions, and reconnect overlap.</p></section>
+        <section class="dense-section"><h2>Availability is a chain, not a checkbox</h2><div class="text-columns"><p>Two backend containers, an HA PostgreSQL plan, and durable buckets do not automatically create a service SLA. The ingress must detect failure, clients must reconnect cleanly, database promotion must preserve consistency, and the application must recover subscriptions without presenting stale queue ownership.</p><p>Backups answer a different question from failover. Point-in-time recovery protects transactional state. Convex exports make application-level recovery portable. Bucket versioning protects object history. Each mechanism needs a defined retention window and a restore drill against a dataset large enough to expose the real recovery time.</p><p>Upgrades deserve the same treatment. Convex recommends an export before an in-place self-host upgrade. If a migration fails, the export/import fallback may require stopping traffic for a final consistent snapshot. A CRM that promises continuous channel intake needs a plan for buffering webhooks during that window.</p><p>Observability must connect infrastructure symptoms to agent experience. CPU and database connections are insufficient. Track queue update delay, webhook age, failed assignments, reconnect duration, subscription reruns, and the difference between event receipt and visibility in an agent inbox.</p></div></section>
+        <section class="dense-section dense-grid"><div><h2>Load-test checklist</h2><ul class="dense-list"><li>Inbox, assignment, presence, contacts, SLA timers, attachments, and search</li><li>30, 100, 300, and 1,000 connected agents with burst traffic</li><li>p50, p95, p99 latency, queued executions, reconnect time, failures</li><li>Calls, subscription reruns, database I/O, action compute, egress</li><li>Tests from Indonesia against Virginia, Ireland, Jakarta, or Singapore</li></ul></div><div><h2>Failure drills for self-hosting</h2><ul class="dense-list"><li>Backend loss and database failover</li><li>Bucket unavailability and credential rotation</li><li>Point-in-time database restore and Convex import</li><li>Version upgrade with in-place failure fallback</li><li>RPO/RTO verification under a production-sized dataset</li></ul></div></section>
+        <section class="dense-section"><h2>Regional placement</h2>${latencyNarrative()}</section>
+        <section class="dense-section"><div class="section-head"><h2>Cost checkpoint</h2><p>Useful only after the technical gates pass.</p></div>${cloudCostTable()}</section>
+        <section class="dense-section"><h2>Primary sources</h2>${sourceList()}</section>
+      </article>`;
+    }
+
+    function variantD() {
+      const pricingCode = `const MONTHLY_SECONDS = 8 * 60 * 60 * 22;
+
+function cloudProfessional(agents, updatesPerSecond = 1) {
+  const calls = agents * MONTHLY_SECONDS * updatesPerSecond;
+  const includedCalls = 25_000_000;
+  const callOverage = Math.max(0, calls - includedCalls) / 1_000_000 * 2;
+  return { calls, developerSeats: 5 * 25, callOverage };
+}`;
+      const queryCode = `export const inbox = query({
+  args: { agentId: v.id("agents"), queueId: v.id("queues") },
+  handler: async (ctx, args) => {
+    return ctx.db.query("conversations")
+      .withIndex("by_queue_assignee_updated", q =>
+        q.eq("queueId", args.queueId).eq("assigneeId", args.agentId))
+      .order("desc")
+      .take(50);
+  },
+});`;
+      const storageCode = `POSTGRES_URL=postgresql://convex:***@db.internal/convex
+AWS_REGION=ap-southeast-1
+S3_ENDPOINT_URL=https://<account>.r2.cloudflarestorage.com
+S3_STORAGE_EXPORTS_BUCKET=crm-convex-exports
+S3_STORAGE_SNAPSHOT_IMPORTS_BUCKET=crm-convex-imports
+S3_STORAGE_MODULES_BUCKET=crm-convex-modules
+S3_STORAGE_FILES_BUCKET=crm-convex-files
+S3_STORAGE_SEARCH_BUCKET=crm-convex-search`;
+      return `<article class="page dense-doc code-doc">
+        <section class="hero"><p class="kicker">Code analysis / model and implementation</p><h1>The decision expressed as executable assumptions</h1><p class="lede">A code-forward response format for technical answers that still need narrative, diagrams, and exact cost evidence.</p>${summaryStrip()}</section>
+        <section class="dense-section dense-grid"><div><h2>Start with a falsifiable model</h2><p>The monthly estimate should be easy to rerun when telemetry replaces assumptions. This sketch exposes the active-shift calendar, subscription update rate, included calls, and developer-seat cost. It deliberately avoids hiding arithmetic in prose.</p><p>Function-call cost alone is incomplete, but it is the best first sensitivity variable because realtime updates count as calls and can multiply with broad dependencies.</p></div>${codeBlock("Cloud call model", "Maple Mono", pricingCode, "typescript")}</section>
+        <section class="dense-section"><h2>Subscription shape is an economic control</h2><div class="dense-grid"><div class="prose-flow"><p>A query subscribed by every agent should depend on the smallest useful indexed slice. A global “all open conversations” query may be convenient, but any update within its dependency set can cause work for many clients. Queue and assignee boundaries reduce both the payload and the fanout surface.</p><p>The example is illustrative, not a universal schema. The real test is to record which mutations invalidate which subscriptions during a realistic message burst.</p></div>${codeBlock("Narrow inbox subscription", "Illustrative Convex query", queryCode, "typescript")}</div></section>
+        <section class="dense-section"><div class="section-head"><h2>Cost output from the model</h2><p>Exact values retained in one table.</p></div>${cloudCostTable()}</section>
+        <section class="dense-section"><h2>Self-host configuration reveals the actual system</h2><div class="dense-grid">${codeBlock("Database and object storage", "Five buckets plus SQL", storageCode, "bash")}<div class="prose-flow"><p>The environment variables make the architecture correction concrete: PostgreSQL stores the primary database while S3-compatible storage holds object-like concerns. An endpoint override enables R2 or another compatible service.</p><p>Credentials, bucket policies, encryption, versioning, replication, and retention remain operator decisions. This is configuration, not a complete production security posture.</p><p>The backend and database should be placed in the same region. Adding a distant SQL service to a nearby Convex container defeats the latency benefit and can degrade every query path.</p></div></div></section>
+        <section class="dense-section">${diagramMarkup()}</section>
+        <section class="dense-section"><h2>What code cannot prove</h2>${operationsNarrative()}</section>
+        <section class="dense-section"><div class="section-head"><h2>Modeled cost curve</h2><p>Use measured inputs before committing.</p></div>${lineChartMarkup()}</section>
+        <section class="dense-section"><h2>Validation harness requirements</h2><div class="numbered-analysis"><div class="analysis-item"><h3>Representative state</h3><p>Generate contacts, queues, assignments, conversations, messages, SLA deadlines, presence, and attachments with realistic indexes.</p></div><div class="analysis-item"><h3>Representative clients</h3><p>Hold open the same subscriptions as the real CRM, including multiple tabs and supervisor views.</p></div><div class="analysis-item"><h3>Burst traffic</h3><p>Replay channel webhooks, agent mutations, reconnect storms, and scheduled jobs together rather than in isolated benchmarks.</p></div><div class="analysis-item"><h3>Cost telemetry</h3><p>Capture calls, database I/O, action compute, search query-GB, egress, and object operations beside latency percentiles.</p></div></div></section>
+        <section class="dense-section"><h2>Primary sources</h2>${sourceList()}</section>
+      </article>`;
+    }
+
+    function variantE() {
+      return `<article class="page dense-doc narrative-doc">
+        <section class="hero story"><p class="kicker">Long-form brief / prose first</p><h1>The cheaper invoice is not necessarily the cheaper platform</h1><p class="lede">A narrative answer for decisions where context, uncertainty, and operational consequences matter more than a matrix.</p>${summaryStrip()}</section>
+        <div class="story">
+          <section class="dense-section"><h2>The decision in plain language</h2><p>For an omnichannel CRM serving between thirty and three hundred concurrently active support agents, Convex Cloud Professional is the sensible default. It is cheaper in the modeled workload, has substantial session headroom, and removes the need to operate the realtime backend, its upgrades, daily backup machinery, log pipeline, and exception reporting. At one thousand agents, the cloud usage estimate approaches the infrastructure subtotal of a serious self-hosted deployment, but self-hosting still carries a large operational cost unless an existing platform team can absorb it.</p><p class="pull-quote">Self-hosting becomes compelling when control solves a real constraint: regional latency, data residency, private networking, or an established operations capability.</p><p>The conclusion is not based on the idea that managed services are always better. It comes from separating three questions that are easily collapsed: what Convex charges, what infrastructure costs, and what reliable operation requires. Object storage is inexpensive. A durable, observable, recoverable realtime CRM is not.</p></section>
+          <section class="dense-section"><h2>What “self-hosted with S3” really means</h2><aside class="aside-note"><strong>Architecture note.</strong> Convex uses five S3-compatible buckets for exports, imports, modules, user files, and search indexes. The primary database is separate.</aside><p>The phrase suggests that S3 might replace the managed Convex database. It does not. The self-hosted backend defaults to SQLite and can point to PostgreSQL or MySQL. Convex's own guidance indicates that a managed SQL database is preferable when production uptime matters. S3-compatible storage handles files and platform artifacts around that database.</p><p>This distinction changes the economics. A credible design must pay for backend compute and an HA database before it pays for object storage. It must keep the backend and database near each other because SQL latency affects query performance. It must also define recovery across two different durability systems: point-in-time database recovery for transactional state, and bucket retention or replication for attachments, modules, search indexes, and exported snapshots.</p><p>It changes the operational story as well. Database credentials, bucket credentials, routing, TLS, monitoring, incident response, version upgrades, and restore testing become part of the product's responsibilities. None of these are reasons to reject self-hosting. They are the work that has to be priced honestly.</p></section>
+          <section class="dense-section"><h2>Why agent count does not determine the cloud bill</h2>${economicsNarrative()}<div style="margin-top: 1rem">${lineChartMarkup()}</div></section>
+          <section class="dense-section"><h2>Reading the curve</h2><p>At thirty agents, Professional is modeled at about $133 per month while self-host infrastructure is about $261 before labor. At one hundred agents, the values are about $247 and $489. At three hundred they are about $633 and $979. The included resources in Professional keep the cloud curve low while self-hosting pays for a minimum credible platform from the beginning.</p><p>At one thousand agents, the two infrastructure figures nearly meet: approximately $2,078 for Professional and $2,141 for the self-host envelope. This is the point where a shallow comparison could declare a tie. Adding a half-time platform allocation moves self-host TCO to roughly $8,141. Removing labor entirely makes self-hosting appear competitive, but that is only valid if the organization truly has spare capacity and accepts the resulting ownership.</p><p>The curve is also highly sensitive to realtime behavior. Reducing aggregate subscription updates from one per active agent-second to one quarter cuts the modeled 1,000-agent call charge to roughly $267. Raising it to four pushes that charge above $5,000. This is why the final decision should follow a measured prototype rather than a seat-based spreadsheet.</p></section>
+          <section class="dense-section"><h2>The scale question</h2><p>Professional runs on the published S256 class with capacity for 10,000 concurrent sessions, 256 concurrent queries, 256 concurrent mutations, and 512 Convex or HTTP actions. One thousand active human agents are therefore within the session limit with room for supervisors, multiple tabs, and some customer-facing sessions. Session capacity alone is not a performance guarantee, because it does not describe how many functions run at the same instant or how expensive those functions are.</p><p>Starter's S16 class allows exactly 1,000 sessions. That is not usable headroom for a target of one thousand active agents. Reconnect overlap, supervisors, integrations, customer chat, and multiple tabs can cross the boundary before the organization reaches its headline staffing number. Starter can still serve smaller prototypes, but it should not anchor the production design for the largest scenario.</p><p>Self-hosting has no published machine-to-S256 equivalence. Convex provides a load generator and tuning controls, which means the capacity claim belongs to the operator. The production gate is a representative load test using the actual query graph, mutation patterns, subscriptions, attachments, search indexes, and channel bursts.</p></section>
+          <section class="dense-section">${diagramMarkup()}</section>
+          <section class="dense-section"><h2>The regional question</h2>${latencyNarrative()}</section>
+          <section class="dense-section"><h2>The reliability question</h2>${operationsNarrative()}<p>The managed product and self-hosted product also offer different contractual positions. Professional includes production-oriented features but its public plan matrix does not promise a contractual SLA. Business begins at $2,500 per month and adds service SLAs, SAML/SSO, and access to dedicated deployment classes. At one thousand agents, Business may be evaluated for risk reasons even if Professional remains technically within published capacity.</p></section>
+          <section class="dense-section"><h2>A measured path to the decision</h2><p>Build one synthetic workload that mirrors the intended CRM rather than a generic CRUD benchmark. Give each virtual agent the subscriptions used by the real inbox. Replay inbound messages and status callbacks from every planned channel. Mix assignment changes, presence, notes, contact merges, search, SLA timers, and attachment access. Test steady shifts, campaign bursts, provider retries, and reconnect storms.</p><p>Run the same workload against Professional from Indonesia and against a self-hosted candidate with its backend and database co-located in Jakarta or Singapore. Record user-visible latency, subscription reruns, failed or queued functions, reconnect behavior, database I/O, action compute, egress, and object operations. Then repeat self-host tests while failing the backend, promoting the database, denying bucket access, rotating credentials, restoring from backup, and upgrading versions.</p><p class="pull-quote">Choose Cloud Professional unless the measurements reveal a regional, contractual, or control requirement that is valuable enough to own the platform.</p></section>
+          <section class="dense-section"><h2>Primary sources</h2>${sourceList()}</section>
+        </div>
+      </article>`;
+    }
+
+    function escapeHtml(value) {
+      return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+    }
+
+    async function renderDiagram() {
+      const canvas = document.querySelector(".diagram-canvas");
+      if (!canvas) return;
+
+      const theme = resolvedTheme();
+      mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: "strict",
+        theme: "base",
+        fontFamily: "ui-sans-serif, system-ui, sans-serif",
+        themeVariables: theme === "dark" ? {
+          background: "#282327",
+          primaryColor: "#442333",
+          primaryTextColor: "#eee9ec",
+          primaryBorderColor: "#e66a9e",
+          lineColor: "#aaa1a7",
+          secondaryColor: "#211d20",
+          tertiaryColor: "#171416"
+        } : {
+          background: "#fcfafb",
+          primaryColor: "#f8dbe8",
+          primaryTextColor: "#272326",
+          primaryBorderColor: "#d32672",
+          lineColor: "#706970",
+          secondaryColor: "#f1eff1",
+          tertiaryColor: "#f8f7f8"
+        },
+        flowchart: { curve: "basis", htmlLabels: false }
+      });
+
+      try {
+        const id = `preview-diagram-${Date.now()}`;
+        const { svg } = await mermaid.render(id, diagramSource);
+        canvas.innerHTML = svg;
+        setupPanZoom(canvas);
+      } catch (error) {
+        canvas.innerHTML = `<div class="diagram-error">Mermaid could not render this diagram.<br>${escapeHtml(error.message || "Unknown error")}</div>`;
+      }
+    }
+
+    function setupPanZoom(canvas) {
+      const svg = canvas.querySelector("svg");
+      const shell = canvas.closest(".diagram-shell");
+      const original = svg.viewBox.baseVal;
+      const base = { x: original.x, y: original.y, width: original.width, height: original.height };
+      let view = { ...base };
+      let drag = null;
+
+      function apply() {
+        svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.width} ${view.height}`);
+      }
+
+      function zoom(factor, clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        const px = clientX == null ? 0.5 : (clientX - rect.left) / rect.width;
+        const py = clientY == null ? 0.5 : (clientY - rect.top) / rect.height;
+        const nextWidth = Math.min(base.width * 4, Math.max(base.width * 0.18, view.width * factor));
+        const nextHeight = nextWidth * (view.height / view.width);
+        view.x += (view.width - nextWidth) * px;
+        view.y += (view.height - nextHeight) * py;
+        view.width = nextWidth;
+        view.height = nextHeight;
+        apply();
+      }
+
+      canvas.addEventListener("wheel", (event) => {
+        event.preventDefault();
+        zoom(event.deltaY > 0 ? 1.12 : 0.89, event.clientX, event.clientY);
+      }, { passive: false });
+
+      canvas.addEventListener("pointerdown", (event) => {
+        drag = { x: event.clientX, y: event.clientY, viewX: view.x, viewY: view.y };
+        canvas.setPointerCapture(event.pointerId);
+        canvas.classList.add("dragging");
+      });
+
+      canvas.addEventListener("pointermove", (event) => {
+        if (!drag) return;
+        const rect = canvas.getBoundingClientRect();
+        view.x = drag.viewX - (event.clientX - drag.x) * view.width / rect.width;
+        view.y = drag.viewY - (event.clientY - drag.y) * view.height / rect.height;
+        apply();
+      });
+
+      function stopDrag() {
+        drag = null;
+        canvas.classList.remove("dragging");
+      }
+
+      canvas.addEventListener("pointerup", stopDrag);
+      canvas.addEventListener("pointercancel", stopDrag);
+
+      shell.querySelector("[data-action='in']").addEventListener("click", () => zoom(0.8));
+      shell.querySelector("[data-action='out']").addEventListener("click", () => zoom(1.25));
+      shell.querySelector("[data-action='reset']").addEventListener("click", () => {
+        view = { ...base };
+        apply();
+      });
+      shell.querySelector("[data-action='fullscreen']").addEventListener("click", () => openFullscreen(shell));
+      apply();
+    }
+
+    function openFullscreen(shell) {
+      restoreTarget = shell.previousElementSibling;
+      dialogStage.append(shell);
+      dialog.showModal();
+    }
+
+    function closeFullscreen() {
+      if (restoreTarget && dialogStage.firstElementChild) {
+        restoreTarget.after(dialogStage.firstElementChild);
+      }
+      restoreTarget = null;
+      dialog.close();
+    }
+
+    function setupCopy() {
+      document.querySelectorAll(".copy-code").forEach((button) => {
+        button.addEventListener("click", async () => {
+          try {
+            const code = button.closest(".code-block")?.querySelector("code")?.textContent || codeSample;
+            await navigator.clipboard.writeText(code);
+            button.textContent = "Copied";
+            setTimeout(() => { button.textContent = "Copy"; }, 1400);
+          } catch {
+            button.textContent = "Unavailable";
+          }
+        });
+      });
+    }
+
+    async function render() {
+      if (dialog.open) closeFullscreen();
+      const variant = selectedVariant();
+      document.documentElement.dataset.theme = selectedTheme();
+      document.documentElement.dataset.resolvedTheme = resolvedTheme();
+      document.querySelectorAll("[data-theme]").forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.theme === selectedTheme()));
+      });
+      document.querySelector("#variant-label").textContent = variant.label;
+      const renderers = { a: variantA, b: variantB, c: variantC, d: variantD, e: variantE };
+      app.innerHTML = renderers[variant.key]();
+      setupCopy();
+      await renderDiagram();
+    }
+
+    function cycleVariant(direction) {
+      const current = variants.findIndex((variant) => variant.key === selectedVariant().key);
+      const next = (current + direction + variants.length) % variants.length;
+      setQuery("variant", variants[next].key);
+    }
+
+    document.querySelectorAll("[data-theme]").forEach((button) => {
+      button.addEventListener("click", () => setQuery("theme", button.dataset.theme));
+    });
+    document.querySelector("#previous-variant").addEventListener("click", () => cycleVariant(-1));
+    document.querySelector("#next-variant").addEventListener("click", () => cycleVariant(1));
+    document.querySelector("#dialog-close").addEventListener("click", closeFullscreen);
+    dialog.addEventListener("cancel", (event) => { event.preventDefault(); closeFullscreen(); });
+    media.addEventListener("change", () => { if (selectedTheme() === "system") render(); });
+    window.addEventListener("keydown", (event) => {
+      const active = document.activeElement;
+      const typing = active && (active.matches("input, textarea") || active.isContentEditable);
+      if (typing || dialog.open) return;
+      if (event.key === "ArrowLeft") cycleVariant(-1);
+      if (event.key === "ArrowRight") cycleVariant(1);
+    });
+
+    render();
+  </script>
+</body>
+</html>
