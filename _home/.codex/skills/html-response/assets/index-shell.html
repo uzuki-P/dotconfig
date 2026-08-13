@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en" data-theme="system">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <script>
+    (() => {
+      const themeKey = "html-response-theme";
+      const themes = ["system", "light", "dark"];
+      let theme = "system";
+      try {
+        const stored = localStorage.getItem(themeKey);
+        if (themes.includes(stored)) theme = stored;
+      } catch {
+        // Fall back to the system preference when storage is unavailable.
+      }
+      const dark = theme === "dark" || (theme === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.dataset.resolvedTheme = dark ? "dark" : "light";
+    })();
+  </script>
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <title>Published HTML · HTML preview</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f8f7f8;
+      --surface: #ffffff;
+      --surface-soft: #f1eff1;
+      --ink: #272326;
+      --muted: #706970;
+      --line: #ded9dd;
+      --line-strong: #c7c0c5;
+      --pink: #d32672;
+      --pink-soft: #f8dbe8;
+      --shadow: 0 18px 50px rgb(79 53 68 / 0.12);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-resolved-theme="light"]) {
+        color-scheme: dark;
+        --page: #171416;
+        --surface: #211d20;
+        --surface-soft: #282327;
+        --ink: #eee9ec;
+        --muted: #aaa1a7;
+        --line: #393238;
+        --line-strong: #51464d;
+        --pink: #e66a9e;
+        --pink-soft: #442333;
+        --shadow: 0 20px 60px rgb(0 0 0 / 0.28);
+      }
+    }
+
+    html[data-resolved-theme="dark"] {
+      color-scheme: dark;
+      --page: #171416;
+      --surface: #211d20;
+      --surface-soft: #282327;
+      --ink: #eee9ec;
+      --muted: #aaa1a7;
+      --line: #393238;
+      --line-strong: #51464d;
+      --pink: #e66a9e;
+      --pink-soft: #442333;
+      --shadow: 0 20px 60px rgb(0 0 0 / 0.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    [hidden] { display: none !important; }
+
+    html { background: var(--page); }
+
+    body {
+      min-width: 20rem;
+      min-height: 100dvh;
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      text-rendering: optimizeLegibility;
+    }
+
+    a {
+      color: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    a:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--pink) 65%, transparent);
+      outline-offset: 3px;
+    }
+
+    .page {
+      width: min(calc(100% - 2rem), 76rem);
+      margin-inline: auto;
+      padding: clamp(3.5rem, 8vw, 7rem) 0 6rem;
+    }
+
+    .hero {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 2rem;
+      padding-bottom: clamp(3rem, 7vw, 6rem);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 1rem;
+    }
+
+    .theme-picker {
+      position: relative;
+      width: 2.65rem;
+      height: 2.65rem;
+    }
+
+    .theme-current,
+    .theme-option {
+      border: 1px solid var(--line);
+      background: var(--surface-soft);
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .theme-current {
+      display: grid;
+      width: 100%;
+      height: 100%;
+      place-items: center;
+      padding: 0;
+      border-radius: 9px;
+    }
+
+    .theme-current:hover,
+    .theme-current:focus-visible { color: var(--ink); }
+
+    .theme-menu {
+      position: absolute;
+      top: calc(100% + 0.35rem);
+      right: 0;
+      display: grid;
+      min-width: 8rem;
+      gap: 0.2rem;
+      padding: 0.3rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      box-shadow: 0 8px 24px rgb(50 33 43 / 0.1);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-0.3rem);
+      transition: opacity 120ms ease, transform 120ms ease, visibility 120ms ease;
+      visibility: hidden;
+    }
+
+    .theme-picker:hover .theme-menu,
+    .theme-picker:focus-within .theme-menu {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+      visibility: visible;
+    }
+
+    .theme-option {
+      display: flex;
+      width: 100%;
+      min-height: 2.1rem;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0 0.55rem;
+      border-color: transparent;
+      border-radius: 7px;
+      font-size: 0.72rem;
+      text-align: left;
+    }
+
+    .theme-option:hover,
+    .theme-option:focus-visible { border-color: var(--line); background: var(--surface-soft); color: var(--ink); }
+    .theme-option[aria-pressed="true"] { background: var(--pink-soft); color: var(--pink); }
+
+    .theme-current svg,
+    .theme-option svg {
+      width: 1rem;
+      height: 1rem;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.8;
+    }
+
+    .kicker,
+    .section-heading p,
+    .document-id,
+    .document-dates dt {
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .kicker { margin: 0 0 1.25rem; color: var(--pink); }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      max-width: 12ch;
+      margin-bottom: 1rem;
+      font-size: clamp(3.25rem, 9vw, 7.5rem);
+      font-weight: 650;
+      letter-spacing: -0.07em;
+      line-height: 0.92;
+    }
+
+    .intro {
+      max-width: 46ch;
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 1.5vw, 1.15rem);
+      line-height: 1.7;
+    }
+
+    .stat {
+      min-width: 8rem;
+      padding: 1rem 1.15rem;
+      border: 1px solid var(--line);
+      border-radius: 0.9rem;
+      background: var(--surface-soft);
+    }
+
+    .stat strong,
+    .stat span { display: block; }
+
+    .stat strong { font-size: 2.25rem; letter-spacing: -0.06em; line-height: 1; }
+    .stat span { margin-top: 0.45rem; color: var(--muted); font-size: 0.8rem; }
+
+    .section-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.15rem;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 0.8rem;
+    }
+
+    .section-heading h2 { margin-bottom: 0; font-size: 1.1rem; letter-spacing: -0.02em; }
+    .section-heading p { margin-bottom: 0; }
+
+    .results-count {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .library-toolbar {
+      display: grid;
+      grid-template-columns: minmax(14rem, 1fr) minmax(12rem, 15rem);
+      align-items: end;
+      gap: 0.75rem;
+      margin-bottom: 1.15rem;
+    }
+
+    .control {
+      position: relative;
+      display: grid;
+      gap: 0.4rem;
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-weight: 650;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .control input,
+    .control select {
+      width: 100%;
+      min-height: 2.75rem;
+      border: 1px solid var(--line-strong);
+      border-radius: 0.7rem;
+      background: var(--surface);
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.9rem;
+      font-weight: 400;
+      letter-spacing: normal;
+      text-transform: none;
+    }
+
+    .control input { padding: 0.65rem 0.8rem; }
+    .control select {
+      appearance: none;
+      -webkit-appearance: none;
+      padding: 0.65rem 2.8rem 0.65rem 0.8rem;
+    }
+
+    .control:has(select)::after {
+      position: absolute;
+      right: 1rem;
+      bottom: 1.08rem;
+      width: 0.45rem;
+      height: 0.45rem;
+      border-right: 1.5px solid var(--muted);
+      border-bottom: 1.5px solid var(--muted);
+      content: "";
+      pointer-events: none;
+      transform: rotate(45deg);
+    }
+
+    .control input::placeholder { color: var(--muted); opacity: 0.8; }
+
+    .control input:focus,
+    .control select:focus {
+      border-color: var(--pink);
+      outline: 3px solid color-mix(in srgb, var(--pink) 22%, transparent);
+      outline-offset: 1px;
+    }
+
+    .document-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+      gap: 1.25rem;
+    }
+
+    .document-card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .document-thumbnail {
+      position: relative;
+      aspect-ratio: 16 / 10;
+      overflow: hidden;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface-soft);
+    }
+
+    .document-thumbnail iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      border: 0;
+      background: #fff;
+      pointer-events: none;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .document-thumbnail iframe::-webkit-scrollbar { display: none; }
+
+    .thumbnail-link {
+      position: absolute;
+      inset: 0;
+      display: block;
+      z-index: 1;
+    }
+
+    .thumbnail-actions {
+      position: absolute;
+      right: 0.75rem;
+      bottom: 0.75rem;
+      z-index: 2;
+      display: flex;
+      gap: 0.35rem;
+      opacity: 0;
+      transform: translateY(0.25rem);
+      transition: opacity 160ms ease, transform 160ms ease;
+      pointer-events: none;
+    }
+
+    .document-thumbnail:hover .thumbnail-actions,
+    .document-thumbnail:focus-within .thumbnail-actions {
+      opacity: 0.94;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .thumbnail-action {
+      display: inline-flex;
+      min-height: 2.25rem;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid color-mix(in srgb, var(--surface) 22%, transparent);
+      border-radius: 0.6rem;
+      background: var(--ink);
+      color: var(--surface);
+      font-size: 0.72rem;
+      text-decoration: none;
+      box-shadow: 0 6px 18px rgb(0 0 0 / 0.18);
+    }
+
+    .thumbnail-preview { padding: 0.4rem 0.6rem; }
+    .thumbnail-action:hover,
+    .thumbnail-action:focus-visible { background: var(--pink); color: var(--pink-ink); }
+
+    .thumbnail-download {
+      width: 2.25rem;
+      padding: 0;
+    }
+
+    .document-card__body { padding: 1.1rem 1.15rem 1.2rem; }
+
+    .thumbnail-download svg { width: 1.05rem; height: 1.05rem; fill: currentColor; }
+
+    .document-card h3 {
+      margin-bottom: 0.55rem;
+      font-size: 1.08rem;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    .document-card h3 a { text-decoration: none; }
+    .document-card h3 a:hover { color: var(--pink); }
+
+    .document-id {
+      overflow: hidden;
+      margin-bottom: 1.15rem;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      letter-spacing: 0.03em;
+      text-transform: none;
+    }
+
+    .document-dates {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin: 0;
+      padding-top: 0.85rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .document-dates div { min-width: 0; }
+    .document-dates dt { margin-bottom: 0.25rem; font-size: 0.65rem; letter-spacing: 0.05em; }
+    .document-dates dd { margin: 0; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      padding: 3rem 1.5rem;
+      border: 1px dashed var(--line-strong);
+      border-radius: 1rem;
+      background: var(--surface-soft);
+      text-align: center;
+    }
+
+    .empty-state h3 { margin-bottom: 0.5rem; }
+    .empty-state p { margin-bottom: 0; color: var(--muted); }
+
+    @media (max-width: 42rem) {
+      .hero { display: block; }
+      .hero-actions { align-items: flex-start; margin-top: 1.5rem; }
+      .stat { width: fit-content; margin-top: 1.5rem; }
+      .section-heading { display: block; }
+      .section-heading p { margin-top: 0.35rem; }
+      .library-toolbar { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div>
+        <p class="kicker">Private HTML preview</p>
+        <h1>Published HTML</h1>
+        <p class="intro">A visual index of every document published to this private preview service, newest first.</p>
+      </div>
+      <div class="hero-actions">
+        <div class="theme-picker" role="group" aria-label="Color theme">
+          <button class="theme-current" type="button" aria-haspopup="menu" aria-label="Choose a color theme">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"></rect><path d="M8 21h8M12 17v4"></path></svg>
+          </button>
+          <div class="theme-menu" role="menu">
+            <button class="theme-option" type="button" role="menuitemradio" data-theme-choice="system" title="System theme" aria-label="Use system theme">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"></rect><path d="M8 21h8M12 17v4"></path></svg>
+              <span>System</span>
+            </button>
+            <button class="theme-option" type="button" role="menuitemradio" data-theme-choice="light" title="Light theme" aria-label="Use light theme">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l-1.42-1.42M17.66 6.34l1.41-1.41"></path></svg>
+              <span>Light</span>
+            </button>
+            <button class="theme-option" type="button" role="menuitemradio" data-theme-choice="dark" title="Dark theme" aria-label="Use dark theme">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.4 15.5A9 9 0 0 1 8.5 3.6 9 9 0 1 0 20.4 15.5Z"></path></svg>
+              <span>Dark</span>
+            </button>
+          </div>
+        </div>
+        <div class="stat" aria-label="Published document count">
+          <strong>{{DOCUMENT_COUNT}}</strong>
+          <span>published</span>
+        </div>
+      </div>
+    </header>
+
+    <section aria-labelledby="library-title">
+      <div class="section-heading">
+        <h2 id="library-title">Document library</h2>
+        <p id="document-results" class="results-count" aria-live="polite">{{DOCUMENT_COUNT}} documents</p>
+      </div>
+      <div class="library-toolbar" role="search" aria-label="Filter and sort documents">
+        <label class="control" for="document-search">
+          Search
+          <input id="document-search" type="search" placeholder="Title or document ID" autocomplete="off" spellcheck="false" aria-controls="document-grid">
+        </label>
+        <label class="control" for="document-sort">
+          Sort by
+          <select id="document-sort" aria-controls="document-grid">
+            <option value="created-desc" selected>Newest created</option>
+            <option value="created-asc">Oldest created</option>
+            <option value="updated-desc">Recently updated</option>
+            <option value="updated-asc">Least recently updated</option>
+            <option value="title-asc">Title A–Z</option>
+            <option value="title-desc">Title Z–A</option>
+          </select>
+        </label>
+      </div>
+      <div class="document-grid" id="document-grid">
+{{DOCUMENT_CARDS}}
+        <div class="empty-state" id="no-results" hidden>
+          <h3>No matching documents</h3>
+          <p>Try a different title or document ID.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script>
+    (() => {
+      const themeKey = "html-response-theme";
+      const themes = ["system", "light", "dark"];
+      const media = matchMedia("(prefers-color-scheme: dark)");
+      const buttons = [...document.querySelectorAll("[data-theme-choice]")];
+      const current = document.querySelector(".theme-current");
+      const icons = {
+        system: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"></rect><path d="M8 21h8M12 17v4"></path></svg>',
+        light: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l-1.42 1.42M17.66 6.34l1.41-1.41"></path></svg>',
+        dark: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.4 15.5A9 9 0 0 1 8.5 3.6 9 9 0 1 0 20.4 15.5Z"></path></svg>',
+      };
+
+      function storedTheme() {
+        try {
+          const value = localStorage.getItem(themeKey);
+          return themes.includes(value) ? value : "system";
+        } catch {
+          return "system";
+        }
+      }
+
+      function applyTheme(theme, persist = true) {
+        const selected = themes.includes(theme) ? theme : "system";
+        const resolved = selected === "system" ? (media.matches ? "dark" : "light") : selected;
+        document.documentElement.dataset.theme = selected;
+        document.documentElement.dataset.resolvedTheme = resolved;
+        if (current) {
+          current.innerHTML = icons[selected];
+          current.title = `${selected[0].toUpperCase()}${selected.slice(1)} theme`;
+          current.setAttribute("aria-label", `Color theme: ${selected}. Choose a theme`);
+        }
+        buttons.forEach((button) => {
+          button.setAttribute("aria-pressed", String(button.dataset.themeChoice === selected));
+        });
+        if (persist) {
+          try {
+            localStorage.setItem(themeKey, selected);
+          } catch {
+            // The visual state still works when storage is unavailable.
+          }
+        }
+      }
+
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => applyTheme(button.dataset.themeChoice));
+      });
+      applyTheme(storedTheme(), false);
+      const followSystem = () => {
+        if (document.documentElement.dataset.theme === "system") applyTheme("system", false);
+      };
+      if (media.addEventListener) media.addEventListener("change", followSystem);
+      else media.addListener(followSystem);
+    })();
+  </script>
+  <script>
+    (() => {
+      const grid = document.querySelector("#document-grid");
+      const search = document.querySelector("#document-search");
+      const sort = document.querySelector("#document-sort");
+      const resultCount = document.querySelector("#document-results");
+      const noResults = document.querySelector("#no-results");
+      if (!grid || !search || !sort || !resultCount || !noResults) return;
+
+      const cards = [...grid.querySelectorAll(".document-card")];
+      const total = cards.length;
+      const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+
+      const countLabel = (count) => `${count} document${count === 1 ? "" : "s"}`;
+      const titleCompare = (left, right) => collator.compare(
+        left.dataset.title || "",
+        right.dataset.title || "",
+      );
+      const createdCompare = (left, right) => Number(left.dataset.created) - Number(right.dataset.created);
+      const updatedCompare = (left, right) => Number(left.dataset.updated) - Number(right.dataset.updated);
+
+      const sorters = {
+        "created-desc": (left, right) => createdCompare(right, left) || titleCompare(left, right),
+        "created-asc": (left, right) => createdCompare(left, right) || titleCompare(left, right),
+        "updated-desc": (left, right) => updatedCompare(right, left) || titleCompare(left, right),
+        "updated-asc": (left, right) => updatedCompare(left, right) || titleCompare(left, right),
+        "title-asc": (left, right) => titleCompare(left, right) || createdCompare(right, left),
+        "title-desc": (left, right) => titleCompare(right, left) || createdCompare(right, left),
+      };
+
+      function applyFiltersAndSort() {
+        const query = search.value.trim().toLocaleLowerCase();
+        const visibleCards = cards.filter((card) => {
+          const matches = !query || (card.dataset.search || "").toLocaleLowerCase().includes(query);
+          card.hidden = !matches;
+          return matches;
+        });
+        const sorter = sorters[sort.value] || sorters["created-desc"];
+        [...cards].sort(sorter).forEach((card) => grid.append(card));
+
+        noResults.hidden = total === 0 || visibleCards.length > 0;
+        resultCount.textContent = query
+          ? `${visibleCards.length} of ${countLabel(total)}`
+          : countLabel(total);
+      }
+
+      search.addEventListener("input", applyFiltersAndSort);
+      sort.addEventListener("change", applyFiltersAndSort);
+      applyFiltersAndSort();
+    })();
+  </script>
+</body>
+</html>

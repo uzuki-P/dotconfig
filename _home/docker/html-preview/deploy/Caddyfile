@@ -16,8 +16,5 @@
 	@health path /healthz
 	respond @health "ok" 200
 
-	@root path /
-	respond @root "HTML preview service" 200
-
 	file_server
 }

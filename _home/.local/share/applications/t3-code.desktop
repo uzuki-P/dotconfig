@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=T3 Code (Nightly)
+Comment=T3 Code desktop build
+#Exec="/home/uzuki_p/apps/T3-Code.AppImage" %U
+Exec=/home/uzuki_p/script/t3code-w-env.sh
+Terminal=false
+Type=Application
+Icon=t3code
+Categories=Development;
+StartupWMClass=t3code
+MimeType=x-scheme-handler/t3code;

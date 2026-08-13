@@ -20,7 +20,7 @@ Prefer prose when a visual does not materially reduce reading effort. Mix forms 
 
 - Use a dense, minimalist document rather than an application shell.
 - Omit navigation headers and sidebars.
-- Keep the main canvas broad. Body paragraphs fill their container and use justified alignment supplied by the shared stylesheet.
+- Keep the main canvas broad. Body paragraphs fill their container with natural left/start alignment; reserve narrow metadata for section headers.
 - Use pink as the primary accent. Let semantic syntax colors appear inside code.
 - Preserve comfortable rhythm across a long answer. Density means low framing overhead, not cramped text.
 - Write enough context for the document to stand alone after the chat is gone.
@@ -39,6 +39,22 @@ Use `<section class="section">` as the main unit:
     <p>Compact context or units</p>
   </div>
   <p>Substantive explanation...</p>
+</section>
+```
+
+The section component supplies a consistent gap between every direct child. Keep related content as direct section children (for example, a callout followed by a table) instead of compensating with one-off margins.
+
+For a short section label or secondary context, keep it inside the header. The shared component controls its spacing and alignment:
+
+```html
+<section class="section">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Decision</p>
+      <h2>Gate the subscription first</h2>
+    </div>
+    <p class="section-meta">FE impact analysis</p>
+  </div>
 </section>
 ```
 
@@ -61,6 +77,21 @@ Use `.prose` for spaced paragraphs, `.columns` for long parallel prose, and grid
 ```
 
 Keep sequential arguments in normal document flow. A two-column grid is useful for alternatives or text beside code; it is weaker for a single continuous explanation.
+
+For an implementation sequence, use the supported timeline component. Each item is a compact, numbered card; do not compose a sequence from unstyled spans and loose paragraphs.
+
+```html
+<div class="timeline">
+  <div class="timeline-item">
+    <span class="timeline-index">1</span>
+    <div><h3>Align the contract</h3><p>Confirm the data and migration boundary.</p></div>
+  </div>
+</div>
+```
+
+Use only the shared component classes in this guide. If a new visual form is needed, add it to the shared stylesheet and document it here before generating documents with it.
+
+Preserve rhythm: each visual component needs clear space before the next one. Prefer the section’s built-in flow gap and a component’s internal spacing over ad-hoc margin overrides.
 
 ## Decisions and supporting facts
 
@@ -105,7 +136,7 @@ Use tables selectively. One good comparison table plus explanatory sections is u
 
 ## Code
 
-Set the real language in the class. The runtime adds highlighting and a copy button.
+Use inline `<code>` only for short identifiers, routes, and values; the shared stylesheet renders it as a GitHub/T3Code-style subtle rounded token with no heavy border. Set the real language in a fenced block’s class. The runtime adds highlighting and a copy button.
 
 ```html
 <div>

@@ -25,6 +25,12 @@ function resolvedTheme(theme) {
 function applyTheme(theme, persist = true) {
   document.documentElement.dataset.theme = theme;
   document.documentElement.dataset.resolvedTheme = resolvedTheme(theme);
+  const current = document.querySelector(".theme-current");
+  if (current) {
+    current.innerHTML = themeIcons[theme];
+    current.title = `${theme[0].toUpperCase()}${theme.slice(1)} theme`;
+    current.setAttribute("aria-label", `Color theme: ${theme}. Choose a theme`);
+  }
   document.querySelectorAll("[data-theme-choice]").forEach((button) => {
     button.setAttribute("aria-pressed", String(button.dataset.themeChoice === theme));
   });
@@ -40,20 +46,33 @@ function applyTheme(theme, persist = true) {
 function setupThemePicker() {
   const picker = document.createElement("div");
   picker.className = "theme-picker";
+  picker.setAttribute("role", "group");
   picker.setAttribute("aria-label", "Color theme");
+  const current = document.createElement("button");
+  current.type = "button";
+  current.className = "theme-current";
+  current.setAttribute("aria-haspopup", "menu");
+  current.setAttribute("aria-label", "Choose a color theme");
+  picker.append(current);
+  const menu = document.createElement("div");
+  menu.className = "theme-menu";
+  menu.setAttribute("role", "menu");
   for (const theme of ["system", "light", "dark"]) {
     const button = document.createElement("button");
     button.type = "button";
+    button.className = "theme-option";
+    button.setAttribute("role", "menuitemradio");
     button.dataset.themeChoice = theme;
     button.title = `${theme[0].toUpperCase()}${theme.slice(1)} theme`;
     button.setAttribute("aria-label", `Use ${theme} theme`);
-    button.innerHTML = themeIcons[theme];
+    button.innerHTML = `${themeIcons[theme]}<span>${theme[0].toUpperCase()}${theme.slice(1)}</span>`;
     button.addEventListener("click", async () => {
       applyTheme(theme);
       if (mermaidApi) await renderDiagrams();
     });
-    picker.append(button);
+    menu.append(button);
   }
+  picker.append(menu);
   document.body.append(picker);
   applyTheme(storedTheme(), false);
   media.addEventListener("change", async () => {
@@ -61,6 +80,16 @@ function setupThemePicker() {
     applyTheme("system", false);
     if (mermaidApi) await renderDiagrams();
   });
+}
+
+function setupHomeButton() {
+  const link = document.createElement("a");
+  link.className = "home-button";
+  link.href = "/";
+  link.title = "HTML preview home";
+  link.setAttribute("aria-label", "HTML preview home");
+  link.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.4 10.7 12 3.4l8.6 7.3v8.1a1.8 1.8 0 0 1-1.8 1.8H5.2a1.8 1.8 0 0 1-1.8-1.8v-8.1Zm2 1v6.9h4.2v-4.2h4.8v4.2h4.2v-6.9L12 6 5.4 11.7Z"></path></svg>';
+  document.body.append(link);
 }
 
 function setupCodeBlocks(highlighter) {
@@ -98,6 +127,87 @@ function setupCodeBlocks(highlighter) {
     });
     block.append(button);
   });
+}
+
+function standaloneStylesheet(source) {
+  // The shared font is the only preview stylesheet dependency. Keep the
+  // downloaded document usable when it is opened without network access.
+  return source.replace(/@font-face\s*\{[^{}]*\}\s*/g, "");
+}
+
+function stylesheetSource(link) {
+  if (!link.sheet) throw new Error(`Could not read ${link.href}`);
+  return standaloneStylesheet(
+    [...link.sheet.cssRules].map((rule) => rule.cssText).join("\n\n"),
+  );
+}
+
+function buildStandaloneDocument() {
+  const stylesheets = [...document.querySelectorAll('link[rel~="stylesheet"]')]
+    .map(stylesheetSource);
+  const copy = document.documentElement.cloneNode(true);
+
+  copy.querySelectorAll(
+    'script, link[rel~="stylesheet"], link[rel~="icon"], .home-button, .theme-picker, .download-document, .copy-code, .diagram-tools, dialog',
+  ).forEach((element) => element.remove());
+  copy.querySelectorAll("pre.mermaid[hidden]").forEach((source) => {
+    const renderedDiagram = source.parentElement?.querySelector(":scope > .diagram-shell");
+    if (renderedDiagram) source.remove();
+    else source.removeAttribute("hidden");
+  });
+
+  const head = copy.querySelector("head");
+  if (head && stylesheets.length) {
+    const style = document.createElement("style");
+    style.textContent = stylesheets.join("\n\n");
+    head.append(style);
+  }
+  return `<!doctype html>\n${copy.outerHTML}\n`;
+}
+
+function downloadFilename() {
+  const title = document.title.trim()
+    || document.querySelector("h1")?.textContent?.trim()
+    || "document";
+  const slug = title.toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 80);
+  return `${slug || "document"}.html`;
+}
+
+function setupDownloadButton() {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "download-document";
+  button.title = "Download HTML";
+  button.setAttribute("aria-label", "Download HTML");
+  button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3a1 1 0 0 1 2 0v10.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 0 1 1.4-1.42l3.3 3.3V3Z"></path><path d="M5 19a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1Z"></path></svg>';
+  button.addEventListener("click", () => {
+    button.disabled = true;
+    button.setAttribute("aria-label", "Preparing download");
+    try {
+      const source = buildStandaloneDocument();
+      const blob = new Blob([source], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = downloadFilename();
+      document.body.append(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      button.setAttribute("aria-label", "Downloaded HTML");
+    } catch (error) {
+      console.error("Could not download the HTML document", error);
+      button.setAttribute("aria-label", "Download unavailable");
+    }
+    window.setTimeout(() => {
+      button.disabled = false;
+      button.setAttribute("aria-label", "Download HTML");
+    }, 1600);
+  });
+  document.body.append(button);
 }
 
 function diagramButton(label, title, action) {
@@ -140,6 +250,7 @@ function setupViewport(canvas, openFullscreen) {
   };
 
   canvas.addEventListener("wheel", (event) => {
+    if (!event.ctrlKey) return;
     event.preventDefault();
     zoom(event.deltaY < 0 ? 1.12 : 0.89, event.clientX, event.clientY);
   }, { passive: false });
@@ -181,7 +292,12 @@ function setupViewport(canvas, openFullscreen) {
   if (openFullscreen) {
     tools.append(diagramButton("⛶", "Open fullscreen diagram", openFullscreen));
   }
+  const note = document.createElement("p");
+  note.className = "diagram-note";
+  note.textContent = "Hold Ctrl while scrolling to zoom; drag to pan.";
+  note.setAttribute("aria-label", "Mermaid diagram interaction note");
   shell?.append(tools);
+  shell?.append(note);
   reset();
 }
 
@@ -216,6 +332,7 @@ function openDiagramFullscreen(svgMarkup) {
   stage.append(shell);
   dialog.showModal();
   setupViewport(canvas, null);
+  dialog.querySelector(".dialog-close")?.focus();
 }
 
 function diagramThemeVariables() {
@@ -280,6 +397,7 @@ async function renderDiagrams() {
 }
 
 async function boot() {
+  setupHomeButton();
   setupThemePicker();
   const [highlightResult, mermaidResult] = await Promise.allSettled([
     import("https://cdn.jsdelivr.net/npm/highlight.js@11.12.0/+esm"),
@@ -289,6 +407,7 @@ async function boot() {
   mermaidApi = mermaidResult.status === "fulfilled" ? mermaidResult.value.default : null;
   setupCodeBlocks(highlighter);
   await renderDiagrams();
+  setupDownloadButton();
 }
 
 boot();

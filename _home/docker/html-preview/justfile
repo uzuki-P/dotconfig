@@ -2,7 +2,7 @@
 default:
     @just --list
 
-# Synchronize the skill's shared browser assets into the service root.
+# Synchronize shared browser assets and refresh the document index.
 prepare:
     python3 ../../.codex/skills/html-response/scripts/html_preview.py sync
 
@@ -10,7 +10,7 @@ prepare:
 dev: prepare
     python3 -m http.server 4178 --bind 127.0.0.1 --directory public
 
-# Validate the publisher, assets, Caddyfile, and Quadlet definition.
+# Validate the publisher, index page, assets, Caddyfile, and Quadlet definition.
 validate:
     python3 ../../.codex/skills/html-response/scripts/html_preview.py self-test
     node --check ../../.codex/skills/html-response/assets/document.js
