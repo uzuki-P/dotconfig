@@ -3,7 +3,9 @@
 This directory contains the Caddy reverse proxy deployed on a tailnet node. It
 serves private HTTPS endpoints below `*.<CADDY_TS_BASE_DOMAIN>` (default
 `*.ts.example.com`) and uses Cloudflare DNS-01 validation for the wildcard
-certificate. The bind address and base domain come from `.env` so no real
+certificate. The wildcard listeners bind only to loopback and the configured
+Tailscale address, so the endpoints are not reachable through another host
+interface. The bind address and base domain come from `.env` so no real
 hostnames or IPs are committed.
 
 ## Files

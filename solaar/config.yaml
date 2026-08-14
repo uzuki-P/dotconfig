@@ -10,7 +10,7 @@
     logivoice-hpf-state, report_rate_extended, gesture2-gestures, gesture2-divert, gesture2-params, dpi_extended, scroll-ratchet-torque, report_rate, multiplatform,
     scroll-ratchet-torque, onboard_profiles, report_rate, led_control, led_zone_]
   _battery: 4100
-  _config_cookie: [28, 141]
+  _config_cookie: [28, 142]
   _modelId: B03400000000
   _sensitive: {change-host: false, divert-keys: false, dpi: true, hires-scroll-mode: ignore, hires-smooth-invert: ignore, hires-smooth-resolution: ignore,
     reprogrammable-keys: false, smart-shift: false, thumb-scroll-invert: false, thumb-scroll-mode: false}

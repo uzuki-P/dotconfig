@@ -9,8 +9,25 @@
 	}
 }
 
+# Keep the automatic HTTP redirect private as well as the HTTPS listener.
+http://*.{$CADDY_TS_BASE_DOMAIN:ts.example.com} {
+	bind 127.0.0.1 {$CADDY_TS_IP:127.0.0.1}
+	redir https://{host}{uri} 308
+}
+
 *.{$CADDY_TS_BASE_DOMAIN:ts.example.com} {
-	bind {$CADDY_TS_IP:127.0.0.1}
+	# The private wildcard is reachable from this host and the tailnet only.
+	bind 127.0.0.1 {$CADDY_TS_IP:127.0.0.1}
+
+	# Gokapi's authenticated admin page is the upload entry point. The public
+	# index otherwise redirects to the configured informational URL.
+	@files_root {
+		host files.{$CADDY_TS_BASE_DOMAIN:ts.example.com}
+		path /
+	}
+	handle @files_root {
+		redir https://{host}/admin 302
+	}
 
 	# Advanced routes that cannot be represented by `dev-route set`.
 	import service ttyd {$CADDY_TS_IP:127.0.0.1}:7681

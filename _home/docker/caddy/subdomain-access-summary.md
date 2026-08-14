@@ -6,8 +6,9 @@ All endpoints in this Caddy instance are private tailnet services:
 
 - Cloudflare provides a DNS-only wildcard record for `*.<CADDY_TS_BASE_DOMAIN>`.
 - The record points to the tailnet address `CADDY_TS_IP` (configured in `.env`).
-- Caddy binds only to that address, so the endpoints are not reachable from the
-  public internet.
+- Caddy binds the HTTP and HTTPS wildcard listeners only to `127.0.0.1` and
+  `CADDY_TS_IP`, so the endpoints are not reachable through another host
+  interface or from the public internet.
 - Caddy uses the Cloudflare DNS module and `CLOUDFLARE_API_TOKEN` to complete
   DNS-01 validation and obtain a wildcard TLS certificate.
 - Requests for wildcard hostnames that are not explicitly configured return
@@ -27,6 +28,7 @@ variables and `Caddyfile` for how they are substituted.
 | `il-api.<CADDY_TS_BASE_DOMAIN>` | IssueLane API | `127.0.0.1:3220` |
 | `il-site.<CADDY_TS_BASE_DOMAIN>` | IssueLane public site | `127.0.0.1:3221` |
 | `il-dash.<CADDY_TS_BASE_DOMAIN>` | IssueLane dashboard | `127.0.0.1:6792` |
+| `files.<CADDY_TS_BASE_DOMAIN>` | Authenticated Gokapi upload UI (`/` redirects to `/admin`) | `127.0.0.1:53842` |
 | `<name>.<CADDY_TS_BASE_DOMAIN>` | Persistent local development route | Generated Caddy route to a loopback upstream |
 | `dev-<8 hex>.<CADDY_TS_BASE_DOMAIN>` | Ephemeral local development route | Generated Caddy route to a loopback upstream |
 
@@ -39,7 +41,7 @@ running on the host.
 - The `(service)` snippet near the top of `Caddyfile` defines the matcher and `reverse_proxy` handler used by generated and advanced proxy routes.
 - Env vars use the parse-time form `{$VAR:default}` so the file validates on a fresh checkout without leaking anything:
   - `CADDY_TS_BASE_DOMAIN` (default `ts.example.com`) — base domain for the wildcard cert and every host matcher.
-  - `CADDY_TS_IP` (default `127.0.0.1`) — address Caddy binds to, and the host ttyd is reached through.
+  - `CADDY_TS_IP` (default `127.0.0.1`) — Tailscale address Caddy binds to, and the host ttyd is reached through. `127.0.0.1` is always included for local access.
 - `{env.CLOUDFLARE_API_TOKEN}` (runtime form, no default) is read by the Cloudflare DNS plugin when issuing the cert; it must be set in `.env`.
 - To add a new env var: declare it in `.env.example` with a safe default (committed) and in `.env` with the real value (gitignored).
 - Don't hardcode real IPs or domains in `Caddyfile`; always go through the env placeholders.

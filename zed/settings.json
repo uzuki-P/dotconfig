@@ -71,7 +71,8 @@
 	"show_edit_predictions": false,
 	"hard_tabs": true,
 	"git_panel": {
-		"tree_view": true,
+		"group_by": "staging",
+  "tree_view": true,
 		"dock": "right"
 	},
 	"base_keymap": "VSCode",

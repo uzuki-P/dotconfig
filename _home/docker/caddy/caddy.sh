@@ -46,9 +46,9 @@ case "${1:-help}" in
 		validate
 		;;
 	reload)
-		validate
-		podman_rootful exec "${CONTAINER_NAME}" \
-			caddy reload --config /etc/caddy/Caddyfile
+		# Load the repository Caddyfile through the admin API so imports are
+		# resolved from the same host-mounted route registry as dev-route.
+		"${SCRIPT_DIR}/../dev-router/dev-router.sh" apply
 		;;
 	status)
 		podman_rootful ps --filter "name=^${CONTAINER_NAME}$"

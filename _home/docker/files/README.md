@@ -63,7 +63,14 @@ dev-route resolve files
 `just route` is equivalent to `cd ~/docker/dev-router && just specific files
 53842`. It should print the exact private HTTPS URL accepted by Caddy. The URL
 is reachable only by devices allowed onto this tailnet; this is not Funnel and
-does not expose Gokapi publicly.
+does not expose Gokapi publicly. The local host is also allowed through
+loopback for local automation and testing.
+
+The root of that URL is the upload entry point. Caddy redirects `/` to
+Gokapi's authenticated `/admin` page, which asks for the `uzuki_p` Gokapi
+password before showing the file-select and drag-and-drop upload interface.
+After an upload, Gokapi displays the download link and, where supported, the
+direct hotlink. Existing `/d` and `/h` links continue to be served by Gokapi.
 
 Open the printed URL on a tailnet device and complete `/setup`. Configure:
 
@@ -198,8 +205,8 @@ database.
 ## Security model
 
 - Tailnet membership and Tailscale ACLs are the network boundary. The dev-router
-  Caddy listener is bound to the tailnet address, while Gokapi is bound only to
-  host loopback.
+  Caddy listeners are bound only to host loopback and the configured Tailscale
+  address, while Gokapi is bound only to host loopback.
 - Gokapi login and upload API keys are an additional application boundary. Use
   a dedicated least-privilege key for agents and revoke it if exposed.
 - Download and hotlink URLs are bearer links. Anyone who can reach the private
