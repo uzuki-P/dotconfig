@@ -1,0 +1,26 @@
+[Unit]
+Description=Speaches local Whisper OpenAI-compatible transcription server
+Wants=network-online.target
+After=network-online.target
+
+[Container]
+Image=ghcr.io/speaches-ai/speaches:latest-cpu
+ContainerName=speaches
+PublishPort=127.0.0.1:9457:8000
+# Keep the loaded model resident so dictation requests never wait for a
+# reload. The env name differs across image versions; unknown vars are ignored.
+Environment=WHISPER__TTL=-1
+Environment=STT_MODEL_TTL=-1
+Environment=ENABLE_UI=false
+Environment=TZ=Asia/Jakarta
+Volume=speaches-hf-cache.volume:/home/ubuntu/.cache/huggingface/hub:Z
+NoNewPrivileges=true
+DropCapability=all
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+TimeoutStartSec=300
+
+[Install]
+WantedBy=default.target

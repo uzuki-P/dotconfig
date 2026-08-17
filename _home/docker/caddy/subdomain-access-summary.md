@@ -22,7 +22,7 @@ variables and `Caddyfile` for how they are substituted.
 | Host | Project/service | Upstream |
 | --- | --- | --- |
 | `t3.<CADDY_TS_BASE_DOMAIN>` | T3 | `127.0.0.1:3773` |
-| `ttyd.<CADDY_TS_BASE_DOMAIN>` | ttyd | `<CADDY_TS_IP>:7681` |
+| `herdr.<CADDY_TS_BASE_DOMAIN>` | Herdr web terminal (ttyd → herdr) | `127.0.0.1:7681` |
 | `code.<CADDY_TS_BASE_DOMAIN>` | code-server | `127.0.0.1:4444` |
 | `il.<CADDY_TS_BASE_DOMAIN>` | IssueLane web application | `[::1]:3000` |
 | `il-api.<CADDY_TS_BASE_DOMAIN>` | IssueLane API | `127.0.0.1:3220` |
@@ -41,7 +41,7 @@ running on the host.
 - The `(service)` snippet near the top of `Caddyfile` defines the matcher and `reverse_proxy` handler used by generated and advanced proxy routes.
 - Env vars use the parse-time form `{$VAR:default}` so the file validates on a fresh checkout without leaking anything:
   - `CADDY_TS_BASE_DOMAIN` (default `ts.example.com`) — base domain for the wildcard cert and every host matcher.
-  - `CADDY_TS_IP` (default `127.0.0.1`) — Tailscale address Caddy binds to, and the host ttyd is reached through. `127.0.0.1` is always included for local access.
+  - `CADDY_TS_IP` (default `127.0.0.1`) — Tailscale address Caddy binds to. `127.0.0.1` is always included for local access.
 - `{env.CLOUDFLARE_API_TOKEN}` (runtime form, no default) is read by the Cloudflare DNS plugin when issuing the cert; it must be set in `.env`.
 - To add a new env var: declare it in `.env.example` with a safe default (committed) and in `.env` with the real value (gitignored).
 - Don't hardcode real IPs or domains in `Caddyfile`; always go through the env placeholders.

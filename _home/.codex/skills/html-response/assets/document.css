@@ -630,8 +630,7 @@ code { font-family: "Maple Mono", ui-monospace, monospace; }
   visibility: hidden;
 }
 
-.theme-picker:hover .theme-menu,
-.theme-picker:focus-within .theme-menu {
+.theme-picker[data-open="true"] .theme-menu {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);

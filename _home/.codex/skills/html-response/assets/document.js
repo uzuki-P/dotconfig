@@ -52,11 +52,19 @@ function setupThemePicker() {
   current.type = "button";
   current.className = "theme-current";
   current.setAttribute("aria-haspopup", "menu");
+  current.setAttribute("aria-expanded", "false");
   current.setAttribute("aria-label", "Choose a color theme");
   picker.append(current);
   const menu = document.createElement("div");
   menu.className = "theme-menu";
   menu.setAttribute("role", "menu");
+  const setOpen = (open) => {
+    picker.dataset.open = String(open);
+    current.setAttribute("aria-expanded", String(open));
+  };
+  current.addEventListener("click", () => {
+    setOpen(picker.dataset.open !== "true");
+  });
   for (const theme of ["system", "light", "dark"]) {
     const button = document.createElement("button");
     button.type = "button";
@@ -68,12 +76,23 @@ function setupThemePicker() {
     button.innerHTML = `${themeIcons[theme]}<span>${theme[0].toUpperCase()}${theme.slice(1)}</span>`;
     button.addEventListener("click", async () => {
       applyTheme(theme);
+      setOpen(false);
+      current.focus();
       if (mermaidApi) await renderDiagrams();
     });
     menu.append(button);
   }
   picker.append(menu);
   document.body.append(picker);
+  document.addEventListener("click", (event) => {
+    if (picker.dataset.open === "true" && !picker.contains(event.target)) setOpen(false);
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && picker.dataset.open === "true") {
+      setOpen(false);
+      current.focus();
+    }
+  });
   applyTheme(storedTheme(), false);
   media.addEventListener("change", async () => {
     if (document.documentElement.dataset.theme !== "system") return;

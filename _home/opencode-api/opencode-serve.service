@@ -1,0 +1,14 @@
+[Unit]
+Description=Headless opencode server (OpenCode REST API on loopback)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=-%h/.config/opencode-api/env
+ExecStart=%h/.local/share/mise/shims/opencode serve --port 14096 --hostname 127.0.0.1
+Restart=on-failure
+RestartSec=3s
+
+[Install]
+WantedBy=default.target

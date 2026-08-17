@@ -24,7 +24,7 @@ DEFAULT_ROOT = Path.home() / "docker" / "html-preview" / "public"
 DEFAULT_BASE_URL = "https://html-preview.ts.uzuki-p.my.id"
 MAX_DOCUMENT_BYTES = 10 * 1024 * 1024
 ASSET_NAMES = ("document.css", "document.js", "favicon.svg")
-ASSET_VERSION = "11"
+ASSET_VERSION = "12"
 SAFE_ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,95}$")
 DOCUMENT_TIMESTAMP = re.compile(r"^(\d{8}-\d{6})(?:-|$)")
 

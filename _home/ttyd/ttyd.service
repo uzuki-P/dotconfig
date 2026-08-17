@@ -5,8 +5,10 @@ After=network-online.target
 [Service]
 Type=simple
 
-# A ttyd service managed from inside Herdr must still create an outer shell.
-# This affects only this service and its children, not the local shell or Herdr.
+# ttyd launches Herdr directly, and the service may be managed from inside a
+# Herdr pane. Unsetting Herdr's pane variables makes the Herdr process started
+# by ttyd an outer launch (no nested-launch guard) and keeps it from inheriting
+# a pane context. This affects only this service and its children.
 UnsetEnvironment=HERDR_ENV HERDR_SOCKET_PATH HERDR_BIN_PATH HERDR_SESSION
 UnsetEnvironment=HERDR_WORKSPACE_ID HERDR_TAB_ID HERDR_PANE_ID
 UnsetEnvironment=HERDR_ACTIVE_WORKSPACE_ID HERDR_ACTIVE_TAB_ID HERDR_ACTIVE_PANE_ID HERDR_ACTIVE_PANE_CWD

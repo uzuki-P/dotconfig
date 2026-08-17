@@ -30,7 +30,7 @@ http://*.{$CADDY_TS_BASE_DOMAIN:ts.example.com} {
 	}
 
 	# Advanced routes that cannot be represented by `dev-route set`.
-	import service ttyd {$CADDY_TS_IP:127.0.0.1}:7681
+	# ttyd (Herdr web terminal) is the generated named route `herdr` -> 127.0.0.1:7681.
 	@draw host draw.{$CADDY_TS_BASE_DOMAIN:ts.example.com}
 	handle @draw {
 		redir http://100.122.109.76:3729{uri} 302

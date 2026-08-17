@@ -1,84 +1,136 @@
 #!/usr/bin/env bash
-# Build ttyd 1.7.7's custom web client.
+# Build ttyd 1.7.7's custom web client with Herdr branding:
+# the page title is "Herdr" and the favicon is the Herdr logo.
 
 set -euo pipefail
 
 TTyd_VERSION="1.7.7"
 OUTPUT="${TTYD_INDEX_PATH:-$HOME/.local/share/ttyd/index.html}"
+FAVICON="$(dirname "$(readlink -f "$0")")/favicon.png"
 BUILD_DIR="$(mktemp -d)"
 trap 'rm -rf "$BUILD_DIR"' EXIT
+
+[[ -r "$FAVICON" ]] || {
+  echo "Herdr favicon not found at '$FAVICON'." >&2
+  exit 1
+}
 
 git clone --quiet --depth 1 --branch "$TTyd_VERSION" https://github.com/tsl0922/ttyd.git "$BUILD_DIR/ttyd"
 
 cd "$BUILD_DIR/ttyd"
-apply_patch <<'PATCH'
-*** Begin Patch
-*** Update File: html/src/components/terminal/xterm/index.ts
-@@
- import { CanvasAddon } from '@xterm/addon-canvas';
-+import { ClipboardAddon } from '@xterm/addon-clipboard';
- import { WebglAddon } from '@xterm/addon-webgl';
-@@
- import '@xterm/xterm/css/xterm.css';
-+
-+const cursor = '#e91e63'; // Material 2 Pink 500
-+const mochaTheme = {
-+    foreground: '#cdd6f4',
-+    background: '#1e1e2e',
-+    cursor,
-+    cursorAccent: '#1e1e2e',
-+    selectionBackground: '#585b70',
-+    black: '#45475a', red: '#f38ba8', green: '#a6e3a1', yellow: '#f9e2af',
-+    blue: '#89b4fa', magenta: '#f5c2e7', cyan: '#94e2d5', white: '#bac2de',
-+    brightBlack: '#585b70', brightRed: '#f38ba8', brightGreen: '#a6e3a1', brightYellow: '#f9e2af',
-+    brightBlue: '#89b4fa', brightMagenta: '#f5c2e7', brightCyan: '#94e2d5', brightWhite: '#a6adc8',
-+};
-+const latteTheme = {
-+    foreground: '#4c4f69',
-+    background: '#eff1f5',
-+    cursor,
-+    cursorAccent: '#eff1f5',
-+    selectionBackground: '#acb0be',
-+    black: '#5c5f77', red: '#d20f39', green: '#40a02b', yellow: '#df8e1d',
-+    blue: '#1e66f5', magenta: '#ea76cb', cyan: '#179299', white: '#acb0be',
-+    brightBlack: '#6c6f85', brightRed: '#d20f39', brightGreen: '#40a02b', brightYellow: '#df8e1d',
-+    brightBlue: '#1e66f5', brightMagenta: '#ea76cb', brightCyan: '#179299', brightWhite: '#bcc0cc',
-+};
-+const colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
-+const systemTheme = () => (colorScheme.matches ? mochaTheme : latteTheme);
-@@
-     public open(parent: HTMLElement) {
--        this.terminal = new Terminal(this.options.termOptions);
-+        this.terminal = new Terminal({...this.options.termOptions, theme: systemTheme()});
-         const { terminal, fitAddon, overlayAddon } = this;
-+        const onColorSchemeChange = () => {
-+            terminal.options.theme = systemTheme();
-+        };
-+        colorScheme.addEventListener('change', onColorSchemeChange);
-+        this.register(toDisposable(() => colorScheme.removeEventListener('change', onColorSchemeChange)));
-@@
-     private overlayAddon = new OverlayAddon();
-+    private clipboardAddon = new ClipboardAddon();
-     private webglAddon?: WebglAddon;
-@@
-         terminal.loadAddon(new WebLinksAddon());
- 
-+        terminal.loadAddon(this.clipboardAddon);
-+
-         terminal.open(parent);
-         fitAddon.fit();
-*** End Patch
-PATCH
 
-apply_patch <<'PATCH'
-*** Begin Patch
-*** Update File: html/package.json
-@@
-     "@xterm/addon-canvas": "^0.6.0",
-+    "@xterm/addon-clipboard": "^0.2.0",
-     "@xterm/addon-fit": "^0.9.0",
-*** End Patch
-PATCH
+# Herdr logo (ogulcancelik/herdr assets/logo.png at v0.7.1), resized to 64x64.
+install -m644 "$FAVICON" html/src/favicon.png
+
+python3 - <<'PY'
+from pathlib import Path
+
+
+def patch(path: str, old: str, new: str) -> None:
+    file = Path(path)
+    text = file.read_text(encoding="utf-8")
+    count = text.count(old)
+    if count != 1:
+        raise SystemExit(f"{path}: expected exactly one match, found {count}")
+    file.write_text(text.replace(old, new), encoding="utf-8")
+
+
+# Page title for the browser tab.
+patch(
+    "html/webpack.config.js",
+    "            title: 'ttyd - Terminal',",
+    "            title: 'Herdr',",
+)
+
+# Clipboard (OSC 52) addon: programs that emit the sequence write into the
+# browser clipboard and reach the client machine.
+patch(
+    "html/src/components/terminal/xterm/index.ts",
+    """import { CanvasAddon } from '@xterm/addon-canvas';
+import { WebglAddon } from '@xterm/addon-webgl';""",
+    """import { CanvasAddon } from '@xterm/addon-canvas';
+import { ClipboardAddon } from '@xterm/addon-clipboard';
+import { WebglAddon } from '@xterm/addon-webgl';""",
+)
+patch(
+    "html/package.json",
+    """    "@xterm/addon-canvas": "^0.6.0",
+    "@xterm/addon-fit": "^0.9.0",""",
+    """    "@xterm/addon-canvas": "^0.6.0",
+    "@xterm/addon-clipboard": "^0.2.0",
+    "@xterm/addon-fit": "^0.9.0",""",
+)
+
+# Catppuccin Mocha/Latte themes following the browser's system theme, with a
+# Material 2 Pink 500 cursor.
+theme_block = """
+const cursor = '#e91e63'; // Material 2 Pink 500
+const mochaTheme = {
+    foreground: '#cdd6f4',
+    background: '#1e1e2e',
+    cursor,
+    cursorAccent: '#1e1e2e',
+    selectionBackground: '#585b70',
+    black: '#45475a', red: '#f38ba8', green: '#a6e3a1', yellow: '#f9e2af',
+    blue: '#89b4fa', magenta: '#f5c2e7', cyan: '#94e2d5', white: '#bac2de',
+    brightBlack: '#585b70', brightRed: '#f38ba8', brightGreen: '#a6e3a1', brightYellow: '#f9e2af',
+    brightBlue: '#89b4fa', brightMagenta: '#f5c2e7', brightCyan: '#94e2d5', brightWhite: '#a6adc8',
+};
+const latteTheme = {
+    foreground: '#4c4f69',
+    background: '#eff1f5',
+    cursor,
+    cursorAccent: '#eff1f5',
+    selectionBackground: '#acb0be',
+    black: '#5c5f77', red: '#d20f39', green: '#40a02b', yellow: '#df8e1d',
+    blue: '#1e66f5', magenta: '#ea76cb', cyan: '#179299', white: '#acb0be',
+    brightBlack: '#6c6f85', brightRed: '#d20f39', brightGreen: '#40a02b', brightYellow: '#df8e1d',
+    brightBlue: '#1e66f5', brightMagenta: '#ea76cb', brightCyan: '#179299', brightWhite: '#bcc0cc',
+};
+const colorScheme = window.matchMedia('(prefers-color-scheme: dark)');
+const systemTheme = () => (colorScheme.matches ? mochaTheme : latteTheme);
+"""
+patch(
+    "html/src/components/terminal/xterm/index.ts",
+    """import '@xterm/xterm/css/xterm.css';
+
+interface TtydTerminal extends Terminal {""",
+    f"""import '@xterm/xterm/css/xterm.css';
+{theme_block}
+interface TtydTerminal extends Terminal {{""",
+)
+patch(
+    "html/src/components/terminal/xterm/index.ts",
+    """        this.terminal = new Terminal(this.options.termOptions);
+        const { terminal, fitAddon, overlayAddon } = this;""",
+    """        this.terminal = new Terminal({ ...this.options.termOptions, theme: systemTheme() });
+        const { terminal, fitAddon, overlayAddon } = this;
+        const onColorSchemeChange = () => {
+            terminal.options.theme = systemTheme();
+        };
+        colorScheme.addEventListener('change', onColorSchemeChange);
+        this.register(toDisposable(() => colorScheme.removeEventListener('change', onColorSchemeChange)));""",
+)
+patch(
+    "html/src/components/terminal/xterm/index.ts",
+    """    private overlayAddon = new OverlayAddon();
+    private webglAddon?: WebglAddon;""",
+    """    private overlayAddon = new OverlayAddon();
+    private clipboardAddon = new ClipboardAddon();
+    private webglAddon?: WebglAddon;""",
+)
+patch(
+    "html/src/components/terminal/xterm/index.ts",
+    """        terminal.loadAddon(new WebLinksAddon());
+
+        terminal.open(parent);""",
+    """        terminal.loadAddon(new WebLinksAddon());
+
+        terminal.loadAddon(this.clipboardAddon);
+
+        terminal.open(parent);""",
+)
+PY
 
 cd html
 YARN_ENABLE_IMMUTABLE_INSTALLS=false corepack yarn@3.6.3 install

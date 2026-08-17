@@ -1,19 +1,26 @@
 #!/usr/bin/env bash
 # Foreground ttyd process supervised by ~/.config/systemd/user/ttyd.service.
+# Launches Herdr, which starts or attaches to the persistent session.
 
 set -euo pipefail
 
 PORT="${TTYD_PORT:-7681}"
-INTERFACE="${TTYD_INTERFACE:-tailscale0}"
+INTERFACE="${TTYD_INTERFACE:-lo}"
 MAX_CLIENTS="${TTYD_MAX_CLIENTS:-1}"
 FONT_FAMILY="${TTYD_FONT_FAMILY:-Maple Mono NF CN}"
 FONT_SIZE="${TTYD_FONT_SIZE:-16}"
 INDEX_PATH="${TTYD_INDEX_PATH:-$HOME/.local/share/ttyd/index.html}"
+HERDR_BIN="${TTYD_HERDR_BIN:-$(command -v herdr || printf '%s' "$HOME/.local/bin/herdr")}"
 
 command -v ttyd >/dev/null || {
   echo "ttyd not found in PATH." >&2
   exit 1
 }
+
+if [[ ! -x "$HERDR_BIN" ]]; then
+  echo "Herdr binary not found at '$HERDR_BIN'." >&2
+  exit 1
+fi
 
 if [[ ! -r "$INDEX_PATH" ]]; then
   echo "Custom ttyd client not found at '$INDEX_PATH'." >&2
@@ -26,9 +33,10 @@ if ! ip link show "$INTERFACE" >/dev/null 2>&1; then
   exit 1
 fi
 
-# Serve a normal login shell. Run `herdr` from the browser after connecting.
-# No credentials are configured here: access is restricted by the Tailscale
-# interface and the tailnet ACLs/grants.
+# Serve Herdr on loopback only. It is published to the tailnet as the named
+# Caddy route `herdr` (`dev-route set herdr 7681`), which owns TLS. No
+# credentials are configured here: access is restricted by Caddy binding and
+# the tailnet ACLs/grants.
 exec ttyd \
   -p "$PORT" \
   -i "$INTERFACE" \
@@ -39,5 +47,6 @@ exec ttyd \
   -t "rendererType=canvas" \
   -t "fontFamily=$FONT_FAMILY" \
   -t "fontSize=$FONT_SIZE" \
+  -t "titleFixed=Herdr" \
   -s 1 \
-  -- fish -l
+  -- "$HERDR_BIN"

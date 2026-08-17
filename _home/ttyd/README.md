@@ -1,12 +1,18 @@
-# ttyd over Tailscale
+# ttyd → Herdr over Caddy
 
-This setup exposes a writable Fish login shell through ttyd on the Tailscale
-interface. Open the web terminal and run `herdr` inside that shell. ttyd does
-not launch Herdr directly.
+This setup exposes Herdr through ttyd. ttyd listens on loopback only and
+launches `herdr` directly, which starts or attaches to the persistent session;
+reconnecting from the browser re-attaches to the same session. Panes still run
+the default shell from Herdr's `config.toml` (`fish`).
 
-Access is controlled by the tailnet ACLs or grants. There is deliberately no
-ttyd username/password: Basic authentication over plain HTTP would not encrypt
-the credentials or terminal traffic.
+The terminal is published to the tailnet as the named dev-router route
+`herdr` (`dev-route set herdr 7681`), so it is reached at
+`https://herdr.<CADDY_TS_BASE_DOMAIN>/` with TLS terminated by Caddy. Caddy
+binds only loopback and the Tailscale address, and the tailnet ACLs or grants
+restrict which devices may connect.
+
+There is deliberately no ttyd username/password: Basic authentication would
+add nothing over Caddy's TLS and tailnet-only binding.
 
 ## Files
 
@@ -25,11 +31,11 @@ the credentials or terminal traffic.
   `~/.config/systemd/user/ttyd.service`.
 - `~/ttyd/justfile` provides the build and service-management commands.
 
-The unit removes Herdr's pane environment variables only from ttyd and its
-children. It does not modify the environment of an existing shell or local
-Herdr process. This makes it safe to manage ttyd from inside Herdr: the Fish
-shell opened in the browser is treated as an outer terminal, so running
-`herdr` there does not trigger the nested-launch guard.
+The unit removes Herdr's pane environment variables before ttyd starts. The
+Herdr process launched by ttyd is therefore treated as an outer launch, so it
+does not trigger the nested-launch guard even when the service itself is
+managed from inside a Herdr pane. It does not modify the environment of an
+existing shell or local Herdr process.
 
 ## Install
 
@@ -55,8 +61,11 @@ just ttyd-status
 just ttyd-logs
 ```
 
-The default URL is `http://<tailscale-ip>:7681/`. The defaults in
-`~/ttyd/ttyd-run` can be overridden for the service with a systemd drop-in:
+The default URL is `https://herdr.<CADDY_TS_BASE_DOMAIN>/`, served by Caddy
+from `127.0.0.1:7681`. ttyd is not reachable directly over the Tailscale
+interface anymore. If the named route is ever missing, recreate it with
+`dev-route set herdr 7681`. The defaults in `~/ttyd/ttyd-run` can be overridden
+for the service with a systemd drop-in:
 
 ```sh
 systemctl --user edit ttyd.service
@@ -66,9 +75,11 @@ For example:
 
 ```ini
 [Service]
-Environment=TTYD_PORT=8765
 Environment=TTYD_MAX_CLIENTS=2
 ```
+
+If you change `TTYD_PORT`, also repoint the named route with
+`dev-route set herdr <new-port>`.
 
 Then apply the change:
 
@@ -92,10 +103,11 @@ startup is no longer wanted.
 
 ## Security notes
 
-- Keep the service bound to `tailscale0`; do not change the interface to a
-  public or wildcard address.
+- Keep the service bound to `lo`; the terminal should only be reachable
+  through Caddy's `herdr` route, never through a public or wildcard address.
 - Use Tailscale ACLs or grants to restrict which tailnet identities can reach
-  TCP port 7681 on this device.
-- A connected client receives shell access as the local user.
+  this device; Caddy's wildcard listener is the only entry point.
+- A connected client receives Herdr, and through it shell access as the local
+  user.
 - The default maximum client count is one. Override `TTYD_MAX_CLIENTS` only
   when concurrent browser connections are intentional.

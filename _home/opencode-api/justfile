@@ -1,0 +1,52 @@
+# List the available opencode-api commands.
+default:
+	@just --list
+
+# Create the local env file with random keys, install units, start services.
+setup: env install
+	systemctl --user start opencode-serve.service opencode-llm.service
+
+# Create ~/.config/opencode-api/env with random keys when missing.
+env:
+	@if [ ! -f "${HOME}/.config/opencode-api/env" ]; then \
+		install -d -m 0700 "${HOME}/.config/opencode-api"; \
+		printf 'SHIM_API_KEY=%s\nOPENCODE_SERVER_PASSWORD=%s\n' "$(openssl rand -hex 24)" "$(openssl rand -hex 24)" > "${HOME}/.config/opencode-api/env"; \
+		chmod 600 "${HOME}/.config/opencode-api/env"; \
+		echo "Generated ${HOME}/.config/opencode-api/env"; \
+	fi
+
+# Install the user units and reload user systemd.
+install:
+	@mkdir -p "${HOME}/.config/systemd/user"
+	@ln -sfn "{{justfile_directory()}}/opencode-serve.service" "${HOME}/.config/systemd/user/opencode-serve.service"
+	@ln -sfn "{{justfile_directory()}}/opencode-llm.service" "${HOME}/.config/systemd/user/opencode-llm.service"
+	systemctl --user daemon-reload
+
+# Validate the tracked unit definitions.
+validate:
+	@grep -q '^ExecStart=.*opencode serve --port 14096 --hostname 127.0.0.1$' opencode-serve.service
+	@grep -q '^ExecStart=/usr/bin/python3 %h/opencode-api/opencode-llm-shim.py$' opencode-llm.service
+	@grep -q '^SHIM_API_KEY=$' env.example
+	@python3 -m py_compile opencode-llm-shim.py
+	@echo "Static validation passed."
+
+# Show both services' status and listeners.
+status:
+	systemctl --user --no-pager --full status opencode-serve.service opencode-llm.service
+	@ss -ltn '( sport = :14096 or sport = :14097 )' || true
+
+# Follow recent service logs.
+logs:
+	journalctl --user-unit opencode-serve.service --user-unit opencode-llm.service --follow --lines=100
+
+# Restart both services after configuration changes.
+restart: install
+	systemctl --user restart opencode-serve.service opencode-llm.service
+
+# Stop both services.
+stop:
+	systemctl --user stop opencode-serve.service opencode-llm.service
+
+# Print the SHIM_API_KEY clients must use (from the local env file).
+key:
+	@grep '^SHIM_API_KEY=' "${HOME}/.config/opencode-api/env" | cut -d= -f2

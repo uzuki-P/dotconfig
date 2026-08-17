@@ -1,0 +1,49 @@
+# List the available Speaches commands.
+default:
+    @just --list
+
+# Install the rootless Quadlets, start Speaches, and fetch the base model.
+setup: install
+    systemctl --user start speaches.service
+    just fetch-model
+
+# Validate the tracked Quadlet definitions.
+validate:
+    @grep -q '^Image=ghcr.io/speaches-ai/speaches:latest-cpu$' deploy/speaches.container
+    @grep -q '^PublishPort=127.0.0.1:9457:8000$' deploy/speaches.container
+    @grep -q '^Environment=WHISPER__TTL=-1$' deploy/speaches.container
+    @grep -q '^VolumeName=speaches-hf-cache$' deploy/speaches-hf-cache.volume
+    @echo "Static validation passed."
+
+# Download the base model into the cache volume (no-op when already present).
+fetch-model:
+    @for i in $(seq 1 60); do \
+        code=$(curl -s -o /dev/null -w '%{http_code}' -X POST 'http://127.0.0.1:9457/v1/models/Systran%2Ffaster-whisper-base'); \
+        if [ "$code" = 200 ]; then echo "Base model ready (HTTP $code)."; exit 0; fi; \
+        sleep 2; \
+    done; echo "Base model fetch did not complete" >&2; exit 1
+
+# Install the rootless user Quadlets and reload user systemd.
+install:
+    install -d -m 0700 "${HOME}/.config/containers/systemd"
+    install -m 0644 deploy/speaches.container "${HOME}/.config/containers/systemd/speaches.container"
+    install -m 0644 deploy/speaches-hf-cache.volume "${HOME}/.config/containers/systemd/speaches-hf-cache.volume"
+    systemctl --user daemon-reload
+
+# Show Speaches container status and listener.
+status:
+    systemctl --user --no-pager --full status speaches.service
+    @ss -ltn '( sport = :9457 )' || true
+
+# Follow recent Speaches logs.
+logs:
+    journalctl --user-unit speaches.service --follow --lines=100
+
+# Stop Speaches while preserving the cached models.
+stop:
+    systemctl --user stop speaches.service
+
+# Pull the current image and restart Speaches.
+update:
+    podman pull ghcr.io/speaches-ai/speaches:latest-cpu
+    systemctl --user restart speaches.service

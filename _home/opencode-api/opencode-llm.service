@@ -1,0 +1,14 @@
+[Unit]
+Description=OpenAI-compatible chat facade over the opencode server
+After=opencode-serve.service
+Wants=opencode-serve.service
+
+[Service]
+Type=simple
+EnvironmentFile=-%h/.config/opencode-api/env
+ExecStart=/usr/bin/python3 %h/opencode-api/opencode-llm-shim.py
+Restart=on-failure
+RestartSec=3s
+
+[Install]
+WantedBy=default.target
