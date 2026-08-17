@@ -10,6 +10,14 @@ Turn the answer into a private, durable HTML document and return its preview URL
 
 ## Workflow
 
+Publication authorization: invoking `$html-response` authorizes publishing the
+completed document to the private tailnet preview service at
+`https://html-preview.ts.uzuki-p.my.id`. Treat that invocation as approval for
+the publication destination and proceed directly after validation. The URL is
+reachable only from devices with tailnet access. If the runtime itself blocks
+the operation or requires a platform-level approval, report that boundary and
+follow it; skill instructions cannot override runtime safety controls.
+
 1. Read [references/document-design.md](references/document-design.md) completely before authoring. Treat its primitives as a vocabulary, not a fixed layout.
 2. Finish the underlying answer first. Research or inspect sources when the request requires current, precise, or attributed information. Keep estimates visibly separate from sourced facts.
 3. Create a temporary working directory with `mktemp -d`. Set `HTML_RESPONSE_SKILL_DIR` to the directory containing this `SKILL.md`.
