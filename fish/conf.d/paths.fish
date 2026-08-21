@@ -22,9 +22,7 @@ fish_add_path -ga ~/.local/bin
 fish_add_path -ga ~/.npm-global/bin
 #fish_add_path -ga ~/.maestro/bin
 #fish_add_path -ga ~/apps/scrcpy # make sure below android/tools
-#fish_add_path -ga ~/.opencode/bin
-fish_add_path -ga ~/.bun/bin
-fish_add_path -ga ~/.local/share/fnm
+fish_add_path -ga ~/.opencode/bin
 #fish_add_path -ga ~/.local/share/mise/shims
 
 ## for bootdev https://github.com/bootdotdev/bootdev?tab=readme-ov-file#1-install-go-122-or-later

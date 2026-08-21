@@ -14,8 +14,6 @@ export ANDROID_HOME="$HOME/Android/Sdk"
 export ANDROID_SDK_ROOT="$HOME/Android/Sdk"
 
 for p in \
-    "$HOME/.local/share/fnm" \
-    "$HOME/.bun/bin" \
     "$HOME/.npm-global/bin" \
     "$HOME/.local/bin" \
     "$HOME/bin" \
@@ -99,3 +97,6 @@ unset rc
 
 # Added by codebase-memory-mcp install
 export PATH="/home/uzuki_p/.local/bin:$PATH"
+
+# opencode
+export PATH=/home/uzuki_p/.opencode/bin:$PATH

@@ -1,6 +1,5 @@
-source ~/.config/fish/conf.d/abbr.fish
-source ~/.config/fish/conf.d/paths.fish
-source ~/.config/fish/conf.d/rustup.fish
+# conf.d/* (abbr, paths, rustup, vite-plus) auto-load before config.fish;
+# do not re-source them here, it reorders PATH after vp's bin is prepended.
 
 function fish_greeting
     switch (random 1 5)
@@ -54,9 +53,6 @@ set -gx PNPM_HOME "/home/uzuki_p/.local/share/pnpm"
 if not string match -q -- $PNPM_HOME $PATH
     set -gx PATH "$PNPM_HOME" $PATH
 end
-
-# fnm
-#fnm env --use-on-cd --shell fish | source
 
 # carapace. https://github.com/carapace-sh/carapace-bin/releases
 carapace _carapace | source
