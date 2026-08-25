@@ -8,7 +8,8 @@
 // custom settings, run the `open default settings` command
 // from the command palette or from `Zed` application menu.
 {
-	"show_wrap_guides": true,
+	"default_open_behavior": "new_window",
+ "show_wrap_guides": true,
 	"wrap_guides": [80, 120],
 	"theme": {
 		"mode": "system",
@@ -29,7 +30,7 @@
 	"show_signature_help_after_edits": false,
 	"auto_signature_help": false,
 	"redact_private_values": false,
-	"cli_default_open_behavior": "existing_window",
+	"cli_default_open_behavior": "new_window",
 	"agent_servers": {
 		"codex-acp": {
 			"favorite_config_option_values": {
