@@ -6,6 +6,7 @@ After=network-online.target
 [Container]
 Image=docker.io/library/caddy:2.11.4-alpine
 ContainerName=html-preview
+Network=pasta:--map-host-loopback=169.254.1.2
 PublishPort=127.0.0.1:4178:8080
 Volume=%h/docker/html-preview/public:/srv:ro,Z
 Volume=%h/docker/html-preview/deploy/Caddyfile:/etc/caddy/Caddyfile:ro,Z

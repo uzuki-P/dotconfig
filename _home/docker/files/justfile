@@ -7,6 +7,9 @@ validate:
     bash -n bin/share
     @grep -q '^Image=docker.io/f0rc3/gokapi:v[0-9]' deploy/gokapi.container
     @grep -q '^PublishPort=127.0.0.1:53842:53842$' deploy/gokapi.container
+    @grep -q '^Volume=%h/docker/files/custom:/app/custom:ro,Z$' deploy/gokapi.container
+    @test -s custom/admin.js
+    @grep -Eq '^[0-9]+$' custom/version.txt
     @test ! -e .env || test -f .env
     @echo "Static validation passed."
 

@@ -17,6 +17,7 @@ loopback admin API.
 | `deploy/gokapi.container` | Rootless Podman Quadlet, pinned to Gokapi v2.2.4 |
 | `data/` | Uploaded objects and Gokapi data (ignored except `.gitkeep`) |
 | `config/` | Generated configuration/database (ignored except `.gitkeep`) |
+| `custom/` | Admin UI tweaks loaded through Gokapi's supported customization hook |
 | `secrets/api-key` | Local API key used by `bin/share` (ignored) |
 | `bin/share` | Upload and deletion helper |
 
@@ -71,6 +72,11 @@ Gokapi's authenticated `/admin` page, which asks for the `uzuki_p` Gokapi
 password before showing the file-select and drag-and-drop upload interface.
 After an upload, Gokapi displays the download link and, where supported, the
 direct hotlink. Existing `/d` and `/h` links continue to be served by Gokapi.
+For files with a hotlink, the admin table shows `Hotlink` before `URL`, and
+clicking the file ID opens the hotlink. The original share and email actions
+are replaced with `Show QR` after `URL`. Download, edit, and delete remain in
+the second button group. Files without a hotlink keep Gokapi's normal
+download-page link.
 
 Open the printed URL on a tailnet device and complete `/setup`. Configure:
 

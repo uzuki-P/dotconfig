@@ -8,3 +8,6 @@ fish/fish_variables
 # nvim deps
 nvim/lazy-lock.json
 /nvim.log
+
+# python bytecode
+__pycache__/

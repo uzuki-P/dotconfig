@@ -1,0 +1,5 @@
+interface:
+  display_name: "Design Taste Frontend"
+  short_description: "Build distinctive, anti-template frontend designs"
+policy:
+  allow_implicit_invocation: false

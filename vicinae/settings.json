@@ -14,9 +14,9 @@
    "pop_to_root_on_close": true,
    "escape_key_behavior": "",
    "font": {
-      "rendering": "qt",
+      "rendering": "native",
       "normal": {
-         "family": "Outfit",
+         "family": "Open Sans",
          "size": 11
       }
    },

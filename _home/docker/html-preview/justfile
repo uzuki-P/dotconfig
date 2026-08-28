@@ -4,7 +4,7 @@ default:
 
 # Synchronize shared browser assets and refresh the document index.
 prepare:
-    python3 ../../.codex/skills/html-response/scripts/html_preview.py sync
+    python3 "$HOME/.agents/skills/publish-html/scripts/html_preview.py" sync
 
 # Serve the preview directory on loopback without Podman.
 dev: prepare
@@ -12,15 +12,19 @@ dev: prepare
 
 # Validate the publisher, index page, assets, Caddyfile, and Quadlet definition.
 validate:
-    python3 ../../.codex/skills/html-response/scripts/html_preview.py self-test
-    node --check ../../.codex/skills/html-response/assets/document.js
-    xmllint --noout ../../.codex/skills/html-response/assets/favicon.svg
+    python3 "$HOME/.agents/skills/publish-html/scripts/html_preview.py" self-test
+    node --check "$HOME/.agents/skills/publish-html/assets/document.js"
+    xmllint --noout "$HOME/.agents/skills/publish-html/assets/favicon.svg"
     @grep -q '^Image=docker.io/library/caddy:2.11.4-alpine$' deploy/html-preview.container
+    @grep -q '^Network=pasta:--map-host-loopback=169.254.1.2$' deploy/html-preview.container
     @grep -q '^PublishPort=127.0.0.1:4178:8080$' deploy/html-preview.container
     @grep -q '^ReadOnly=true$' deploy/html-preview.container
     @grep -q '^NoNewPrivileges=true$' deploy/html-preview.container
     @grep -q '^DropCapability=all$' deploy/html-preview.container
     @grep -q '^AddCapability=NET_BIND_SERVICE$' deploy/html-preview.container
+    @grep -q 'reverse_proxy @api host.containers.internal:4179' deploy/Caddyfile
+    @grep -q 'respond @archived 404' deploy/Caddyfile
+    @grep -q 'serve --bind 127.0.0.1 --port 4179' deploy/html-preview-api.service
     @echo "Static validation passed."
 
 # Install the rootless Quadlet and prepare the document directory.
@@ -33,10 +37,26 @@ install: prepare
 setup: install
     systemctl --user start html-preview.service
 
+# Install and start the host write API user service.
+api-install:
+    install -d -m 0755 "${HOME}/.config/systemd/user"
+    install -m 0644 deploy/html-preview-api.service "${HOME}/.config/systemd/user/html-preview-api.service"
+    systemctl --user daemon-reload
+    systemctl --user enable --now html-preview-api.service
+
+# Apply deploy file changes to both preview services.
+deploy: install api-install
+    systemctl --user restart html-preview.service
+
 # Show the user service and loopback listener status.
 status:
     systemctl --user --no-pager --full status html-preview.service
-    @ss -ltn '( sport = :4178 )' || true
+    @ss -ltn '( sport = :4178 or sport = :4179 )' || true
+
+# Show the write API service status.
+api-status:
+    systemctl --user --no-pager --full status html-preview-api.service
+    @ss -ltn '( sport = :4179 )' || true
 
 # Follow recent preview-service logs.
 logs:
@@ -52,4 +72,4 @@ route:
 
 # Publish an HTML file through the skill's deterministic CLI.
 publish file *args:
-    python3 ../../.codex/skills/html-response/scripts/html_preview.py publish {{file}} {{args}}
+    python3 "$HOME/.agents/skills/publish-html/scripts/html_preview.py" publish {{file}} {{args}}

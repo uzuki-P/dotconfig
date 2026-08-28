@@ -9,6 +9,7 @@ ContainerName=gokapi-files
 PublishPort=127.0.0.1:53842:53842
 Volume=%h/docker/files/data:/app/data:Z
 Volume=%h/docker/files/config:/app/config:Z
+Volume=%h/docker/files/custom:/app/custom:ro,Z
 Environment=TZ=Asia/Jakarta
 Environment=GOKAPI_LOG_STDOUT=true
 Environment=GOKAPI_TRUSTED_PROXIES=127.0.0.1

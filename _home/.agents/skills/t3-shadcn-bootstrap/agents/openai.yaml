@@ -1,0 +1,6 @@
+interface:
+  display_name: "T3 shadcn bootstrap"
+  short_description: "Scaffold a T3-themed shadcn app"
+  default_prompt: "Use $t3-shadcn-bootstrap to scaffold a T3-themed shadcn app."
+policy:
+  allow_implicit_invocation: false

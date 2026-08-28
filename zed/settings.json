@@ -8,7 +8,8 @@
 // custom settings, run the `open default settings` command
 // from the command palette or from `Zed` application menu.
 {
-	"default_open_behavior": "new_window",
+	"soft_wrap": "editor_width",
+ "default_open_behavior": "new_window",
  "show_wrap_guides": true,
 	"wrap_guides": [80, 120],
 	"theme": {

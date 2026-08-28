@@ -16,5 +16,13 @@
 	@health path /healthz
 	respond @health "ok" 200
 
-	file_server
+	@archived path /.archive /.archive/*
+	respond @archived 404
+
+	@api path /api/*
+	reverse_proxy @api host.containers.internal:4179
+
+	file_server {
+		hide /.archive
+	}
 }

@@ -38,6 +38,11 @@ mise activate fish | source
 # zoxide. https://github.com/ajeetdsouza/zoxide
 zoxide init --cmd cd fish | source
 
+function __list_on_pwd_change --on-variable PWD
+    status is-interactive; or return
+    eza -lg --git --header
+end
+
 # yazi. https://yazi-rs.github.io/docs/quick-start#shell-wrapper
 function y
     set tmp (mktemp -t "yazi-cwd.XXXXXX")
