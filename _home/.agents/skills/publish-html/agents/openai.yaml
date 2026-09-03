@@ -1,0 +1,10 @@
+interface:
+  display_name: "Publish HTML"
+  short_description: "Create and privately publish rich HTML documents"
+  icon_small: "./assets/favicon.svg"
+  icon_large: "./assets/favicon.svg"
+  brand_color: "#D32672"
+  default_prompt: "Use $publish-html to turn this answer into a polished private HTML document."
+
+policy:
+  allow_implicit_invocation: false

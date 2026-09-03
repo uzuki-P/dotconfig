@@ -1,0 +1,4 @@
+interface:
+  display_name: "Publish Route"
+  short_description: "Publish random or named private Caddy routes"
+  default_prompt: "Use $publish-route to publish a random private dev URL or set a stable named route through the Tailscale dev router."
