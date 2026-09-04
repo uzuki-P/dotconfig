@@ -38,11 +38,6 @@ mise activate fish | source
 # zoxide. https://github.com/ajeetdsouza/zoxide
 zoxide init --cmd cd fish | source
 
-function __list_on_pwd_change --on-variable PWD
-    status is-interactive; or return
-    eza -lg --git --header
-end
-
 # yazi. https://yazi-rs.github.io/docs/quick-start#shell-wrapper
 function y
     set tmp (mktemp -t "yazi-cwd.XXXXXX")
@@ -64,3 +59,7 @@ carapace _carapace | source
 
 # Generated for envman. Do not edit.
 #test -s ~/.config/envman/load.fish; and source ~/.config/envman/load.fish
+
+
+# Added by Antigravity CLI installer
+set -gx PATH "/home/uzuki_p/.local/bin" $PATH

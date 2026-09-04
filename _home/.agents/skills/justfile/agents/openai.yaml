@@ -1,0 +1,4 @@
+interface:
+  display_name: "Justfile"
+  short_description: "Create and maintain project Just recipes"
+  default_prompt: "Use $justfile to create or update this project's justfile."

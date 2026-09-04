@@ -1,15 +1,15 @@
 - 1.1.20
 - _NAME: MX Master 3S
   _absent: [backlight-timed, rgb_control, rgb_zone_, rgb_idle_effect, rgb_idle_timeout, rgb_sleep_timeout, rgb_startup_animation, rgb_shutdown_animation,
-    persistent-remappable-keys, disable-keyboard-keys, force-sensing, divert-gkeys, m-key-leds, mr-key-led, analog-button-tuning, equalizer, adc_power_management,
-    headset-eco-mode, headset-mic-mute, headset-mic-snr, headset-ai-nr, headset-ai-nr-level, headset-sidetone, headset-mic-gain, headset-mix-balance, headset-auto-sleep,
+    persistent-remappable-keys, disable-keyboard-keys, force-sensing, divert-gkeys, m-key-leds, analog-button-tuning, equalizer, adc_power_management, headset-eco-mode,
+    headset-mic-mute, headset-mic-snr, headset-ai-nr, headset-ai-nr-level, headset-sidetone, headset-mic-gain, headset-mix-balance, headset-auto-sleep,
     headset-onboard-eq, headset-eq-active-preset, headset-advanced-eq, headset_led_control, headset-onboard-effect, headset_per_zone_lighting, headset-signature-startup,
     headset-signature-shutdown, headset-signature-passive, logivoice-nr-state, logivoice-ng-state, logivoice-comp-state, logivoice-deesser-state, logivoice-depopper-state,
     logivoice-limiter-state, logivoice-hpf-state, report_rate_extended, dpi_extended, scroll-ratchet-torque, scroll-ratchet-torque, onboard_profiles, led_control,
-    led_zone_, speed-change, per-key-lighting, pointer_speed, haptic-play, backlight, backlight_level, backlight_duration_hands_out, backlight_duration_hands_in,
-    backlight_duration_powered, multiplatform, report_rate, gesture2-gestures, gesture2-divert, gesture2-params]
+    led_zone_, speed-change, per-key-lighting, pointer_speed, haptic-play, multiplatform, report_rate, backlight, backlight_level, backlight_duration_hands_out,
+    backlight_duration_hands_in, backlight_duration_powered, mr-key-led, gesture2-gestures, gesture2-divert, gesture2-params]
   _battery: 4100
-  _config_cookie: [183, 201]
+  _config_cookie: [218, 52]
   _modelId: B03400000000
   _sensitive: {change-host: false, divert-keys: false, dpi: true, hires-scroll-mode: ignore, hires-smooth-invert: ignore, hires-smooth-resolution: ignore,
     reprogrammable-keys: false, smart-shift: false, thumb-scroll-invert: false, thumb-scroll-mode: false}
@@ -120,5 +120,27 @@
   hires-smooth-resolution: true
   mr-key-led: false
   sidetone: 8
+  thumb-scroll-invert: false
+  thumb-scroll-mode: false
+- _NAME: MX Master 3S
+  _absent: [lowres-scroll-mode, scroll-ratchet, scroll-ratchet-torque, smart-shift, report_rate, report_rate_extended, pointer_speed, dpi, speed-change,
+    backlight, backlight_level, backlight_duration_hands_out, backlight_duration_hands_in, backlight_duration_powered, backlight-timed, led_control, led_zone_,
+    rgb_control, rgb_zone_, per-key-lighting, brightness_control, rgb_idle_effect, rgb_idle_timeout, rgb_sleep_timeout, rgb_startup_animation, rgb_shutdown_animation,
+    fn-swap, reprogrammable-keys, persistent-remappable-keys, divert-keys, disable-keyboard-keys, force-sensing, crown-smooth, divert-crown, m-key-leds,
+    mr-key-led, change-host, gesture2-gestures, gesture2-divert, gesture2-params, analog-button-tuning, haptic-level, haptic-play, sidetone, equalizer,
+    adc_power_management, headset-eco-mode, headset-do-not-disturb, headset-mic-mute, headset-mic-snr, headset-ai-nr, headset-ai-nr-level, headset-sidetone,
+    headset-mic-gain, headset-mix-balance, headset-onboard-eq, headset-eq-active-preset, headset-advanced-eq, headset-onboard-effect, headset_per_zone_lighting,
+    headset-signature-startup, headset-signature-shutdown, headset-signature-passive, logivoice-nr-state, logivoice-ng-state, logivoice-comp-state, logivoice-deesser-state,
+    logivoice-depopper-state, logivoice-limiter-state, logivoice-hpf-state]
+  _battery: 4100
+  _config_cookie: [24, 183]
+  _sensitive: {hires-scroll-mode: ignore, hires-smooth-invert: ignore, hires-smooth-resolution: ignore}
+  _unitId: '03000000'
+  divert-gkeys: false
+  headset-auto-sleep: 3
+  hi-res-scroll: false
+  hires-scroll-mode: false
+  hires-smooth-invert: false
+  hires-smooth-resolution: true
   thumb-scroll-invert: false
   thumb-scroll-mode: false

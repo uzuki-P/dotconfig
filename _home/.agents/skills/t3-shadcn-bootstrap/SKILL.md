@@ -59,7 +59,7 @@ Use this skill only when the user explicitly invokes `$t3-shadcn-bootstrap`. It 
 
    Confirm that `components.json` uses the selected template's generated configuration, Base UI, and Phosphor. Keep application-specific brand icons separate from the generated UI icons.
 
-7. If the project has a runnable development server, ensure its root has a `justfile`. Preserve existing recipes. For a new project, add a `default` recipe that runs `just --list` and a documented `dev` recipe that runs the project's normal development command.
+7. Apply the `justfile` skill to the scaffolded project.
 
 8. Run the scaffold's available typecheck, lint, and build checks. Check both light and dark tokens for the selected T3 Code theme on representative Button, Card, Input, Dialog, and Sidebar components. Stop if the project does not expose the command needed for a check, and report it.
 

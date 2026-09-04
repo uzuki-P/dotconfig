@@ -1,0 +1,16 @@
+[Unit]
+Description=Fidgeting static site (Caddy file-server on loopback 4311)
+
+[Container]
+Image=docker.io/library/caddy:2.11.4-alpine
+ContainerName=fidgeting-serve
+Volume=%h/projects/_sandbox/fidgeting/build/client:/srv:ro,Z
+Exec=caddy file-server --listen 127.0.0.1:4311 --root /srv
+Network=host
+
+[Service]
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target
