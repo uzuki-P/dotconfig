@@ -9,7 +9,7 @@
     led_zone_, speed-change, per-key-lighting, pointer_speed, haptic-play, multiplatform, report_rate, backlight, backlight_level, backlight_duration_hands_out,
     backlight_duration_hands_in, backlight_duration_powered, mr-key-led, gesture2-gestures, gesture2-divert, gesture2-params]
   _battery: 4100
-  _config_cookie: [218, 52]
+  _config_cookie: [218, 53]
   _modelId: B03400000000
   _sensitive: {change-host: false, divert-keys: false, dpi: true, hires-scroll-mode: ignore, hires-smooth-invert: ignore, hires-smooth-resolution: ignore,
     reprogrammable-keys: false, smart-shift: false, thumb-scroll-invert: false, thumb-scroll-mode: false}
