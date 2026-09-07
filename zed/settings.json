@@ -144,6 +144,11 @@
 			"enable_thinking": true,
 			"effort": "medium"
 		},
+		"commit_message_model": {
+			"provider": "openai-subscribed",
+			"model": "gpt-5.6-luna",
+			"effort": "high"
+		},
 		"sidebar_side": "right",
 		"default_profile": "bypass",
 		"dock": "right",

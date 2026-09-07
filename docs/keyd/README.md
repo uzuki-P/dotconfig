@@ -13,12 +13,13 @@ fingerprint to one of the selected devices.
 | Escape | Caps Lock |
 | Hold Caps + H/J/K/L | Left/Down/Up/Right |
 | Hold Caps + Y/O | Home/End |
-| Hold Caps + U/D | Page Up/Page Down |
+| Hold Caps + U/I | Page Down/Page Up |
 | Hold Caps + other keys | Ctrl + that key, such as Ctrl + F |
 
 The navigation layer activates immediately. Releasing Caps after navigation
 does not send Escape. The layer's `:C` suffix supplies Ctrl for keys without
-an explicit navigation binding. Caps + D still sends plain Page Down.
+an explicit navigation binding. D has no navigation binding, so Caps + D
+sends Ctrl + D.
 Keys pressed without Caps retain their normal bindings.
 
 This configuration requires keyd. Follow the
