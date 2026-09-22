@@ -8,6 +8,8 @@
 			"space g s": "git_panel::ToggleFocus",
 			"space g w t": "git::Worktree",
 			"space g f h": "git::FileHistory",
+			// Open file at cursor from project diff / staged changes view
+			"space g o": "editor::OpenExcerpts",
 			"space g g": [
 				"task::Spawn",
 				{
@@ -165,6 +167,13 @@
 			"ctrl-l": "workspace::ActivatePaneRight",
 			"ctrl-k": "workspace::ActivatePaneUp",
 			"ctrl-j": "workspace::ActivatePaneDown",
+		},
+	},
+	// Git panel: open selected file in editor without diff view
+	{
+		"context": "GitPanel && ChangesList",
+		"bindings": {
+			"o": "git::ViewFile",
 		},
 	},
 	// Panel nagivation

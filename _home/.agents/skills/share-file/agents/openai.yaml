@@ -1,0 +1,4 @@
+interface:
+  display_name: "Share File"
+  short_description: "Share files through private Gokapi links"
+  default_prompt: "Use $share-file to upload this file and return its private link."

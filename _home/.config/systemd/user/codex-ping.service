@@ -1,0 +1,7 @@
+[Unit]
+Description=Codex quota window ping (one trivial message to anchor the 5h rolling window)
+
+[Service]
+Type=oneshot
+ExecStartPre=/usr/bin/mkdir -p %h/.local/state/codex-ping
+ExecStart=%h/.local/bin/codex exec --skip-git-repo-check -C %h/.local/state/codex-ping "Reply with exactly: ok"

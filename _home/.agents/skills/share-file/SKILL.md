@@ -1,9 +1,9 @@
 ---
-name: share-artifact
-description: Upload local images, reports, archives, and other agent-produced artifacts to this machine's private Gokapi service and return stable tailnet HTTPS links. Use when the user asks to share, publish, upload, or provide a private URL for a file, or when an artifact must be shown as a Markdown image through the files service. Also use to delete a previously shared item by its Gokapi file ID.
+name: share-file
+description: Upload local images, reports, archives, and other files to this machine's private Gokapi service and return stable tailnet HTTPS links. Use when the user asks to share, publish, upload, or provide a private URL for a file, or when a file must be shown as a Markdown image through the files service. Also use to delete a previously shared item by its Gokapi file ID.
 ---
 
-# Share Artifact
+# Share File
 
 Use the installed helper at `~/docker/files/bin/share`. It owns authentication,
 expiry defaults, URL construction, error handling, and image-hotlink selection.
@@ -12,12 +12,12 @@ without reading, copying, logging, or printing that file.
 
 ## Upload
 
-1. Resolve the artifact to a readable local regular file. Preserve its useful
+1. Resolve the target to a readable local regular file. Preserve its useful
    filename and extension because Gokapi uses them for content type and links.
 2. Run:
 
    ```bash
-   ~/docker/files/bin/share /absolute/path/to/artifact
+   ~/docker/files/bin/share /absolute/path/to/file
    ```
 
    The default is seven-day expiry with unlimited downloads. Pass

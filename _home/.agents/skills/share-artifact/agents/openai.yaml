@@ -1,4 +1,0 @@
-interface:
-  display_name: "Share Artifact"
-  short_description: "Share files through private Gokapi links"
-  default_prompt: "Use $share-artifact to upload this artifact and return its private link."

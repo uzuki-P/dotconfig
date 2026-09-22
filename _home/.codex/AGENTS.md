@@ -1,5 +1,9 @@
 # Global instructions
 
+## Language
+
+Always respond in English unless the user explicitly asks for another language.
+
 ## Intent boundary
 
 Treat questions, explanations, reviews, diagnoses, recommendations, and status requests as read-only by default. Do not change source files, dependencies, version-control state, or external systems unless the user explicitly requests a change or implementation. Inspection and verification commands remain allowed when they only produce disposable caches or temporary output.
@@ -29,6 +33,10 @@ When the user says "dotconfig folder", they mean `~/dotconfig`, their personal d
 ### Temp folder
 
 When the user says "temp folder", they mean `~/projects/_temp`, the scratch project for quick chats and throwaway work. Its own AGENTS.md defines the layout for new work there.
+
+## Capital CRM backend
+
+When working in the `capital-crm` repository or any of its worktrees, "BE" and "backend" refer to `/home/uzuki_p/projects/crmapi/`. Inspect that repository when frontend work depends on backend behavior. Change it only when the user explicitly requests backend changes.
 
 ## Development server
 

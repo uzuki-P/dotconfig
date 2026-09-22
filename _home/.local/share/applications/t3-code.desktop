@@ -7,5 +7,5 @@ Terminal=false
 Type=Application
 Icon=t3code
 Categories=Development;
-StartupWMClass=t3code
+StartupWMClass=com.t3tools.T3Code
 MimeType=x-scheme-handler/t3code;
