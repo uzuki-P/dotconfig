@@ -6,9 +6,9 @@ Description=Ping Codex at the start of each work block
 #   08:00-13:00 covers 10:30-13:00      (reset mid-morning)
 #   13:00-18:00 covers 13:00-16:30      (reset right before evening block)
 #   18:00-23:00 covers the evening 19:00-23:00 exactly
-OnCalendar=Mon..Fri 08:00
-OnCalendar=Mon..Fri 13:00
-OnCalendar=Mon..Fri 18:00
+OnCalendar=*-*-* 08:00
+OnCalendar=*-*-* 13:00
+OnCalendar=*-*-* 18:00
 Persistent=true
 Unit=codex-ping.service
 

@@ -63,6 +63,9 @@ Applications such as Herdr, lazygit, Superfile, Vicinae, code-server, and Zed
 may require their upstream installation method when they are not available
 from your enabled Fedora repositories.
 
+The Vicinae emoji preview workaround and reinstall steps are in
+[docs/vicinae-emoji.md](docs/vicinae-emoji.md).
+
 This guide assumes regular package-based Fedora Workstation. Fedora
 Silverblue/Kinoite uses `rpm-ostree`/Toolbox instead of the DNF host workflow.
 

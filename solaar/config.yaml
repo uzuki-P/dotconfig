@@ -9,7 +9,7 @@
     gesture2-gestures, gesture2-divert, gesture2-params, onboard_profiles, report_rate_extended, backlight_level, backlight_duration_hands_out, backlight_duration_hands_in,
     backlight_duration_powered, multiplatform, analog-button-tuning, haptic-play]
   _battery: 4100
-  _config_cookie: [192, 31]
+  _config_cookie: [109, 219]
   _modelId: B03400000000
   _sensitive: {change-host: false, divert-keys: false, dpi: true, hires-scroll-mode: ignore, hires-smooth-invert: ignore, hires-smooth-resolution: ignore,
     reprogrammable-keys: false, smart-shift: false, thumb-scroll-invert: false, thumb-scroll-mode: false}
