@@ -22,6 +22,7 @@ Create a small project task runner without changing unrelated developer workflow
 - Use the package manager selected by the project's lockfile or configuration.
 - If the required command cannot be determined from the project, ask before inventing it.
 - Do not start the development server merely to test the recipe.
+- For build recipes that produce an APK, AppImage, or EXE, stage a copy in `_apk/` named `<app>-<version>_<dd-mmm_hh-mm>.<extension>`. Use a lowercase month abbreviation and the format's usual extension casing, such as `.apk`, `.AppImage`, or `.exe`. Keep the untimestamped build output in the project's build directory. Use the staged file when reporting or sharing the build.
 
 ## Verification
 

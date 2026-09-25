@@ -1,0 +1,7 @@
+[Unit]
+Description=OpenCode quota window ping using GLM-5.3-Flash
+
+[Service]
+Type=oneshot
+ExecStartPre=/usr/bin/mkdir -p %h/.local/state/opencode-ping
+ExecStart=%h/.opencode/bin/opencode run --dir %h/.local/state/opencode-ping --model zai-coding-plan/glm-5.3-flash --variant minimal "Reply with exactly: ok"

@@ -100,3 +100,6 @@ export PATH="/home/uzuki_p/.local/bin:$PATH"
 
 # opencode
 export PATH=/home/uzuki_p/.opencode/bin:$PATH
+
+# Turso
+export PATH="$PATH:/home/uzuki_p/.turso"

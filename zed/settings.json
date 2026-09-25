@@ -24,7 +24,6 @@
 	},
 	"diff_view_style": "unified",
 	"colorize_brackets": true,
-	"code_lens": "on",
 	"toolbar": {
 		"code_actions": true
 	},

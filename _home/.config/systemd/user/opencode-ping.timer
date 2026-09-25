@@ -1,0 +1,12 @@
+[Unit]
+Description=Ping OpenCode at the start of each work block
+
+[Timer]
+OnCalendar=*-*-* 08:00
+OnCalendar=*-*-* 13:00
+OnCalendar=*-*-* 18:00
+Persistent=true
+Unit=opencode-ping.service
+
+[Install]
+WantedBy=timers.target

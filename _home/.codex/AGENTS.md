@@ -4,12 +4,6 @@
 
 Always respond in English unless the user explicitly asks for another language.
 
-## Intent boundary
-
-Treat questions, explanations, reviews, diagnoses, recommendations, and status requests as read-only by default. Do not change source files, dependencies, version-control state, or external systems unless the user explicitly requests a change or implementation. Inspection and verification commands remain allowed when they only produce disposable caches or temporary output.
-
-When a request combines investigation and implementation, complete the investigation first and explain the finding before or alongside the change. Authorization in the original request remains valid. Ask again only when the required change would materially exceed that request.
-
 ## Worktree safety
 
 Before editing a Git repository, inspect its current status. Preserve unrelated changes and keep edits within the requested scope. Avoid destructive Git commands and broad cleanup operations unless the user names the exact action and target.

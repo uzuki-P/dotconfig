@@ -9,7 +9,7 @@
     gesture2-gestures, gesture2-divert, gesture2-params, onboard_profiles, report_rate_extended, backlight_level, backlight_duration_hands_out, backlight_duration_hands_in,
     backlight_duration_powered, multiplatform, analog-button-tuning, haptic-play]
   _battery: 4100
-  _config_cookie: [109, 219]
+  _config_cookie: [204, 51]
   _modelId: B03400000000
   _sensitive: {change-host: false, divert-keys: false, dpi: true, hires-scroll-mode: ignore, hires-smooth-invert: ignore, hires-smooth-resolution: ignore,
     reprogrammable-keys: false, smart-shift: false, thumb-scroll-invert: false, thumb-scroll-mode: false}
@@ -38,7 +38,7 @@
   smart-shift: 10
   thumb-scroll-invert: false
   thumb-scroll-mode: true
-- _NAME: G304
+- _NAME: G304 Lightspeed Wireless Gaming Mouse
   _absent: [lowres-scroll-mode, hires-smooth-invert, hires-smooth-resolution, hires-scroll-mode, scroll-ratchet-torque, thumb-scroll-invert, thumb-scroll-mode,
     report_rate_extended, pointer_speed, dpi_extended, speed-change, backlight-timed, per-key-lighting, brightness_control, reprogrammable-keys, divert-keys,
     disable-keyboard-keys, force-sensing, divert-gkeys, m-key-leds, mr-key-led, multiplatform, change-host, gesture2-gestures, gesture2-divert, gesture2-params,
@@ -46,8 +46,9 @@
     headset-mic-snr, headset-ai-nr, headset-ai-nr-level, headset-sidetone, headset-mic-gain, headset-mix-balance, headset-auto-sleep, headset-onboard-eq,
     headset-eq-active-preset, headset-advanced-eq, headset_led_control, headset-onboard-effect, headset_per_zone_lighting, headset-signature-startup, headset-signature-shutdown,
     headset-signature-passive, logivoice-nr-state, logivoice-ng-state, logivoice-comp-state, logivoice-deesser-state, logivoice-depopper-state, logivoice-limiter-state,
-    logivoice-hpf-state, persistent-remappable-keys, report_rate, backlight_level, backlight_duration_hands_out, backlight_duration_hands_in, backlight_duration_powered,
-    led_zone_, rgb_startup_animation, rgb_shutdown_animation, fn-swap, persistent-remappable-keys, crown-smooth, divert-crown]
+    logivoice-hpf-state, persistent-remappable-keys, backlight_level, backlight_duration_hands_out, backlight_duration_hands_in, backlight_duration_powered,
+    rgb_startup_animation, rgb_shutdown_animation, fn-swap, persistent-remappable-keys, crown-smooth, divert-crown, scroll-ratchet, smart-shift, rgb_control,
+    rgb_zone_]
   _battery: 4096
   _modelId: '407400000000'
   _sensitive: {hires-scroll-mode: ignore, hires-smooth-invert: ignore, hires-smooth-resolution: ignore}
