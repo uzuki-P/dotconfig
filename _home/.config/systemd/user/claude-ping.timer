@@ -1,0 +1,13 @@
+[Unit]
+Description=Ping Claude at the start of each work block
+
+[Timer]
+# 5h-window chain with the afternoon reset at 14:30.
+OnCalendar=*-*-* 09:30
+OnCalendar=*-*-* 14:30
+OnCalendar=*-*-* 19:30
+Persistent=true
+Unit=claude-ping.service
+
+[Install]
+WantedBy=timers.target
