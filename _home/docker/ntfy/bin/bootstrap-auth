@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+"""Create private phone/publisher accounts without printing their credentials."""
+import os
+from pathlib import Path
+import re
+import secrets
+import subprocess
+
+ROOT = Path(__file__).resolve().parent.parent
+FILES = ROOT.parent / "files"
+
+
+def private_file(path, value):
+    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    path.write_text(value + "\n")
+    path.chmod(0o600)
+
+
+def run(args, env=None):
+    result = subprocess.run(args, env=env, capture_output=True, text=True)
+    if result.returncode:
+        raise SystemExit("ntfy credential setup failed. Inspect the local service status.")
+    return result.stdout
+
+
+for name in ("android", "publisher"):
+    password_file = ROOT / "secrets" / f"{name}-password"
+    if not password_file.exists():
+        password = secrets.token_urlsafe(32)
+        env = os.environ.copy()
+        env["NTFY_PASSWORD"] = password
+        run(["podman", "exec", "--env", "NTFY_PASSWORD", "ntfy-gokapi", "ntfy", "user", "add", name], env)
+        private_file(password_file, password)
+    run(["podman", "exec", "ntfy-gokapi", "ntfy", "access", name, "up*", "read-only" if name == "android" else "write-only"])
+    run(["podman", "exec", "ntfy-gokapi", "ntfy", "access", name, "gokapi-uploads", "read-only" if name == "android" else "write-only"])
+    token_file = ROOT / "secrets" / f"{name}-token"
+    if not token_file.exists():
+        output = run(["podman", "exec", "ntfy-gokapi", "ntfy", "token", "add", "--label=gokapi", name])
+        match = re.search(r"\btk_[A-Za-z0-9]+\b", output)
+        if not match:
+            raise SystemExit("The token command returned an unexpected response.")
+        private_file(token_file, match.group())
+
+publisher_token = FILES / "secrets" / "ntfy-token"
+if not publisher_token.exists():
+    private_file(publisher_token, (ROOT / "secrets" / "publisher-token").read_text().strip())
+endpoints = FILES / "secrets" / "ntfy-endpoints"
+if not endpoints.exists():
+    private_file(endpoints, "# One Gokapi UnifiedPush device endpoint per line.")
+env_file = FILES / ".env"
+content = env_file.read_text() if env_file.exists() else ""
+if not re.search(r"^\s*(?:export\s+)?NTFY_ENDPOINTS_FILE=", content, re.MULTILINE):
+    with env_file.open("a") as output:
+        output.write("\nNTFY_ENDPOINTS_FILE=" + str(endpoints) + "\n")
+print("Phone and publisher credentials are in ntfy/secrets with mode 0600.")
+print("The files notification hook is enabled. Add a device endpoint to files/secrets/ntfy-endpoints.")

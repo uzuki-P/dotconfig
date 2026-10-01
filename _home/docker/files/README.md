@@ -300,3 +300,12 @@ just route
 dev-route resolve files
 bin/share /path/to/test.png
 ```
+
+## Android upload notifications
+
+The optional `bin/notify-upload` hook publishes after a successful `bin/share`
+upload. Configure `NTFY_ENDPOINTS_FILE` for Gokapi's UnifiedPush device endpoints,
+`NTFY_TOKEN_FILE` for the publisher token, and optionally `NTFY_URL` for a regular
+ntfy topic. Token and endpoint files must have mode 0600. With none configured,
+the helper behaves as before. A publish failure prints a warning and preserves
+the successful upload result. See `../ntfy/README.md` for the private service.

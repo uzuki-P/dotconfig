@@ -36,6 +36,7 @@
       }
    },
    "favorites": [
+      "applications:com.mitchellh.ghostty",
       "core:search-emojis",
       "applications:com.mattjakeman.ExtensionManager",
       "clipboard:history"

@@ -1,8 +1,8 @@
-# Triage Labels
+# Triage states
 
-The skills speak in terms of five canonical triage roles. This file maps those roles to the actual label strings used in this repo's issue tracker.
+The skills use five canonical triage states. This file maps them to the strings recorded in each local Markdown issue's `Status:` field.
 
-| Label in mattpocock/skills | Label in our tracker | Meaning                                  |
+| Canonical state | Local Status value | Meaning                                  |
 | -------------------------- | -------------------- | ---------------------------------------- |
 | `needs-triage`             | `needs-triage`       | Maintainer needs to evaluate this issue  |
 | `needs-info`               | `needs-info`         | Waiting on reporter for more information |
@@ -10,6 +10,6 @@ The skills speak in terms of five canonical triage roles. This file maps those r
 | `ready-for-human`          | `ready-for-human`    | Requires human implementation            |
 | `wontfix`                  | `wontfix`            | Will not be actioned                     |
 
-When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the corresponding label string from this table.
+When a skill says to apply a triage state or label, update the local issue's `Status:` field using the corresponding value from this table. Record the separate category in its `Category:` field as `bug` or `enhancement`.
 
 Edit the right-hand column to match whatever vocabulary you actually use.

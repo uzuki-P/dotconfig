@@ -156,6 +156,10 @@ upload_file() {
 		 | .FileInfo.UrlHotlink = (if $hotlink_url == "" then null else $hotlink_url end)' \
 		"${response_file}"
 
+	if ! "${SCRIPT_DIR}/notify-upload" "${response_file}" "${download_url}"; then
+		printf 'share: upload succeeded, but notification publishing failed\n' >&2
+	fi
+
 	local alt_text="${filename//]/\\]}"
 	if [[ "${content_type}" == image/* && -n "${hotlink_url}" ]]; then
 		markdown="![${alt_text}](${hotlink_url})"

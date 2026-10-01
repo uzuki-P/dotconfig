@@ -1,14 +1,14 @@
 {
-    "workbench.activityBar.location": "top",
+    "workbench.activityBar.location": "bottom",
     "workbench.sideBar.location": "right",
-    "workbench.iconTheme": "catppuccin-latte",
+    "workbench.iconTheme": "catppuccin-macchiato",
     "workbench.preferredLightColorTheme": "Catppuccin Latte",
     "workbench.preferredDarkColorTheme": "Catppuccin Macchiato",
     "window.autoDetectColorScheme": true,
+    "catppuccin.syncWithIconPack": true,
     "editor.fontFamily": "'Maple Mono NF CN', 'JetBrainsMono Nerd Font Mono', monospace",
     "editor.fontSize": 15,
     "editor.fontLigatures": true,
-    "editor.minimap.enabled": false,
     "editor.wordWrap": "bounded",
     "editor.wordWrapColumn": 120,
     "editor.rulers": [80, 120],
@@ -33,5 +33,9 @@
         "<C-a>": false,
         "<C-b>": false
     },
-    "extensions.autoUpdate": "off"
+    "extensions.autoUpdate": "off",
+    "catppuccin-icons.hidesExplorerArrows": true,
+    "catppuccin.accentColor": "pink",
+    "editor.minimap.showSlider": "always",
+    "window.menuStyle": "custom"
 }

@@ -1,0 +1,39 @@
+{
+  "repository": "https://github.com/cursor/plugins",
+  "commit": "2eb7ed4613cfc8f098dfe464a23680ea44d84c5e",
+  "installedAt": "2026-10-01T11:31:56.425Z",
+  "publicSkills": [
+    "interrogate",
+    "architect",
+    "tdd",
+    "teach",
+    "unslop",
+    "how",
+    "why",
+    "arena"
+  ],
+  "upstreamSha256": {
+    "interrogate": "59d498c3e9848a24b2d105eb3f05b808aa4152adf4cb1de7bbb6aff4f4cd9b68",
+    "architect": "691cd39f52c7b613866e6baf9ea0b05451ffa21a6a9b4102f166418b89178fde",
+    "tdd": "eeb868e2dfebee528d730a67d7b17498fac4bb85dec2e38bc5c5176aca4d5d2f",
+    "teach": "bd286e5a6290673be2cd28aef7af2ec7f1fb138e6bce156ea657368c7e7fc8a4",
+    "unslop": "195411d320b5b328f9f642baf59757ed19aaf0931c0838740e0aca273d538dc1",
+    "how": "d31805589c7f6a63a6db6c9fadebbd79fb9660682cf1654e9b2e5e1e7cd30bc0",
+    "why": "2a852ec8680920109d2b56538b027c52867896a597250ac5d18a13e0b42e5b06",
+    "arena": "e3a1f6c49a08b7e0b92134e53300d146f1f22ba83386d2019926e736df421851"
+  },
+  "localChanges": [
+    "runtime pointer in each SKILL.md",
+    "agents/openai.yaml explicit invocation policy"
+  ],
+  "preservedMattSkills": [
+    "ask-matt",
+    "improve-codebase-architecture",
+    "to-spec",
+    "to-tickets",
+    "wayfinder",
+    "implement",
+    "handoff",
+    "to-questionnaire"
+  ]
+}

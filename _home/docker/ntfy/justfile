@@ -1,0 +1,52 @@
+# List the private notification service commands.
+default:
+    @just --list
+
+# Validate the loopback binding, pinned image, and ignored local configuration.
+validate:
+    @grep -q '^Image=docker.io/binwiederhier/ntfy:v2.28.0$' deploy/ntfy.container
+    @grep -q '^PublishPort=127.0.0.1:53843:8080$' deploy/ntfy.container
+    @grep -q '^Environment=NTFY_AUTH_DEFAULT_ACCESS=deny-all$' deploy/ntfy.container
+    @echo "Static validation passed."
+
+# Install the rootless Quadlet and create private persistent directories.
+install:
+    install -d -m 0700 data secrets "${HOME}/.config/containers/systemd"
+    install -m 0644 deploy/ntfy.container "${HOME}/.config/containers/systemd/ntfy.container"
+    systemctl --user daemon-reload
+
+# Start the installed private ntfy service.
+start:
+    systemctl --user start ntfy.service
+
+# Inspect the user service and loopback listener.
+status:
+    systemctl --user --no-pager --full status ntfy.service
+    @ss -ltn '( sport = :53843 )' || true
+
+# Publish the stable private ntfy route using the existing dev-router.
+route:
+    cd ../dev-router && just specific ntfy 53843
+
+# Generate private phone/publisher credentials and connect the files helper.
+bootstrap-auth:
+    ./bin/bootstrap-auth
+
+# Create an account with a password entered in the container's prompt.
+user-add name:
+    podman exec -it ntfy-gokapi ntfy user add {{name}}
+
+# Give the phone read access and the upload helper write access to device topics.
+configure-access:
+    podman exec ntfy-gokapi ntfy access android 'up*' read-only
+    podman exec ntfy-gokapi ntfy access publisher 'up*' write-only
+    podman exec ntfy-gokapi ntfy access android gokapi-uploads read-only
+    podman exec ntfy-gokapi ntfy access publisher gokapi-uploads write-only
+
+# Create a token for the named account.
+token-add name:
+    podman exec ntfy-gokapi ntfy token add --label=gokapi {{name}}
+
+# Follow the private notification service logs.
+logs:
+    journalctl --user-unit ntfy.service --follow --lines=100

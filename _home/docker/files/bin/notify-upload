@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Called by bin/share after a successful upload. No configuration means no work.
+[[ $# -eq 2 ]] || exit 2
+response_file="$1"
+download_url="$2"
+[[ -n "${NTFY_URL:-}" || -n "${NTFY_ENDPOINTS_FILE:-}" ]] || exit 0
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+token_file="${NTFY_TOKEN_FILE:-${script_dir}/../secrets/ntfy-token}"
+[[ -r "$token_file" ]] || { printf 'notify-upload: publisher token file is missing\n' >&2; exit 1; }
+mode="$(stat -L -c '%a' "$token_file")"
+(( (8#${mode} & 077) == 0 )) || { printf 'notify-upload: publisher token must have mode 0600\n' >&2; exit 1; }
+token="$(<"$token_file")"
+[[ -n "$token" && "$token" != *$'\n'* && "$token" != *$'\r'* ]] || exit 1
+
+work_dir="$(mktemp -d)"
+trap 'rm -f -- "$work_dir/header" "$work_dir/message"; rmdir -- "$work_dir"' EXIT
+chmod 700 "$work_dir"
+printf 'Authorization: Bearer %s\n' "$token" > "$work_dir/header"
+chmod 600 "$work_dir/header"
+jq --arg url "$download_url" '{Id:.FileInfo.Id, Name:.FileInfo.Name, Size:.FileInfo.Size, ContentType:.FileInfo.ContentType, UrlDownload:$url}' "$response_file" > "$work_dir/message"
+
+publish() {
+    local url="$1" unified="$2"
+    # Loopback HTTP is allowed for local testing. Remote endpoints must use HTTPS.
+    [[ "$url" == https://* || "$url" == http://127.0.0.1:*/* ]] || { printf 'notify-upload: endpoint must use HTTPS\n' >&2; return 1; }
+    curl --fail --silent --show-error --connect-timeout 2 --max-time 5 \
+        --header "@$work_dir/header" --header 'Content-Type: application/octet-stream' \
+        --header "X-UnifiedPush: $unified" --data-binary "@$work_dir/message" \
+        --output /dev/null "$url"
+}
+
+failed=0
+if [[ -n "${NTFY_URL:-}" ]]; then publish "$NTFY_URL" 0 || failed=1; fi
+if [[ -n "${NTFY_ENDPOINTS_FILE:-}" ]]; then
+    [[ -r "$NTFY_ENDPOINTS_FILE" ]] || { printf 'notify-upload: endpoint file is missing\n' >&2; exit 1; }
+    mode="$(stat -L -c '%a' "$NTFY_ENDPOINTS_FILE")"
+    (( (8#${mode} & 077) == 0 )) || { printf 'notify-upload: endpoint file must have mode 0600\n' >&2; exit 1; }
+    while IFS= read -r endpoint || [[ -n "$endpoint" ]]; do
+        [[ -z "$endpoint" || "$endpoint" == \#* ]] && continue
+        publish "$endpoint" 1 || failed=1
+    done < "$NTFY_ENDPOINTS_FILE"
+fi
+exit "$failed"

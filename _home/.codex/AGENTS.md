@@ -8,6 +8,14 @@ Always respond in English unless the user explicitly asks for another language.
 
 Before editing a Git repository, inspect its current status. Preserve unrelated changes and keep edits within the requested scope. Avoid destructive Git commands and broad cleanup operations unless the user names the exact action and target.
 
+## Project commands and conventions
+
+Before choosing commands or proposing workflow changes, read the project's justfile if one exists. Check the repository root and the relevant subdirectory, and follow imports or modules used by the relevant recipes.
+
+Treat recipe comments, command bodies, dependencies, and variables as evidence of the intended workflow. Read the relevant recipe before running it. Prefer existing recipes for development, testing, builds, and deployment unless the user explicitly requests another approach.
+
+When the user's shorthand matches an existing recipe or documented convention, use that meaning. If several interpretations remain, inspect the relevant project files before asking for clarification.
+
 ## Folders the user often mentions
 
 ### Sandbox folder
@@ -37,3 +45,9 @@ When working in the `capital-crm` repository or any of its worktrees, "BE" and "
 Reuse an existing development server when one is available. If verification requires a server and none is reachable, start it only when the command is known and doing so is within the requested task. Do not stop, restart, or replace a user-owned process without permission.
 
 If the server needs credentials, privileged access, or another user-only action, report the exact blocker and ask the user to handle it.
+
+## Skill replacements
+
+Poteto's `interrogate` replaces the previous `code-review`, and `architect` replaces `codebase-design`. The current `tdd`, `teach`, and `unslop` are Poteto's versions. When older workflows reference the retired names, use these replacements within the user's requested scope.
+
+For these skills and `how`, `why`, or `arena`, read `~/.agents/pstack/RUNTIME.md` before executing the workflow. The installation and Vercel removal are recorded in `~/dotconfig/docs/pstack-skills.md`.

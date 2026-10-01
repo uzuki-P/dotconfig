@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    cat <<'EOF'
+Usage: kde-send [--dry-run] [--] DEVICE_NAME FILE...
+       kde-send [--dry-run] --device-id DEVICE_ID FILE...
+       kde-send --list
+
+Send readable files to a paired, reachable KDE Connect device.
+Device names must match exactly, including case. Quote names with spaces.
+All files are checked before any transfer is requested.
+
+  -l, --list      List available device IDs and names
+  --device-id ID  Select by ID instead of name
+  --dry-run       Resolve the device and print commands without sending
+  --              End options, for device names starting with a dash
+  -h, --help      Show this help
+
+Examples:
+  kde-send --list
+  kde-send "My Phone" ./report.pdf ./photo.jpg
+  kde-send --dry-run "My Phone" ./report.pdf
+
+Exit status: 0 means requests were submitted, not delivery confirmed.
+             1 means validation or KDE Connect failed, 2 means invalid usage.
+Run in your desktop user session with access to its D-Bus.
+EOF
+}
+
+fail() {
+    printf 'kde-send: %s\n' "$*" >&2
+    exit 1
+}
+
+dry_run=false
+list=false
+device_id=''
+while (($#)); do
+    case "$1" in
+        --dry-run) dry_run=true; shift ;;
+        -l|--list) list=true; shift ;;
+        --device-id)
+            if (($# < 2)) || [[ -z "$2" ]]; then
+                usage >&2
+                exit 2
+            fi
+            device_id=$2
+            shift 2
+            ;;
+        -h|--help) usage; exit 0 ;;
+        --) shift; break ;;
+        -*) printf 'kde-send: unknown option: %s\n' "$1" >&2; exit 2 ;;
+        *) break ;;
+    esac
+done
+
+if $list; then
+    if (($#)) || $dry_run || [[ -n "$device_id" ]]; then
+        usage >&2
+        exit 2
+    fi
+elif [[ -z "$device_id" ]]; then
+    (($# >= 2)) || { usage >&2; exit 2; }
+    device_name=$1
+    [[ -n "$device_name" ]] || { usage >&2; exit 2; }
+    shift
+else
+    (($# >= 1)) || { usage >&2; exit 2; }
+fi
+
+command -v kdeconnect-cli >/dev/null 2>&1 || fail 'kdeconnect-cli is not installed.'
+
+files=()
+for file in "$@"; do
+    [[ -f "$file" && -r "$file" ]] || fail "Not a readable regular file: $file"
+    # Absolute paths keep leading dashes and URL-like filenames as local files.
+    if [[ "$file" != /* ]]; then
+        file="$PWD/$file"
+    fi
+    files+=("$file")
+done
+
+if ! devices=$(kdeconnect-cli --list-available --id-name-only); then
+    fail 'Cannot list devices. Run in your desktop user session with access to its D-Bus.'
+fi
+
+if $list; then
+    if [[ -n "$devices" ]]; then
+        printf '%s\n' "$devices"
+    else
+        printf 'No paired, reachable devices.\n' >&2
+    fi
+    exit 0
+fi
+
+matches=()
+while IFS= read -r line; do
+    [[ "$line" == *' '* ]] || continue
+    id=${line%% *}
+    name=${line#* }
+    if [[ -n "$device_id" ]]; then
+        [[ "$id" != "$device_id" ]] || matches+=("$id")
+    elif [[ "$name" == "$device_name" ]]; then
+        matches+=("$id")
+    fi
+done <<< "$devices"
+
+((${#matches[@]})) || fail 'No matching paired, reachable device. Check kde-send --list and the device connection.'
+((${#matches[@]} == 1)) || fail 'Multiple devices have that name. Use --device-id with an ID from kde-send --list.'
+device_id=${matches[0]}
+
+for file in "${files[@]}"; do
+    if $dry_run; then
+        printf '%q ' kdeconnect-cli --device "$device_id" --share "$file"
+        printf '\n'
+    elif ! kdeconnect-cli --device "$device_id" --share "$file"; then
+        fail "Share request failed for: $file. Earlier requests may already have been submitted."
+    fi
+done
