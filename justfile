@@ -2,6 +2,14 @@
 default:
   @just --list
 
+# Link home user skills to the dotconfig sources and remove stale links.
+sync-skills:
+  python3 "{{justfile_directory()}}/_home/.agents/sync-skills.py"
+
+# Check home skill links without changing files.
+validate-skills:
+  python3 "{{justfile_directory()}}/_home/.agents/sync-skills.py" --check
+
 # Install Vim and Which Key in the desktop VS Code-compatible editor.
 install-vscode-vim-which-key:
   @editor=""; \
