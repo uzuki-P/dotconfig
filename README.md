@@ -250,6 +250,14 @@ Notes:
 - The `SSH_AUTH_SOCK` setting expects a user SSH agent at
   `$XDG_RUNTIME_DIR/ssh-agent.socket`. Comment it out if your desktop/session
   manages SSH authentication differently.
+- Run `ssh-set` to load `~/.ssh/ghUzukiP` and `~/.ssh/bbPajar` into the
+  systemd user agent. The script uses `/run/user/$(id -u)/ssh-agent.socket`
+  when `XDG_RUNTIME_DIR` is unset.
+- `_home/.ssh/config` points GitHub and Bitbucket at
+  `/run/user/%i/ssh-agent.socket`, where SSH expands `%i` to your user ID.
+  This lets applications use the agent without `SSH_AUTH_SOCK`. Keep private
+  keys outside this repository. After a reboot, run `ssh-set` again if the
+  agent has no keys loaded.
 
 ## Optional development tooling
 

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/ssh-agent.socket"
+
+exec ssh-add "$HOME/.ssh/ghUzukiP" "$HOME/.ssh/bbPajar"

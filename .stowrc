@@ -3,5 +3,6 @@
 --ignore=favicon.svg
 --ignore=_home
 --ignore=docs
+--ignore=^_template$
 --ignore=setup.sh
 --ignore=DS_Store

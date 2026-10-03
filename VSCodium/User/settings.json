@@ -35,7 +35,7 @@
     },
     "extensions.autoUpdate": "off",
     "catppuccin-icons.hidesExplorerArrows": true,
-    "catppuccin.accentColor": "pink",
     "editor.minimap.showSlider": "always",
-    "window.menuStyle": "custom"
+    "window.menuStyle": "custom",
+    "catppuccin.accentColor": "pink"
 }

@@ -1,0 +1,24 @@
+# Only reusable source and documentation belong in this public directory.
+.env
+.env.*
+!.env.example
+local.properties
+signing.properties
+keystore.properties
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+.gradle/
+.kotlin/
+build/
+_apk/
+*.apk
+*.AppImage
+*.exe
+*.db
+*.sqlite
+*.sqlite3
+*.log
