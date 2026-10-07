@@ -1,11 +1,13 @@
 ---
 name: compose-expressive
-description: Build or redesign personal Kotlin Compose apps with Material 3 Expressive, using maintained modules in dotconfig for Android and desktop theme and settings behavior. Use for new Compose UI, settings work, or requested design migrations, not unrelated fixes or automatic rewrites of other stacks.
+description: Build or redesign Kotlin Compose UI with Material 3 Expressive when explicitly invoked, selected by material-expressive, requested by the user, or established by project docs or UI code. Use maintained dotconfig modules where available. Ordinary Compose or Material 3 alone does not activate this skill. Preserve existing stacks and targets.
 ---
 
 # Compose expressive
 
-Use Material 3 Expressive as the default design direction for the user's personal Compose apps unless the task specifies another direction. Adapt the template patterns to the target's purpose and supported platforms.
+Apply this skill when explicitly invoked, selected by `material-expressive`, or the task or project already establishes Material 3 Expressive. Ordinary Compose or Material 3 alone does not activate it. Within that scope, use Kotlin Compose Multiplatform with Material 3 Expressive as the default for new personal Android, iOS, and desktop apps unless the task specifies another stack or direction. Include only the requested platforms. Adapt the template patterns to the target's purpose and supported platforms.
+
+For new personal websites and web apps, use `web-expressive` and shadcn-m3e by default. Compose Multiplatform can also run in browsers through Kotlin/Wasm, but use that option when the user requests it or explicitly chooses shared Compose UI across native and web targets. For an existing Compose web target, preserve its stack and check browser and library compatibility. Keep these defaults within new work or requested migrations.
 
 ## Read the relevant template
 
@@ -18,6 +20,8 @@ Inspect the target project's instructions, UI structure, settings persistence, a
 | `~/dotconfig/_template/compose/desktop/` | Settings persistence and live system-theme detection |
 
 Replace the example package and adapt the modules to the target's existing storage and UI. Templates do not pin versions. Check compatibility with the target's dependencies before using APIs. Treat templates as read-only during app work unless template changes are requested. If they are unavailable, state the gap and use the target's existing patterns where possible.
+
+The maintained platform templates cover Android and JVM desktop. For iOS or an explicitly requested web target, reuse compatible common code and implement platform settings persistence, system-theme observation, and input behavior for that target. Do not copy Android or JVM APIs into shared or unsupported source sets. Check current Compose Multiplatform and Material 3 API availability for each requested platform.
 
 ## Theme and settings behavior
 

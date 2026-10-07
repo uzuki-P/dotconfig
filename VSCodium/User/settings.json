@@ -1,17 +1,20 @@
 {
     "workbench.activityBar.location": "bottom",
     "workbench.sideBar.location": "right",
-    "workbench.iconTheme": "catppuccin-macchiato",
+    "workbench.iconTheme": "catppuccin-latte",
+    "workbench.colorTheme": "Catppuccin Macchiato",
     "workbench.preferredLightColorTheme": "Catppuccin Latte",
     "workbench.preferredDarkColorTheme": "Catppuccin Macchiato",
-    "window.autoDetectColorScheme": true,
     "catppuccin.syncWithIconPack": true,
     "editor.fontFamily": "'Maple Mono NF CN', 'JetBrainsMono Nerd Font Mono', monospace",
     "editor.fontSize": 15,
     "editor.fontLigatures": true,
     "editor.wordWrap": "bounded",
     "editor.wordWrapColumn": 120,
-    "editor.rulers": [80, 120],
+    "editor.rulers": [
+        80,
+        120
+    ],
     "editor.renderWhitespace": "all",
     "editor.bracketPairColorization.enabled": true,
     "editor.codeLens": true,
@@ -24,6 +27,8 @@
     "files.autoSave": "afterDelay",
     "files.autoSaveDelay": 1000,
     "diffEditor.renderSideBySide": false,
+    "git.enabled": true,
+    "git.decorations.enabled": true,
     "terminal.integrated.defaultProfile.linux": "fish",
     "vim.leader": "<space>",
     "vim.useSystemClipboard": true,
@@ -34,8 +39,387 @@
         "<C-b>": false
     },
     "extensions.autoUpdate": "off",
-    "catppuccin-icons.hidesExplorerArrows": true,
     "editor.minimap.showSlider": "always",
     "window.menuStyle": "custom",
-    "catppuccin.accentColor": "pink"
+    "catppuccin.accentColor": "pink",
+    "vim.normalModeKeyBindingsNonRecursive": [
+        {
+            "before": [
+                "<space>"
+            ],
+            "commands": [
+                "whichkey.show"
+            ]
+        },
+        {
+            "before": [
+                "g",
+                "I"
+            ],
+            "commands": [
+                "workbench.action.splitEditorRight",
+                "editor.action.goToImplementation"
+            ]
+        },
+        {
+            "before": [
+                "g",
+                "T"
+            ],
+            "commands": [
+                "workbench.action.splitEditorRight",
+                "editor.action.goToTypeDefinition"
+            ]
+        },
+        {
+            "before": [
+                "g",
+                "d"
+            ],
+            "commands": [
+                "editor.action.revealDefinition"
+            ]
+        },
+        {
+            "before": [
+                "g",
+                "D"
+            ],
+            "commands": [
+                "editor.action.revealDefinitionAside"
+            ]
+        },
+        {
+            "before": [
+                "g",
+                "i"
+            ],
+            "commands": [
+                "editor.action.goToImplementation"
+            ]
+        },
+        {
+            "before": [
+                "g",
+                "t"
+            ],
+            "commands": [
+                "editor.action.goToTypeDefinition"
+            ]
+        },
+        {
+            "before": [
+                "g",
+                "r"
+            ],
+            "commands": [
+                "editor.action.goToReferences"
+            ]
+        },
+        {
+            "before": [
+                "g",
+                "f"
+            ],
+            "commands": [
+                "editor.action.openLink"
+            ]
+        }
+    ],
+    "vim.visualModeKeyBindingsNonRecursive": [
+        {
+            "before": [
+                "<space>"
+            ],
+            "commands": [
+                "whichkey.show"
+            ]
+        },
+        {
+            "before": [
+                "g",
+                "c"
+            ],
+            "commands": [
+                "editor.action.commentLine"
+            ]
+        },
+        {
+            "before": [
+                "g",
+                "f"
+            ],
+            "commands": [
+                "editor.action.openLink"
+            ]
+        }
+    ],
+    "vim.sneak": true,
+    "whichkey.delay": 100,
+    "whichkey.bindings": [
+        {
+            "key": " ",
+            "name": "Find file",
+            "type": "command",
+            "command": "workbench.action.quickOpen"
+        },
+        {
+            "key": "/",
+            "name": "Search project",
+            "type": "command",
+            "command": "workbench.action.findInFiles"
+        },
+        {
+            "key": ".",
+            "name": "Code actions",
+            "type": "command",
+            "command": "editor.action.quickFix"
+        },
+        {
+            "key": "e",
+            "name": "Reveal file in explorer",
+            "type": "command",
+            "command": "workbench.files.action.showActiveFileInExplorer"
+        },
+        {
+            "key": "f",
+            "name": "Files",
+            "type": "bindings",
+            "bindings": [
+                {
+                    "key": "f",
+                    "name": "Find file",
+                    "type": "command",
+                    "command": "workbench.action.quickOpen"
+                },
+                {
+                    "key": "g",
+                    "name": "Search project",
+                    "type": "command",
+                    "command": "workbench.action.findInFiles"
+                },
+                {
+                    "key": "p",
+                    "name": "Recent projects",
+                    "type": "command",
+                    "command": "workbench.action.openRecent"
+                }
+            ]
+        },
+        {
+            "key": "s",
+            "name": "Search",
+            "type": "bindings",
+            "bindings": [
+                {
+                    "key": "g",
+                    "name": "Search project",
+                    "type": "command",
+                    "command": "workbench.action.findInFiles"
+                },
+                {
+                    "key": "b",
+                    "name": "Search current file",
+                    "type": "command",
+                    "command": "actions.find"
+                },
+                {
+                    "key": "w",
+                    "name": "Search word in project",
+                    "type": "command",
+                    "command": "workbench.action.findInFiles"
+                }
+            ]
+        },
+        {
+            "key": "c",
+            "name": "Code",
+            "type": "bindings",
+            "bindings": [
+                {
+                    "key": "a",
+                    "name": "Code actions",
+                    "type": "command",
+                    "command": "editor.action.quickFix"
+                },
+                {
+                    "key": "r",
+                    "name": "Rename symbol",
+                    "type": "command",
+                    "command": "editor.action.rename"
+                },
+                {
+                    "key": "f",
+                    "name": "Format file",
+                    "type": "command",
+                    "command": "editor.action.formatDocument"
+                }
+            ]
+        },
+        {
+            "key": "b",
+            "name": "Buffers",
+            "type": "bindings",
+            "bindings": [
+                {
+                    "key": "d",
+                    "name": "Close editor",
+                    "type": "command",
+                    "command": "workbench.action.closeActiveEditor"
+                },
+                {
+                    "key": "o",
+                    "name": "Close other editors",
+                    "type": "command",
+                    "command": "workbench.action.closeOtherEditors"
+                }
+            ]
+        },
+        {
+            "key": "g",
+            "name": "Git",
+            "type": "bindings",
+            "bindings": [
+                {
+                    "key": "s",
+                    "name": "Focus source control",
+                    "type": "command",
+                    "command": "workbench.view.scm"
+                },
+                {
+                    "key": "h",
+                    "name": "Hunks",
+                    "type": "bindings",
+                    "bindings": [
+                        {
+                            "key": "d",
+                            "name": "Open file diff",
+                            "type": "command",
+                            "command": "git.openChange"
+                        }
+                    ]
+                },
+                {
+                    "key": "w",
+                    "name": "Worktrees",
+                    "type": "bindings",
+                    "bindings": [
+                        {
+                            "key": "t",
+                            "name": "Open worktree",
+                            "type": "command",
+                            "command": "git.openWorktree"
+                        }
+                    ]
+                },
+                {
+                    "key": "f",
+                    "name": "File",
+                    "type": "bindings",
+                    "bindings": [
+                        {
+                            "key": "h",
+                            "name": "File history in timeline",
+                            "type": "command",
+                            "command": "timeline.focus"
+                        }
+                    ]
+                },
+                {
+                    "key": "o",
+                    "name": "Open file without diff",
+                    "type": "command",
+                    "command": "git.openFile"
+                },
+                {
+                    "key": "g",
+                    "name": "Lazy Git in a new terminal",
+                    "type": "commands",
+                    "commands": [
+                        "workbench.action.terminal.new",
+                        {
+                            "command": "workbench.action.terminal.sendSequence",
+                            "args": {
+                                "text": "lazygit\r"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "key": "m",
+            "name": "Markdown",
+            "type": "bindings",
+            "bindings": [
+                {
+                    "key": "p",
+                    "name": "Preview",
+                    "type": "command",
+                    "command": "markdown.showPreview"
+                },
+                {
+                    "key": "P",
+                    "name": "Preview beside editor",
+                    "type": "command",
+                    "command": "markdown.showPreviewToSide"
+                }
+            ]
+        },
+        {
+            "key": "r",
+            "name": "Run",
+            "type": "bindings",
+            "bindings": [
+                {
+                    "key": "t",
+                    "name": "Choose task",
+                    "type": "command",
+                    "command": "workbench.action.tasks.runTask"
+                }
+            ]
+        },
+        {
+            "key": "t",
+            "name": "Toggle",
+            "type": "bindings",
+            "bindings": [
+                {
+                    "key": "i",
+                    "name": "Configure inlay hints",
+                    "type": "command",
+                    "command": "workbench.action.openSettings",
+                    "args": "editor.inlayHints.enabled"
+                }
+            ]
+        },
+        {
+            "key": "u",
+            "name": "UI",
+            "type": "bindings",
+            "bindings": [
+                {
+                    "key": "w",
+                    "name": "Toggle word wrap",
+                    "type": "command",
+                    "command": "editor.action.toggleWordWrap"
+                }
+            ]
+        },
+        {
+            "key": "x",
+            "name": "Diagnostics",
+            "type": "bindings",
+            "bindings": [
+                {
+                    "key": "x",
+                    "name": "Show problems",
+                    "type": "command",
+                    "command": "workbench.actions.view.problems"
+                }
+            ]
+        }
+    ],
+    "window.autoDetectColorScheme": true,
+    "git.autofetch": true
 }

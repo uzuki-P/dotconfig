@@ -38,13 +38,9 @@ When the user says "temp folder", they mean `~/projects/_temp`, the scratch proj
 
 ## Task handoffs
 
-Store task handoffs outside repositories under `~/projects/_md/YYYY-MM-DD_HHMMSS-project-task/handoff.md`, using local time for the folder's creation timestamp. Create the task folder when needed, reuse it across threads and worktrees, and add other Markdown files only when the task needs them.
+Use the `handoff` skill to create or update a handoff at major milestones in substantial work, before planned breaks, when asked, and immediately when the runtime reports an impending usage or context limit. Reuse the same task file across threads and worktrees. Do not wait for a percentage or ask permission to write the handoff.
 
-Record the goal, creation and last-updated times, task status, repository, main checkout, exact working directory, branch, last observed commit, and uncommitted changes. Include a checklist, key decisions, verification results, unresolved problems, and the next concrete action.
-
-Update the handoff when asked, before a planned break, or at a major milestone. Keep it concise and current rather than copying conversation logs or creating a new dated file for every session.
-
-When resuming, read the explicitly supplied handoff and verify its state against the current checkout before continuing. If no path is supplied, inspect matching task folders and ask when the intended task is ambiguous. Do not assume the newest folder is the right task. A handoff does not preserve uncommitted work after its worktree is removed.
+Use reliable quota data as an additional trigger when available. Missing quota data must never delay a normal handoff. When resuming, use the `handoff` skill to read the supplied handoff and verify it against the current checkout before continuing.
 
 ## Capital CRM backend
 
@@ -58,8 +54,6 @@ If the server needs credentials, privileged access, or another user-only action,
 
 ## Personal app conventions
 
-When creating a new personal Kotlin Compose app or redesigning its UI, default to Material 3 Expressive unless I specify another direction. Use the `compose-expressive` skill. Read the maintained reusable modules under `~/dotconfig/_template/compose/` for Android and desktop themes, settings, motion, and supported vibration behavior. Keep changes within the requested scope.
-
 The `app-icon` skill is explicit-only. Run it only when I invoke `$app-icon`, `/app-icon`, or explicitly name that skill. Its workflow bases the design on the app's function and saves a small JPG in the project root for T3 Code. Do not invoke it automatically for a new app or a generic icon request.
 
 Use the `justfile` skill for new-project developer commands and requested workflow changes. It defines the production APK build-and-share convention and the AppImage build, staging, install, and update conventions. Use the maintained examples under `~/dotconfig/_template/build/`. Existing project recipes remain the source of truth.
@@ -70,4 +64,4 @@ Shared skill sources live under `~/dotconfig/_home/.agents/skills/` and are link
 
 Poteto's `interrogate` replaces the previous `code-review`, and `architect` replaces `codebase-design`. The current `tdd`, `teach`, and `unslop` are Poteto's versions. When older workflows reference the retired names, use these replacements within the user's requested scope.
 
-For these skills and `how`, `why`, or `arena`, read `~/.agents/pstack/RUNTIME.md` before executing the workflow. The installation and Vercel removal are recorded in `~/dotconfig/docs/pstack-skills.md`.
+For every pstack skill, including `setup-pstack` and `poteto-mode`, read `~/.agents/pstack/RUNTIME.md` and the active profile in `~/.agents/pstack/MODELS.json` before executing the workflow. These mappings override upstream Cursor tools, models, paths, and permissions. The installation and usage are recorded in `~/dotconfig/docs/pstack-skills.md`.
