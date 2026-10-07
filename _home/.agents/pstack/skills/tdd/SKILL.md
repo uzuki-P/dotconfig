@@ -1,10 +1,13 @@
 ---
 name: tdd
-description: "Use only when the user explicitly asks for TDD, a failing test, or a regression test, OR when the bug has an obvious cheap local test target. Skip when the test path is unclear, expensive, integration-heavy, or not requested."
+description: Use only when the user explicitly asks for TDD, a failing test, or a regression test, OR when the bug has an obvious cheap local test target. Skip when the test path is unclear, expensive, integration-heavy, or not requested.
 disable-model-invocation: true
+metadata:
+  opencode/autoinvoke: 'false'
+  opencode/slash: 'true'
 ---
 
-Before following this workflow outside Cursor, read `~/.agents/pstack/RUNTIME.md` for tool, model, and reference mappings.
+Read `~/.agents/pstack/RUNTIME.md` and the active profile in `~/.agents/pstack/MODELS.json` before following this workflow. Their runtime mappings override the Cursor-specific tools, model defaults, paths, and permissions below.
 
 
 # TDD Bug Fix

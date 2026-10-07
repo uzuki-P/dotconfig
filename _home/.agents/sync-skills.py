@@ -6,6 +6,8 @@ import json
 import os
 from pathlib import Path
 import shutil
+import subprocess
+import sys
 import time
 
 
@@ -22,14 +24,17 @@ TARGETS = (
     ".config/goose/skills",
     ".config/opencode/skills",
 )
-RESERVED = {".codex/skills": {".system"}, ".claude/skills": {"synced"}}
-REMOVED = {"modern-web-guidance"}
+RESERVED = {".codex/skills": {".system"}, ".claude/skills": {"synced", ".trash"}}
+REMOVED = {"modern-web-guidance", "chrome-extensions"}
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--check", action="store_true", help="Report drift without changing files")
     args = parser.parse_args()
+    guard = subprocess.run([sys.executable, str(REPO / "_home/.agents/validate-pstack.py")])
+    if guard.returncode:
+        return guard.returncode
     skills = {p.name: p for p in SOURCE.iterdir() if (p / "SKILL.md").is_file()}
     if not skills or REMOVED & set(skills):
         parser.error("Source is empty or contains a deliberately removed skill")

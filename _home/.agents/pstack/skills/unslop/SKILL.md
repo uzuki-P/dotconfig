@@ -2,9 +2,12 @@
 name: unslop
 description: Cut AI tells from any writing. Must always apply.
 disable-model-invocation: true
+metadata:
+  opencode/autoinvoke: 'false'
+  opencode/slash: 'true'
 ---
 
-Before following this workflow outside Cursor, read `~/.agents/pstack/RUNTIME.md` for tool, model, and reference mappings.
+Read `~/.agents/pstack/RUNTIME.md` and the active profile in `~/.agents/pstack/MODELS.json` before following this workflow. Their runtime mappings override the Cursor-specific tools, model defaults, paths, and permissions below.
 
 
 # Unslop

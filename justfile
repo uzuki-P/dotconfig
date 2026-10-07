@@ -6,6 +6,10 @@ default:
 sync-skills:
   python3 "{{justfile_directory()}}/_home/.agents/sync-skills.py"
 
+# Check installed Poteto adaptations before accepting a skill update.
+validate-pstack:
+  python3 "{{justfile_directory()}}/_home/.agents/validate-pstack.py"
+
 # Check home skill links without changing files.
 validate-skills:
   python3 "{{justfile_directory()}}/_home/.agents/sync-skills.py" --check

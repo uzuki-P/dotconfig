@@ -1,10 +1,13 @@
 ---
 name: teach
-description: "Explain a body of work plainly so a person actually understands it. Runs the `how` and `why` skills and weaves what they find into one clear explanation. Use for 'teach me this', 'help me really understand X', 'explain this change or subsystem to me'."
+description: Explain a body of work plainly so a person actually understands it. Runs the `how` and `why` skills and weaves what they find into one clear explanation. Use for 'teach me this', 'help me really understand X', 'explain this change or subsystem to me'.
 disable-model-invocation: true
+metadata:
+  opencode/autoinvoke: 'false'
+  opencode/slash: 'true'
 ---
 
-Before following this workflow outside Cursor, read `~/.agents/pstack/RUNTIME.md` for tool, model, and reference mappings.
+Read `~/.agents/pstack/RUNTIME.md` and the active profile in `~/.agents/pstack/MODELS.json` before following this workflow. Their runtime mappings override the Cursor-specific tools, model defaults, paths, and permissions below.
 
 
 # Teach

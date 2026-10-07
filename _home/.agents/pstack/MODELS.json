@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "profiles": {
+    "t3": {
+      "budget": "inherit",
+      "roles": {
+        "feature, refactoring": "inherit-parent",
+        "bug-fix": "inherit-parent",
+        "perf-issue": "inherit-parent",
+        "hillclimb": "inherit-parent",
+        "judgment and prose": "inherit-parent",
+        "hardest tasks": "inherit-parent",
+        "how explorer": "inherit-parent",
+        "how explainer": "inherit-parent",
+        "why investigators": "inherit-parent",
+        "why synthesizer": "inherit-parent",
+        "reflect tooling": "inherit-parent",
+        "reflect judgment, divergent, synthesizer": "inherit-parent",
+        "architect runners": [
+          "inherit-parent",
+          "inherit-parent",
+          "inherit-parent"
+        ],
+        "interrogate reviewers": [
+          "inherit-parent",
+          "inherit-parent",
+          "inherit-parent"
+        ]
+      }
+    },
+    "codex": {
+      "budget": "inherit",
+      "roles": {
+        "feature, refactoring": "inherit-parent",
+        "bug-fix": "inherit-parent",
+        "perf-issue": "inherit-parent",
+        "hillclimb": "inherit-parent",
+        "judgment and prose": "inherit-parent",
+        "hardest tasks": "inherit-parent",
+        "how explorer": "inherit-parent",
+        "how explainer": "inherit-parent",
+        "why investigators": "inherit-parent",
+        "why synthesizer": "inherit-parent",
+        "reflect tooling": "inherit-parent",
+        "reflect judgment, divergent, synthesizer": "inherit-parent",
+        "architect runners": [
+          "inherit-parent",
+          "inherit-parent",
+          "inherit-parent"
+        ],
+        "interrogate reviewers": [
+          "inherit-parent",
+          "inherit-parent",
+          "inherit-parent"
+        ]
+      }
+    },
+    "claude": {
+      "budget": "inherit",
+      "roles": {
+        "feature, refactoring": "inherit-parent",
+        "bug-fix": "inherit-parent",
+        "perf-issue": "inherit-parent",
+        "hillclimb": "inherit-parent",
+        "judgment and prose": "inherit-parent",
+        "hardest tasks": "inherit-parent",
+        "how explorer": "inherit-parent",
+        "how explainer": "inherit-parent",
+        "why investigators": "inherit-parent",
+        "why synthesizer": "inherit-parent",
+        "reflect tooling": "inherit-parent",
+        "reflect judgment, divergent, synthesizer": "inherit-parent",
+        "architect runners": [
+          "inherit-parent",
+          "inherit-parent",
+          "inherit-parent"
+        ],
+        "interrogate reviewers": [
+          "inherit-parent",
+          "inherit-parent",
+          "inherit-parent"
+        ]
+      }
+    },
+    "opencode": {
+      "budget": "inherit",
+      "roles": {
+        "feature, refactoring": "inherit-parent",
+        "bug-fix": "inherit-parent",
+        "perf-issue": "inherit-parent",
+        "hillclimb": "inherit-parent",
+        "judgment and prose": "inherit-parent",
+        "hardest tasks": "inherit-parent",
+        "how explorer": "inherit-parent",
+        "how explainer": "inherit-parent",
+        "why investigators": "inherit-parent",
+        "why synthesizer": "inherit-parent",
+        "reflect tooling": "inherit-parent",
+        "reflect judgment, divergent, synthesizer": "inherit-parent",
+        "architect runners": [
+          "inherit-parent",
+          "inherit-parent",
+          "inherit-parent"
+        ],
+        "interrogate reviewers": [
+          "inherit-parent",
+          "inherit-parent",
+          "inherit-parent"
+        ]
+      }
+    }
+  }
+}
