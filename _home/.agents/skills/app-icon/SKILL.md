@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Create an icon that communicates the app's main function and remains readable at small sizes. Also provide a small JPG in the project root for the user's T3 Code project icon.
 
-Run this workflow only when the user explicitly invokes `app-icon`, such as `$app-icon` or `/app-icon`. Do not select it automatically for a new app or a generic icon request.
+Run this workflow only when the user invokes `$app-icon`, `/app-icon`, or explicitly asks to use the `app-icon` skill. Do not select it automatically for a new app or a generic icon request.
 
 ## Determine the icon's purpose
 

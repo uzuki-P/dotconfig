@@ -4,6 +4,10 @@
 
 Always respond in English unless the user explicitly asks for another language.
 
+## Subagent limit
+
+Run at most 3 subagents concurrently by default, unless the user explicitly requests a different limit. Count all active subagents across the task, including nested delegates and both native and T3 Code delegated tasks. The parent agent does not count toward this limit. Wait for an active subagent to finish before starting another when all 3 slots are occupied. Pass this limit to delegated agents so nested delegation respects the same shared limit.
+
 ## Worktree safety
 
 Before editing a Git repository, inspect its current status. Preserve unrelated changes and keep edits within the requested scope. Avoid destructive Git commands and broad cleanup operations unless the user names the exact action and target.
@@ -53,8 +57,6 @@ Reuse an existing development server when one is available. If verification requ
 If the server needs credentials, privileged access, or another user-only action, report the exact blocker and ask the user to handle it.
 
 ## Personal app conventions
-
-The `app-icon` skill is explicit-only. Run it only when I invoke `$app-icon`, `/app-icon`, or explicitly name that skill. Its workflow bases the design on the app's function and saves a small JPG in the project root for T3 Code. Do not invoke it automatically for a new app or a generic icon request.
 
 Use the `justfile` skill for new-project developer commands and requested workflow changes. It defines the production APK build-and-share convention and the AppImage build, staging, install, and update conventions. Use the maintained examples under `~/dotconfig/_template/build/`. Existing project recipes remain the source of truth.
 
