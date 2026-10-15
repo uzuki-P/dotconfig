@@ -20,6 +20,12 @@ loopback admin API.
 | `custom/` | Admin UI tweaks loaded through Gokapi's supported customization hook |
 | `secrets/api-key` | Local API key used by `bin/share` (ignored) |
 | `bin/share` | Upload and deletion helper |
+| `docs/cloudflare-api-plan.md` | Plan for publishing only the API to gokapi-android through Cloudflare (not implemented) |
+
+An optional Material 3 Expressive web UI lives in
+`~/projects/_sandbox/gokapi-admin`. It uses Gokapi's API through its own
+loopback server and tailnet route. Gokapi's `/admin` page works the same
+with or without it.
 
 The repository path `_home/docker/files` is installed by this dotfiles repo as
 `~/docker/files`. Run service commands from `~/docker/files` after Stow/setup.

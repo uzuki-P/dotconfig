@@ -8,6 +8,14 @@ Always respond in English unless the user explicitly asks for another language.
 
 Run at most 3 subagents concurrently by default, unless the user explicitly requests a different limit. Count all active subagents across the task, including nested delegates and both native and T3 Code delegated tasks. The parent agent does not count toward this limit. Wait for an active subagent to finish before starting another when all 3 slots are occupied. Pass this limit to delegated agents so nested delegation respects the same shared limit.
 
+## Subagent models
+
+Choose a model for every subagent you start. Do not let it inherit the parent model by default. Pstack workflows use `~/.agents/pstack/MODELS.json` instead of this list.
+
+Use Claude Opus 5.5 with medium reasoning for every subagent task, including exploration, search, evidence gathering, code review, and implementation. Keep final decisions in the parent.
+
+In T3 Code, use native subagents when they support the chosen model and `delegate_task` otherwise. Outside T3 Code, use the closest model the host supports and report any role that had to inherit the parent model.
+
 ## Worktree safety
 
 Before editing a Git repository, inspect its current status. Preserve unrelated changes and keep edits within the requested scope. Avoid destructive Git commands and broad cleanup operations unless the user names the exact action and target.

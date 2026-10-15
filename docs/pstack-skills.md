@@ -68,7 +68,7 @@ For example, ask poteto-mode to add a JSON output flag while preserving the curr
 
 ### Models and reasoning
 
-`~/.agents/pstack/MODELS.json` stores separate profiles for standalone Codex, Claude Code, OpenCode, and T3 Code. All 17 roles currently inherit the parent model and reasoning settings. Reviewer and candidate panels have three inherited seats. They provide independent attempts with the same model until you configure different supported models.
+`~/.agents/pstack/MODELS.json` stores separate profiles for standalone Codex, Claude Code, OpenCode, and T3 Code. Since 2026-10-13, every T3 and Claude Code role runs on Claude Opus 5.5 with medium reasoning. T3 selects `claudeAgent` with `claude-opus-5-5`, and Claude Code selects the `opus` alias. Interrogate has two Opus reviewers in T3 and three in Claude Code. Architect has three Opus runners. Those panels are independent same-model attempts rather than cross-model evidence. The standalone Codex and OpenCode profiles cannot run Opus natively, so they still inherit the parent model and reasoning settings.
 
 Reasoning budget controls internal reasoning, affects latency and usage, and does not set reply length or a spending limit. Setup offers current settings, medium, high, extra-high, and the model's highest supported level. It stores reasoning separately from model IDs and applies only settings the delegation tool supports. Inheritance aliases retain the session settings. Rerunning setup preserves other runtime profiles and role overrides.
 

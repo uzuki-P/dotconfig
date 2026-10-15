@@ -4,27 +4,128 @@
     "t3": {
       "budget": "inherit",
       "roles": {
-        "feature, refactoring": "inherit-parent",
-        "bug-fix": "inherit-parent",
-        "perf-issue": "inherit-parent",
-        "hillclimb": "inherit-parent",
-        "judgment and prose": "inherit-parent",
-        "hardest tasks": "inherit-parent",
-        "how explorer": "inherit-parent",
-        "how explainer": "inherit-parent",
-        "why investigators": "inherit-parent",
-        "why synthesizer": "inherit-parent",
-        "reflect tooling": "inherit-parent",
-        "reflect judgment, divergent, synthesizer": "inherit-parent",
+        "feature, refactoring": {
+          "providerInstanceId": "claudeAgent",
+          "model": "claude-opus-5-5",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "bug-fix": {
+          "providerInstanceId": "claudeAgent",
+          "model": "claude-opus-5-5",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "perf-issue": {
+          "providerInstanceId": "claudeAgent",
+          "model": "claude-opus-5-5",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "hillclimb": {
+          "providerInstanceId": "claudeAgent",
+          "model": "claude-opus-5-5",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "judgment and prose": {
+          "providerInstanceId": "claudeAgent",
+          "model": "claude-opus-5-5",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "hardest tasks": {
+          "providerInstanceId": "claudeAgent",
+          "model": "claude-opus-5-5",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "how explorer": {
+          "providerInstanceId": "claudeAgent",
+          "model": "claude-opus-5-5",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "how explainer": {
+          "providerInstanceId": "claudeAgent",
+          "model": "claude-opus-5-5",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "why investigators": {
+          "providerInstanceId": "claudeAgent",
+          "model": "claude-opus-5-5",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "why synthesizer": {
+          "providerInstanceId": "claudeAgent",
+          "model": "claude-opus-5-5",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "reflect tooling": {
+          "providerInstanceId": "claudeAgent",
+          "model": "claude-opus-5-5",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "reflect judgment, divergent, synthesizer": {
+          "providerInstanceId": "claudeAgent",
+          "model": "claude-opus-5-5",
+          "options": {
+            "effort": "medium"
+          }
+        },
         "architect runners": [
-          "inherit-parent",
-          "inherit-parent",
-          "inherit-parent"
+          {
+            "providerInstanceId": "claudeAgent",
+            "model": "claude-opus-5-5",
+            "options": {
+              "effort": "medium"
+            }
+          },
+          {
+            "providerInstanceId": "claudeAgent",
+            "model": "claude-opus-5-5",
+            "options": {
+              "effort": "medium"
+            }
+          },
+          {
+            "providerInstanceId": "claudeAgent",
+            "model": "claude-opus-5-5",
+            "options": {
+              "effort": "medium"
+            }
+          }
         ],
         "interrogate reviewers": [
-          "inherit-parent",
-          "inherit-parent",
-          "inherit-parent"
+          {
+            "providerInstanceId": "claudeAgent",
+            "model": "claude-opus-5-5",
+            "options": {
+              "effort": "medium"
+            }
+          },
+          {
+            "providerInstanceId": "claudeAgent",
+            "model": "claude-opus-5-5",
+            "options": {
+              "effort": "medium"
+            }
+          }
         ]
       }
     },
@@ -58,27 +159,117 @@
     "claude": {
       "budget": "inherit",
       "roles": {
-        "feature, refactoring": "inherit-parent",
-        "bug-fix": "inherit-parent",
-        "perf-issue": "inherit-parent",
-        "hillclimb": "inherit-parent",
-        "judgment and prose": "inherit-parent",
-        "hardest tasks": "inherit-parent",
-        "how explorer": "inherit-parent",
-        "how explainer": "inherit-parent",
-        "why investigators": "inherit-parent",
-        "why synthesizer": "inherit-parent",
-        "reflect tooling": "inherit-parent",
-        "reflect judgment, divergent, synthesizer": "inherit-parent",
+        "feature, refactoring": {
+          "model": "opus",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "bug-fix": {
+          "model": "opus",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "perf-issue": {
+          "model": "opus",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "hillclimb": {
+          "model": "opus",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "judgment and prose": {
+          "model": "opus",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "hardest tasks": {
+          "model": "opus",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "how explorer": {
+          "model": "opus",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "how explainer": {
+          "model": "opus",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "why investigators": {
+          "model": "opus",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "why synthesizer": {
+          "model": "opus",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "reflect tooling": {
+          "model": "opus",
+          "options": {
+            "effort": "medium"
+          }
+        },
+        "reflect judgment, divergent, synthesizer": {
+          "model": "opus",
+          "options": {
+            "effort": "medium"
+          }
+        },
         "architect runners": [
-          "inherit-parent",
-          "inherit-parent",
-          "inherit-parent"
+          {
+            "model": "opus",
+            "options": {
+              "effort": "medium"
+            }
+          },
+          {
+            "model": "opus",
+            "options": {
+              "effort": "medium"
+            }
+          },
+          {
+            "model": "opus",
+            "options": {
+              "effort": "medium"
+            }
+          }
         ],
         "interrogate reviewers": [
-          "inherit-parent",
-          "inherit-parent",
-          "inherit-parent"
+          {
+            "model": "opus",
+            "options": {
+              "effort": "medium"
+            }
+          },
+          {
+            "model": "opus",
+            "options": {
+              "effort": "medium"
+            }
+          },
+          {
+            "model": "opus",
+            "options": {
+              "effort": "medium"
+            }
+          }
         ]
       }
     },

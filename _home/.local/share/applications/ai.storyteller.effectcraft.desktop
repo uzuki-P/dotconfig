@@ -1,0 +1,16 @@
+[Desktop Entry]
+# Overrides the packaged launcher: starts the app with its agent control channel on
+# 127.0.0.1:29683 (effectcraft-cli --bridge 29683). Keep the port in sync with
+# ~/projects/_effect-craft/justfile.
+Type=Application
+Name=EffectCraft
+GenericName=Motion Graphics Editor
+Comment=Motion graphics and visual effects compositor
+Exec=env EFFECTCRAFT_CONTROL_PORT=29683 effectcraft %F
+TryExec=effectcraft
+Icon=ai.storyteller.effectcraft
+Terminal=false
+StartupNotify=true
+StartupWMClass=ai.storyteller.effectcraft
+Categories=AudioVideo;Video;Graphics;2DGraphics;
+Keywords=motion;graphics;animation;compositor;effects;keyframe;vfx;

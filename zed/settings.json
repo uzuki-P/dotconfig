@@ -72,6 +72,8 @@
 	"show_edit_predictions": false,
 	"hard_tabs": true,
 	"git_panel": {
+		"default_width": 480,
+		"default_width": 480,
 		"group_by": "staging",
   "tree_view": true,
 		"dock": "right"
@@ -117,7 +119,14 @@
 		"right_padding": 0.15
 	},
 	"agent": {
-		"profiles": {
+		"threads_sidebar": {
+			"auto_open": false
+		},
+		"threads_sidebar": {
+			"auto_open": false
+		},
+		"button": false,
+  "profiles": {
 			"bypass": {
 				"name": "Bypass",
 				"tools": {
@@ -150,7 +159,7 @@
 		},
 		"sidebar_side": "right",
 		"default_profile": "bypass",
-		"dock": "right",
+		"dock": "left",
 		"tool_permissions": {
 			"tools": {
 				"fetch": {
@@ -238,15 +247,21 @@
 	},
 	// Move all panel to the right
 	"project_panel": {
+		"default_width": 480,
+		"default_width": 480,
 		"auto_fold_dirs": false,
 		"button": true,
 		"dock": "right",
 		"git_status": true
 	},
 	"outline_panel": {
+		"default_width": 480,
+		"default_width": 480,
 		"dock": "right"
 	},
 	"collaboration_panel": {
+		"default_width": 480,
+		"default_width": 480,
 		"button": false,
   "dock": "right"
 	},
