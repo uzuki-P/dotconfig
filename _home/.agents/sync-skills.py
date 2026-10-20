@@ -23,7 +23,11 @@ TARGETS = (
     ".config/goose/skills",
     ".config/opencode/skills",
 )
-RESERVED = {".codex/skills": {".system"}, ".claude/skills": {"synced", ".trash"}}
+# tldraw Desktop installs and updates tldraw-offline itself (~/.config/tldraw/agent-skills.json).
+RESERVED = {
+    ".codex/skills": {".system", "tldraw-offline"},
+    ".claude/skills": {"synced", ".trash", "tldraw-offline"},
+}
 REMOVED = {"modern-web-guidance", "chrome-extensions"}
 
 
