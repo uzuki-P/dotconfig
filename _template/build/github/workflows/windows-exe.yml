@@ -1,0 +1,50 @@
+# Build the Windows EXE installer on a GitHub-hosted Windows runner.
+# Compose's packageExe needs jpackage + WiX on Windows, so Linux can't build it.
+# Runs on every push to main that touches more than docs; ci-exe-fetch.timer
+# (dotconfig) downloads the artifact locally, and `just ci-exe` waits for it.
+name: windows-exe
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**.md", "docs/**", ".scratch/**"]
+  workflow_dispatch:
+
+# A newer push supersedes a build still in progress.
+concurrency:
+  group: windows-exe-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  exe:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      # Full history: the version is <versionBase>.<commit count>.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # build-exe stamps the staged name with Get-Date, which reads the
+      # Windows system zone; set it to Asia/Jakarta before building.
+      - name: Set timezone
+        run: tzutil /s "SE Asia Standard Time"
+
+      - uses: extractions/setup-just@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build and stage EXE
+        run: just build-exe
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: example-app-exe
+          path: _apk/*.exe
+          if-no-files-found: error
+          retention-days: 7
