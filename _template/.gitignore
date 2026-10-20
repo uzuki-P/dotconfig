@@ -14,6 +14,8 @@ keystore.properties
 .gradle/
 .kotlin/
 build/
+# The build-module template folder, not Gradle output.
+!/build/
 _apk/
 *.apk
 *.AppImage
