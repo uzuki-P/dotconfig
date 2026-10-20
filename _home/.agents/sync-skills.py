@@ -19,7 +19,6 @@ TARGETS = (
     ".claude/skills",
     ".codex/skills",
     ".zcode/skills",
-    ".hermes/skills",
     ".openwiki/skills",
     ".config/goose/skills",
     ".config/opencode/skills",

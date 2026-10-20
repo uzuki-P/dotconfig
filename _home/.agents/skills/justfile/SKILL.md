@@ -43,6 +43,14 @@ Apply these defaults when creating a new app's release workflow or when asked to
 - Make `update` perform the full build, staging, and installation flow. Order these operations explicitly and avoid duplicate builds when the packaging tasks already share dependencies.
 - Retain other platform recipes. Add EXE or other packaging only for requested targets supported by the project.
 
+### Windows desktop
+
+- For a Compose Desktop app that targets `TargetFormat.Exe`, use the `build-exe` and `update-exe` examples in `~/dotconfig/_template/build/justfile.example` and its `scripts/update-installed-exe.ps1` helper. metrolist-desktop and gokapi-android under `~/projects/_sandbox/` are working references.
+- Add `set windows-shell` for Windows PowerShell and mark both recipes `[windows]` with a PowerShell `[script]` attribute, so Linux recipes keep `sh`.
+- Make `build-exe` run `createDistributable` and `packageExe` together, stage the installer in `_apk/` with the naming rule above, and print the staged path as its last line.
+- Make `update-exe` call `build-exe`, then pass the staged installer, the Compose `packageName`, the `createDistributable` output folder, and the version to `update-installed-exe.ps1`. The helper swaps files in place when the app is installed and runs the installer once when it is not.
+- Check that the Gradle `windows {}` block sets a fixed `upgradeUuid` and that the version increases on every build within Windows Installer's `major.minor.build` limits. Report a missing one instead of inventing it silently.
+
 Creating recipes does not require running release builds, uploads, or installation to validate them. Execute those operations when requested as part of the task or through a requested recipe.
 
 ## Verification

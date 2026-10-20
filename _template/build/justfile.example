@@ -1,0 +1,75 @@
+# On Windows, backticks and recipes run in Windows PowerShell.
+set windows-shell := ["powershell.exe", "-NoLogo", "-NoProfile", "-Command"]
+
+# Adapt these values to the target project's configuration.
+app_id := "example-app"
+app_name := "Example App"
+app_version := "0.1.0"
+android_release_task := ":app:assembleRelease"
+apk_output := "app/build/outputs/apk/release/app-release.apk"
+appimage_task := "packageAppImageFile"
+appimage_output := "build/compose/binaries/main/appimage/example-app-0.1.0.AppImage"
+launcher_icon := "src/main/resources/icons/app.png"
+# Compose nativeDistributions.packageName: the EXE name and uninstall DisplayName.
+package_name := "example-app"
+distributable_task := "createDistributable"
+exe_task := "packageExe"
+distributable_dir := "build/compose/binaries/main/app/example-app"
+exe_output := "build/compose/binaries/main/exe/example-app-0.1.0.exe"
+
+# List available commands.
+default:
+    @just --list
+
+# Build the production APK, stage it, and upload the staged copy.
+build-apk:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    ./gradlew {{android_release_task}}
+    staged="$(bash scripts/stage-artifact '{{apk_output}}' '{{app_id}}' '{{app_version}}' _apk)"
+    ~/docker/files/bin/share "$staged"
+
+# Build and stage the Linux AppImage.
+build-appimage:
+    ./gradlew {{appimage_task}}
+    bash scripts/stage-artifact '{{appimage_output}}' '{{app_id}}' '{{app_version}}' _apk
+
+# Ensure the AppImage exists and register it with desktop launchers.
+install:
+    ./gradlew {{appimage_task}}
+    bash scripts/install-appimage '{{appimage_output}}' '{{app_id}}' '{{app_name}}' '{{launcher_icon}}'
+
+# Build, stage, and install the Linux AppImage.
+update:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    ./gradlew {{appimage_task}}
+    staged="$(bash scripts/stage-artifact '{{appimage_output}}' '{{app_id}}' '{{app_version}}' _apk)"
+    bash scripts/install-appimage "$staged" '{{app_id}}' '{{app_name}}' '{{launcher_icon}}'
+
+# On Windows: build the EXE installer and stage it in _apk/.
+[windows]
+[script("powershell.exe", "-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File")]
+[extension(".ps1")]
+build-exe:
+    $ErrorActionPreference = "Stop"
+    # packageExe alone runs jpackage from the jars; update-exe swaps in the
+    # app image that only createDistributable writes.
+    .\gradlew.bat {{distributable_task}} {{exe_task}}
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    $stamp = (Get-Date).ToString("dd-MMM_HH-mm", [Globalization.CultureInfo]::InvariantCulture).ToLower()
+    New-Item -ItemType Directory -Force _apk | Out-Null
+    $target = "_apk/{{app_id}}-{{app_version}}_$stamp.exe"
+    Copy-Item -LiteralPath "{{exe_output}}" -Destination $target -Force
+    (Resolve-Path $target).Path
+
+# On Windows: build and stage the installer, then swap the installed app's files in place.
+[windows]
+[script("powershell.exe", "-NoLogo", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File")]
+[extension(".ps1")]
+update-exe:
+    $ErrorActionPreference = "Stop"
+    & "{{just_executable()}}" build-exe | Tee-Object -Variable buildOutput
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    $staged = @($buildOutput)[-1]
+    & .\scripts\update-installed-exe.ps1 -PackageName "{{package_name}}" -Source "{{distributable_dir}}" -Installer $staged -Version "{{app_version}}"

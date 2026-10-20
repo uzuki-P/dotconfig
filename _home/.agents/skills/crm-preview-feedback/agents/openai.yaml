@@ -1,0 +1,6 @@
+policy:
+  allow_implicit_invocation: false
+interface:
+  display_name: "CRM preview feedback"
+  short_description: "Fix a Capital CRM preview feedback report"
+  default_prompt: "Use $crm-preview-feedback to fix this feedback report."

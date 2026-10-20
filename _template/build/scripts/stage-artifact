@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# != 4 ]]; then
+    echo "Usage: stage-artifact SOURCE APP_ID VERSION OUTPUT_DIR" >&2
+    exit 2
+fi
+source_file=$1
+app_id=$2
+app_version=$3
+output_dir=$4
+[[ -f "$source_file" ]] || { echo "Artifact not found: $source_file" >&2; exit 1; }
+[[ "$app_id" =~ ^[a-z0-9][a-z0-9.-]*$ ]] || { echo "Invalid app identifier" >&2; exit 2; }
+[[ "$app_version" =~ ^[A-Za-z0-9][A-Za-z0-9.+_-]*$ ]] || { echo "Invalid version" >&2; exit 2; }
+case "$source_file" in
+    *.apk) extension=apk ;;
+    *.AppImage) extension=AppImage ;;
+    *.exe) extension=exe ;;
+    *) echo "Expected an APK, AppImage, or EXE" >&2; exit 2 ;;
+esac
+
+stamp=$(LC_ALL=C date +%d-%b_%H-%M | tr '[:upper:]' '[:lower:]')
+mkdir -p "$output_dir"
+output_dir=$(cd "$output_dir" && pwd)
+target="$output_dir/$app_id-${app_version}_$stamp.$extension"
+temporary=$(mktemp "$output_dir/.artifact.XXXXXX")
+trap 'rm -f -- "$temporary"' EXIT
+cp -- "$source_file" "$temporary"
+chmod --reference="$source_file" "$temporary"
+mv -f -- "$temporary" "$target"
+printf '%s\n' "$target"
