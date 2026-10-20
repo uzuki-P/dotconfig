@@ -1,0 +1,6 @@
+[Unit]
+Description=Fetch and share finished windows-exe and android-apk GitHub Actions builds
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/ci-fetch

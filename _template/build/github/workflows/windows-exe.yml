@@ -1,6 +1,6 @@
 # Build the Windows EXE installer on a GitHub-hosted Windows runner.
 # Compose's packageExe needs jpackage + WiX on Windows, so Linux can't build it.
-# Runs on every push to main that touches more than docs; ci-exe-fetch.timer
+# Runs on every push to main that touches more than docs; ci-fetch.timer
 # (dotconfig) downloads the artifact locally, and `just ci-exe` waits for it.
 name: windows-exe
 

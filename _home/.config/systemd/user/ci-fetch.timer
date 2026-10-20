@@ -1,11 +1,11 @@
 [Unit]
-Description=Poll GitHub Actions for finished Windows builds
+Description=Poll GitHub Actions for finished Windows and Android builds
 
 [Timer]
 # A cold build takes 6 to 10 minutes; a 3-minute poll adds little on top.
 OnBootSec=2min
 OnUnitActiveSec=3min
-Unit=ci-exe-fetch.service
+Unit=ci-fetch.service
 
 [Install]
 WantedBy=timers.target

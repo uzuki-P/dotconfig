@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Wait for the windows-exe GitHub Actions build of the pushed HEAD, then
-# fetch it with ci-exe-fetch (dotconfig): the EXE lands in _apk/, the GitHub
+# fetch it with ci-fetch (dotconfig): the EXE lands in _apk/, the GitHub
 # artifact is deleted, and the Gokapi share link prints last. Reuses the
 # build the push started; dispatches one when there is none, for example
 # after a docs-only push.
@@ -34,4 +34,4 @@ if [[ -z "$run_id" ]]; then
 fi
 
 gh run watch "$run_id" --exit-status
-ci-exe-fetch --run "$run_id" "$PWD"
+ci-fetch --run "$run_id" "$PWD"

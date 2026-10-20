@@ -1,6 +1,7 @@
-# Repos whose windows-exe GitHub Actions builds ci-exe-fetch.timer downloads
+# Repos whose windows-exe and android-apk GitHub Actions builds ci-fetch.timer downloads
 # into <repo>/_apk/ and shares through Gokapi. One path per line.
 ~/projects/_sandbox/lyrics-float
 ~/projects/_sandbox/metrolist-desktop
 ~/projects/_sandbox/gokapi-android
 ~/projects/_sandbox/pray-time
+~/projects/_sandbox/spendr-kt

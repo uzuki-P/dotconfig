@@ -21,13 +21,23 @@ exe_output := "build/compose/binaries/main/exe/example-app-0.1.0.exe"
 default:
     @just --list
 
-# Build the production APK, stage it, and upload the staged copy.
-build-apk:
+# Build the production APK and stage it in _apk/.
+stage-apk:
+    ./gradlew {{android_release_task}}
+    bash scripts/stage-artifact '{{apk_output}}' '{{app_id}}' '{{app_version}}' _apk
+
+# Build and stage the production APK, then upload the staged copy.
+build-apk: stage-apk
     #!/usr/bin/env bash
     set -euo pipefail
-    ./gradlew {{android_release_task}}
-    staged="$(bash scripts/stage-artifact '{{apk_output}}' '{{app_id}}' '{{app_version}}' _apk)"
-    ~/docker/files/bin/share "$staged"
+    # The newest staged copy of this version is the one stage-apk just wrote.
+    staged="$(ls -t _apk/{{app_id}}-{{app_version}}_*.apk | head -1)"
+    ~/docker/files/bin/share "$(pwd)/$staged"
+
+# Wait for the GitHub Actions APK build of the pushed HEAD, save it in _apk/, and share it via Gokapi.
+[linux]
+ci-apk:
+    bash scripts/ci-apk
 
 # Build and stage the Linux AppImage.
 build-appimage:

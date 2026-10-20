@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Wait for the android-apk GitHub Actions build of the pushed HEAD, then
+# fetch it with ci-fetch (dotconfig): the APK lands in _apk/, the GitHub
+# artifact is deleted, and the Gokapi share link prints last. Reuses the
+# build the push started; dispatches one when there is none, for example
+# after a docs-only push.
+set -euo pipefail
+
+workflow=android-apk.yml
+
+git fetch --quiet origin
+head=$(git rev-parse HEAD)
+branch=$(git branch --show-current)
+if [[ "$head" != "$(git rev-parse "origin/$branch")" ]]; then
+  echo "HEAD is not pushed to origin/$branch; push first so CI builds this commit." >&2
+  exit 1
+fi
+
+# Newest run for this commit that is still going or succeeded.
+find_run() {
+  gh run list --workflow "$workflow" --commit "$head" --limit 5 --json databaseId,status,conclusion \
+    --jq '[.[] | select(.status != "completed" or .conclusion == "success")][0].databaseId // empty'
+}
+
+run_id=$(find_run)
+if [[ -z "$run_id" ]]; then
+  gh workflow run "$workflow" --ref "$branch"
+  for _ in $(seq 30); do
+    run_id=$(find_run)
+    [[ -n "$run_id" ]] && break
+    sleep 2
+  done
+  [[ -n "$run_id" ]] || { echo "Workflow run did not appear." >&2; exit 1; }
+fi
+
+gh run watch "$run_id" --exit-status
+ci-fetch --run "$run_id" "$PWD"

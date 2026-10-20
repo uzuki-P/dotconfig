@@ -30,9 +30,9 @@ Apply these defaults when creating a new app's release workflow or when asked to
 
 ### Android
 
-- Use the `build-apk` example in `~/dotconfig/_template/build/justfile.example` and its `scripts/stage-artifact` helper as the starting point.
-- Make `build-apk` build the production release APK, stage the timestamped copy in `_apk/`, then upload that exact copy with `~/docker/files/bin/share`. Read the `share-file` skill for the helper's behavior. Do not read or embed its credentials in a recipe.
-- Derive the version and artifact path from the target project's configuration. Keep its existing signing setup. If release signing needs user-provided configuration, report the exact missing input instead of silently producing a debug APK.
+- Use the `stage-apk` and `build-apk` examples in `~/dotconfig/_template/build/justfile.example` and its `scripts/stage-artifact` helper as the starting point.
+- Make `stage-apk` build the production release APK and stage the timestamped copy in `_apk/`. Make `build-apk` depend on `stage-apk`, then upload that exact copy with `~/docker/files/bin/share`. Read the `share-file` skill for the helper's behavior. Do not read or embed its credentials in a recipe.
+- Derive the version and artifact path from the target project's configuration. Keep its existing signing setup. The user's apps read an optional git-ignored `keystore.properties` at the repo root and otherwise sign release builds with `~/.android/debug.keystore`, which is the user's intended signing key for sideloaded apps. For any other signing setup that needs user-provided configuration, report the exact missing input.
 - Add `build-apk-dev` only when the project has a separate dev flavor and the requested workflow needs it. Keep its package ID and artifact name distinct from production.
 
 ### Linux desktop
@@ -52,14 +52,15 @@ Apply these defaults when creating a new app's release workflow or when asked to
 - Never pipe or capture the output of a command that runs Gradle, such as `just build-exe | Tee-Object` or `$(just build-exe)`. The Gradle and Kotlin daemons inherit the pipe and keep it open, so the recipe hangs after the build succeeds. Let the build write to the console and locate its artifact on disk. Capturing a helper that does not start Gradle, such as `stage-artifact`, is fine.
 - Check that the Gradle `windows {}` block sets a fixed `upgradeUuid` and that the version increases on every build within Windows Installer's `major.minor.build` limits. Report a missing one instead of inventing it silently.
 
-### Windows builds on GitHub Actions
+### Builds on GitHub Actions
 
-This Linux machine cannot build an EXE, so GitHub Actions builds it and a local poller fetches it. lyrics-float, metrolist-desktop, gokapi-android, and pray-time under `~/projects/_sandbox/` are working references.
+GitHub Actions builds the Windows EXE, because this Linux machine cannot, and the release APK. A local poller fetches both. For EXE builds, lyrics-float, metrolist-desktop, gokapi-android, and pray-time under `~/projects/_sandbox/` are working references. For APK builds, spendr-kt and gokapi-android are.
 
-- Add this only for a project with a GitHub remote and working `build-exe` and `update-exe` recipes. GitHub builds only the Windows version. AppImage and APK builds stay local.
+- Add the EXE workflow only for a project with a GitHub remote and working `build-exe` and `update-exe` recipes. AppImage builds stay local.
 - Copy `~/dotconfig/_template/build/github/workflows/windows-exe.yml` to the target's `.github/workflows/` and rename its artifact to `<app>-exe`. Keep its `just build-exe` step, full-history checkout, Asia/Jakarta timezone step, 7-day retention, push trigger with `paths-ignore` for docs, manual dispatch, and `concurrency` cancellation.
-- Copy `~/dotconfig/_template/build/scripts/ci-exe` unchanged and add the `[linux]` `ci-exe` recipe from `justfile.example`. The script refuses an unpushed HEAD, waits for the push's run or dispatches one, then calls `ci-exe-fetch --run`.
-- Add the project's path to `~/dotconfig/_home/.config/ci-exe/repos`. `ci-exe-fetch.timer` then downloads each successful build into `_apk/`, shares it through Gokapi, deletes the GitHub artifact, and sends a desktop notification. Confirm the timer is enabled with `systemctl --user is-active ci-exe-fetch.timer`.
+- Copy `~/dotconfig/_template/build/scripts/ci-exe` unchanged and add the `[linux]` `ci-exe` recipe from `justfile.example`. The script refuses an unpushed HEAD, waits for the push's run or dispatches one, then calls `ci-fetch --run`.
+- Add the APK workflow only for an Android project with a GitHub remote and a working `stage-apk` recipe. Copy `~/dotconfig/_template/build/github/workflows/android-apk.yml` and rename its artifact to `<app>-apk`, copy `scripts/ci-apk` unchanged, and add the `[linux]` `ci-apk` recipe. Set the four `ANDROID_*` signing secrets from `~/.android/debug.keystore` as the template README describes. Without them, the workflow fails rather than signing with the runner's own key.
+- Add the project's path to `~/dotconfig/_home/.config/ci-fetch/repos`. `ci-fetch.timer` then downloads each successful build of either workflow into `_apk/`, shares it through Gokapi, deletes the GitHub artifact, and sends a desktop notification. Confirm the timer is enabled with `systemctl --user is-active ci-fetch.timer`.
 - A private repo spends included Actions minutes on every non-docs push. Tell the user before adding the workflow to one.
 
 Creating recipes does not require running release builds, uploads, or installation to validate them. Execute those operations when requested as part of the task or through a requested recipe.
