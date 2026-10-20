@@ -9,7 +9,7 @@ Copy the helpers into the target project's `scripts/` directory. The example inv
 - `install` installs the built AppImage under a stable name and registers its launcher icon and desktop entry.
 - `update` builds, stages, then installs the staged AppImage. Installation copies through a temporary file and renames it so an existing AppImage's mounted file is not overwritten in place.
 - `build-exe` runs only on Windows. It runs `createDistributable` and `packageExe`, stages the installer in `_apk/`, and prints the staged path last.
-- `update-exe` runs only on Windows. It calls `build-exe`, then `update-installed-exe.ps1` swaps the installed app's files in place. If the app is not installed yet, it runs the staged installer once.
+- `update-exe` runs only on Windows. It calls `build-exe` without piping or capturing its output, picks the newest staged installer for the version from `_apk/`, then `update-installed-exe.ps1` swaps the installed app's files in place. If the app is not installed yet, it runs the staged installer once. A pipe such as `build-exe | Tee-Object` hangs after the build: the Gradle and Kotlin daemons that Gradle starts inherit the pipe and keep it open until they exit.
 
 `stage-artifact` takes an existing artifact, app identifier, version, and output directory. It emits the staged path on stdout. The output name is `<app>-<version>_<dd-mmm_hh-mm>.<extension>`, with an English lowercase month and `.apk`, `.AppImage`, or `.exe`. It keeps the source file.
 
