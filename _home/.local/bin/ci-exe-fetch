@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+# Fetch Windows builds from the windows-exe GitHub Actions workflow.
+#
+#   ci-exe-fetch [--run RUN_ID] [REPO_DIR...]
+#
+# For each repo, every successful windows-exe run that still has an artifact
+# is downloaded into REPO_DIR/_apk/, shared through Gokapi, and its GitHub
+# artifact deleted, so a run is fetched once. A failed run gets one desktop
+# notification. Without REPO_DIR, the repos come from
+# ${XDG_CONFIG_HOME:-~/.config}/ci-exe/repos, one path per line.
+#
+# The ci-exe-fetch.timer user unit runs this every few minutes; a project's
+# `just ci-exe` calls it with --run once its build finishes. A lock keeps the
+# two from fetching the same run, and --run prints the share link last even
+# when the timer fetched the run first.
+set -euo pipefail
+
+workflow=windows-exe.yml
+share=~/docker/files/bin/share
+config=${XDG_CONFIG_HOME:-$HOME/.config}/ci-exe/repos
+state_dir=${XDG_STATE_HOME:-$HOME/.local/state}/ci-exe
+log=$state_dir/fetched.tsv
+
+run_id=""
+if [[ ${1:-} == --run ]]; then
+  run_id=${2:?--run needs a run id}
+  shift 2
+fi
+
+repos=("$@")
+if [[ ${#repos[@]} == 0 ]]; then
+  [[ -f $config ]] || { echo "No repos given and no $config." >&2; exit 2; }
+  while IFS= read -r line; do
+    line=${line%%#*}
+    line=${line//[[:space:]]/}
+    [[ -n $line ]] && repos+=("${line/#\~/$HOME}")
+  done < "$config"
+fi
+
+mkdir -p "$state_dir"
+touch "$log"
+exec 9> "$state_dir/lock"
+flock 9
+
+notify() {
+  command -v notify-send > /dev/null || return 0
+  notify-send --app-name=ci-exe "$@" || true
+}
+
+# Already recorded: tab-separated time, repo, run id, status, file, link.
+seen() { awk -F'\t' -v r="$1" -v id="$2" '$2 == r && $3 == id { found = 1 } END { exit !found }' "$log"; }
+
+# Returns 1 when the run has no artifact left. Checks every step itself:
+# callers use `fetch_run || ...`, which turns off errexit inside it.
+fetch_run() {
+  local dir=$1 slug=$2 id=$3
+  local artifacts out file staged link
+  artifacts=$(gh api "repos/$slug/actions/runs/$id/artifacts" \
+    --jq '.artifacts[] | select(.expired | not) | "\(.id)\t\(.name)"' < /dev/null) || return 2
+  [[ -n $artifacts ]] || return 1
+
+  out=$(mktemp -d)
+  mkdir -p "$dir/_apk" || return 2
+  while IFS=$'\t' read -r artifact_id name; do
+    gh run download "$id" -R "$slug" --name "$name" --dir "$out/$name" < /dev/null || { rm -rf "$out"; return 2; }
+    while IFS= read -r -d '' file; do
+      staged="$dir/_apk/$(basename "$file")"
+      cp "$file" "$staged" || { rm -rf "$out"; return 2; }
+      echo "Saved: $staged"
+      # The helper prints its JSON reply, then the Markdown link last. Commands
+      # in these loops read /dev/null so they cannot eat the loop input.
+      link=$("$share" "$staged" < /dev/null | tail -n 1) && [[ -n $link ]] || link="(share failed; saved at $staged)"
+      printf '%s\t%s\t%s\tfetched\t%s\t%s\n' "$(date -Is)" "$slug" "$id" "$staged" "$link" >> "$log"
+      echo "$link"
+      notify "$(basename "$staged") is ready" "$link"
+    done < <(find "$out/$name" -type f -print0)
+    # The local copy is the keeper; drop the GitHub artifact so it stops
+    # using Actions storage and the run counts as fetched.
+    gh api --silent -X DELETE "repos/$slug/actions/artifacts/$artifact_id" < /dev/null || { rm -rf "$out"; return 2; }
+  done <<< "$artifacts"
+  rm -rf "$out"
+}
+
+for dir in "${repos[@]}"; do
+  dir=$(realpath "$dir")
+  url=$(git -C "$dir" remote get-url origin)
+  slug=${url#*github.com[:/]}
+  slug=${slug%.git}
+
+  if [[ -n $run_id ]]; then
+    status=0
+    fetch_run "$dir" "$slug" "$run_id" || status=$?
+    [[ $status == 2 ]] && { echo "Fetching run $run_id failed." >&2; exit 1; }
+    if [[ $status == 1 ]]; then
+      # The timer got there first; repeat the link it recorded.
+      link=$(awk -F'\t' -v r="$slug" -v id="$run_id" '$2 == r && $3 == id && $4 == "fetched" { l = $6 } END { print l }' "$log")
+      [[ -n $link ]] || { echo "Run $run_id has no artifact and no fetch record." >&2; exit 1; }
+      echo "$link"
+    fi
+    continue
+  fi
+
+  while IFS=$'\t' read -r id conclusion; do
+    [[ -n $id ]] || continue
+    case $conclusion in
+      success)
+        seen "$slug" "$id" && continue
+        # A run with nothing left was fetched elsewhere; record it so later
+        # polls skip it without another API call.
+        status=0
+        fetch_run "$dir" "$slug" "$id" || status=$?
+        [[ $status == 1 ]] && printf '%s\t%s\t%s\tempty\t\t\n' "$(date -Is)" "$slug" "$id" >> "$log"
+        [[ $status == 2 ]] && notify --urgency=critical "${slug#*/}: fetching run $id failed" "Run ci-exe-fetch $dir to retry."
+        ;;
+      failure | timed_out)
+        seen "$slug" "$id" && continue
+        printf '%s\t%s\t%s\t%s\t\t\n' "$(date -Is)" "$slug" "$id" "$conclusion" >> "$log"
+        notify --urgency=critical "${slug#*/} Windows build failed" "https://github.com/$slug/actions/runs/$id"
+        ;;
+    esac
+  done < <(gh run list -R "$slug" --workflow "$workflow" --status completed --limit 10 \
+    --json databaseId,conclusion --jq '.[] | "\(.databaseId)\t\(.conclusion)"')
+done
