@@ -178,6 +178,14 @@
 	},
 	// LSP
 	"lsp": {
+		// Run tsrs (Rust port of TS 7) in place of vtsls for TS/TSX/JS.
+		// Installed with `npm install --prefix ~/.local/share/tsrs tsrs@latest`. Remove this block to go back to vtsls.
+		"vtsls": {
+			"binary": {
+				"path": "/home/uzuki_p/.local/share/tsrs/node_modules/@tsrs/linux-x64-gnu/tsrs",
+				"arguments": ["--lsp", "--stdio"]
+			}
+		},
 		"tailwindcss-language-server": {
 			"settings": {
 				"classAttributes": ["class", "className", "ngClass", "styles"]
