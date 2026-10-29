@@ -18,11 +18,30 @@ Create a small project task runner without changing unrelated developer workflow
 - Preserve existing recipes, the current default recipe, naming, imports, settings, and formatting conventions.
 - In a new `justfile`, put a `default` recipe first and make it run `just --list`.
 - Add a `dev` recipe when the project has a known development command.
+- When the project runs a web dev server that accepts a port, also add the `dev-share` recipe from the section below.
 - Give each new recipe a concise one-line doc comment. Do not rewrite old recipes merely to add comments.
 - Use the package manager selected by the project's lockfile or configuration.
 - If the required command cannot be determined from the project, ask before inventing it.
 - Do not start the development server merely to test the recipe.
 - For build recipes that produce an APK, AppImage, or EXE, stage a copy in `_apk/` named `<app>-<version>_<dd-mmm_hh-mm>.<extension>`. Use a lowercase month abbreviation and the format's usual extension casing, such as `.apk`, `.AppImage`, or `.exe`. Keep the untimestamped build output in the project's build directory. Use the staged file when reporting or sharing the build.
+
+## Tailnet dev server
+
+`dev-share` runs the dev server on the project's stable named route from the `publish-route` skill. `dev-route port [name]` returns the port already registered for the name, or creates the route on a free port in 20000-59999. With no name, it uses the project directory name. It prints the URL on stderr and only the port on stdout.
+
+```just
+# Run the dev server on this project's named tailnet route.
+dev-share *name:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    port="$(dev-route port {{name}})"
+    exec pnpm dev --port "$port" --host 127.0.0.1
+```
+
+- Replace `pnpm dev --port "$port" --host 127.0.0.1` with the project's own dev command and its port and host flags. Some tools take an environment variable such as `PORT="$port"` instead.
+- Keep the separate `port=` assignment under `set -euo pipefail`. If `dev-route` fails, the recipe stops before the server starts on a default port.
+- Bind to localhost. The router accepts only loopback targets.
+- If the dev server needs to know its public origin, for allowed hosts or callback URLs, pass `https://<name>.<base-domain>` from `dev-route resolve <name>`. Do not hard-code the domain.
 
 ## APK and desktop release conventions
 
@@ -67,6 +86,6 @@ Creating recipes does not require running release builds, uploads, or installati
 
 ## Verification
 
-Run `just --list` and `just --dry-run dev` when `dev` exists. Completion means Just parses the file, lists the new recipes, and expands `dev` to the command established by the project.
+Run `just --list` and `just --dry-run dev` when `dev` exists. Do not run `dev-share` to verify it, because that registers a live route. Read its expanded script with `just --show dev-share` instead. Completion means Just parses the file, lists the new recipes, and expands `dev` to the command established by the project.
 
 For added or changed release recipes, also run `just --dry-run <recipe>` for each relevant recipe. Inspect task names, artifact paths, version extraction, filename formatting, dependency order, and upload or install targets. Dry runs verify recipe expansion, not artifact creation. When a real build is requested, verify the staged file and report the upload or installation result only if that operation succeeds.

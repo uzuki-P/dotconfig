@@ -10,12 +10,14 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import errno
 import ipaddress
 import json
 import os
 from pathlib import Path
 import re
 import secrets
+import socket
 import sys
 import tempfile
 from urllib import error, request
@@ -294,6 +296,64 @@ def command_set(args: argparse.Namespace) -> None:
     print(f"https://{name}.{settings['base_domain']}")
 
 
+PORT_RANGE = (20000, 59999)
+
+
+def default_route_name() -> str:
+    name = re.sub(r"[^a-z0-9-]+", "-", Path.cwd().name.lower()).strip("-")
+    return normalize_name(name[:63].strip("-"))
+
+
+def target_port(target: str) -> int:
+    port = urlparse(target).port
+    if port is None:
+        raise ValueError(f"target has no port: {target}")
+    return port
+
+
+def port_is_free(port: int) -> bool:
+    for family, host in ((socket.AF_INET, "0.0.0.0"), (socket.AF_INET6, "::")):
+        try:
+            with socket.socket(family, socket.SOCK_STREAM) as probe:
+                probe.bind((host, port))
+        except OSError as exc:
+            if family == socket.AF_INET6 and exc.errno == errno.EAFNOSUPPORT:
+                continue
+            return False
+    return True
+
+
+def allocate_port(routes: dict[str, dict[str, str]]) -> int:
+    taken = {target_port(route["target"]) for route in routes.values()}
+    for _ in range(256):
+        port = secrets.randbelow(PORT_RANGE[1] - PORT_RANGE[0] + 1) + PORT_RANGE[0]
+        if port not in taken and port_is_free(port):
+            return port
+    raise RuntimeError("could not allocate a free port")
+
+
+def command_port(args: argparse.Namespace) -> None:
+    settings = load_settings()
+    name = normalize_name(args.name) if args.name else default_route_name()
+    routes = load_routes()
+    url = f"https://{name}.{settings['base_domain']}"
+    if name in routes:
+        port = target_port(routes[name]["target"])
+    else:
+        if name in static_route_names():
+            raise ValueError(f"route name already exists in Caddyfile: {name}")
+        port = allocate_port(routes)
+        routes[name] = {
+            "target": f"http://127.0.0.1:{port}",
+            "kind": "named",
+            "created_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+            "cwd": str(Path.cwd()),
+        }
+        persist_and_apply(routes, no_apply=args.no_apply)
+    print(url, file=sys.stderr)
+    print(port)
+
+
 def command_list_named(_args: argparse.Namespace) -> None:
     settings = load_settings()
     routes = {name: route for name, route in load_routes().items() if not is_random_route(name)}
@@ -391,6 +451,13 @@ def build_parser() -> argparse.ArgumentParser:
     named.add_argument("target", help="port, or http(s)://localhost:port")
     add_no_apply(named)
     named.set_defaults(handler=command_set)
+    port = commands.add_parser(
+        "port",
+        help="print the port of a named route, creating the route on a free port if needed",
+    )
+    port.add_argument("name", nargs="?", help="subdomain name; defaults to the current directory name")
+    add_no_apply(port)
+    port.set_defaults(handler=command_port)
     list_named = commands.add_parser("list-named", help="list persistent named routes")
     list_named.set_defaults(handler=command_list_named)
     remove_named = commands.add_parser("remove-named", help="remove a persistent named route")

@@ -14,6 +14,10 @@ random target:
 specific name target:
     ./dev-router.sh specific {{name}} {{target}}
 
+# Print a named route's port, creating the route on a free port if needed.
+port name:
+    dev-route port {{name}}
+
 # List persistent named localhost routes.
 list-named:
     ./dev-router.sh list-named

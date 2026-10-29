@@ -70,3 +70,9 @@ The above creates `https://myapp.<CADDY_TS_BASE_DOMAIN>` pointing to
 inspect and change the generated registry. The command accepts only loopback
 HTTP(S) upstreams with explicit ports; use a compact static Caddyfile handler
 when a service needs an advanced upstream, redirect, or Caddy matcher.
+
+To let the router pick the port, run `dev-route port [name]` from the project
+directory. It prints the URL on stderr and the port on stdout. An existing name
+returns its registered port. A new name gets a free port in 20000-59999 and a
+route to it. Without a name it uses the directory name, so a dev server can
+start with `--port "$(dev-route port)"` and keep the same URL every time.
