@@ -66,7 +66,7 @@ journalctl -u code-server@$USER -f
 ```
 
 Because this is a system service, it starts at boot without `loginctl
-enable-linger` — no lingering setup is needed, unlike the `ttyd` user service.
+enable-linger` — no lingering setup is needed.
 
 To confirm code-server picked up the copied config:
 
@@ -141,6 +141,6 @@ just keep the file out of source control.
 - Use Tailscale ACLs or grants to restrict which tailnet identities can reach
   Caddy on this device.
 - A connected client receives shell access as the local user through the
-  integrated terminal, equivalent to the `ttyd` setup.
+  integrated terminal.
 - If the host is shared, prefer `auth: password` as a second factor (see the
   caveat above).

@@ -22,7 +22,6 @@ variables and `Caddyfile` for how they are substituted.
 | Host | Project/service | Upstream |
 | --- | --- | --- |
 | `t3.<CADDY_TS_BASE_DOMAIN>` | T3 | `127.0.0.1:3773` |
-| `herdr.<CADDY_TS_BASE_DOMAIN>` | Herdr web terminal (ttyd → herdr) | `127.0.0.1:7681` |
 | `code.<CADDY_TS_BASE_DOMAIN>` | code-server | `127.0.0.1:4444` |
 | `il.<CADDY_TS_BASE_DOMAIN>` | IssueLane web application | `[::1]:3000` |
 | `il-api.<CADDY_TS_BASE_DOMAIN>` | IssueLane API | `127.0.0.1:3220` |

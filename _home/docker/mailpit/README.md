@@ -11,7 +11,7 @@ inspect it, and `just stop` to stop it without deleting the `mailpit-data`
 volume. Run `just` for the full command list.
 
 The network Quadlet creates the externally named `mailpit` Podman network.
-Penpot's backend joins that network and submits mail to `mailpit:1025`, with
+Containers that join that network can submit mail to `mailpit:1025`, with
 authentication and TLS disabled. The volume Quadlet retains the existing
 `mailpit-data` named volume, so captured messages survive the migration.
 

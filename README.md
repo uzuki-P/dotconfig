@@ -15,9 +15,8 @@ The repository has two Stow targets:
 | Top-level directories such as `fish/`, `nvim/`, `tmux/`, and `zed/` | `~/.config/` | Application configuration |
 | `_home/` | `~/` | Home-directory files, scripts, and service directories |
 
-`setup.sh` applies both targets. The `_home/docker/`, `_home/cockpit/`, and
-`_home/ttyd/` directories contain optional services with their own READMEs and
-`justfile`s; the main setup only creates links and does not start them.
+`setup.sh` applies both targets. The `_home/docker/` directories contain
+optional services with their own READMEs and `justfile`s; the main setup only creates links and does not start them.
 
 ## Recommended order on a clean Fedora Workstation
 
@@ -58,8 +57,8 @@ project pages before enabling them on another machine. The old
 intentionally not part of the clean-install steps.
 
 Useful but optional packages depend on which configurations you plan to use:
-`alacritty`, `btop`, `i3`, `i3blocks`, `rofi`, `solaar`, and `podman`.
-Applications such as Herdr, lazygit, Superfile, Vicinae, code-server, and Zed
+`btop`, `solaar`, and `podman`.
+Applications such as Herdr, lazygit, Vicinae, code-server, and Zed
 may require their upstream installation method when they are not available
 from your enabled Fedora repositories.
 
@@ -298,8 +297,6 @@ ya pack -a TD-Sky/sudo
 - `docs/code-server.md` — code-server setup and recovery.
 - `docs/herdr/README.md` — pinned Herdr reference.
 - `_home/docker/*/README.md` — local Podman Compose stacks.
-- `_home/cockpit/README.md` — Cockpit configuration.
-- `_home/ttyd/README.md` — ttyd user service.
 
 Each optional service directory has a `justfile`; run `just` inside that
 directory to list its commands before applying changes.

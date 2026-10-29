@@ -1,4 +1,0 @@
-[WebService]
-Origins = https://cockpit.@COCKPIT_BASE_DOMAIN@
-ProtocolHeader = X-Forwarded-Proto
-ForwardedForHeader = X-Forwarded-For

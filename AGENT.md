@@ -26,7 +26,7 @@ This is a **public** repository. Never leak private information.
 
 - Do not commit real IP addresses, hostnames, domains, emails, usernames, passwords, API keys, tokens, SSH keys, certificates, or any PII / personally identifying data.
 - Loopback (`127.0.0.1`, `::1`), link-local, and `example.com` / `example.tld` placeholders are fine.
-- Upstream copyright/contact notices already present in third-party scripts (e.g. under `i3/scripts/`) are intentional and must be left as-is; do not introduce new personal identifiers.
+- Upstream copyright/contact notices already present in third-party scripts are intentional and must be left as-is; do not introduce new personal identifiers.
 - When a configuration needs a sensitive or machine-specific value, read it from an environment variable or a `.env` file and **always provide a sensible default** so the config works on a fresh checkout without leaking anything. Example:
   ```sh
   MY_HOST="${MY_HOST:-127.0.0.1}"

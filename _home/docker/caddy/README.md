@@ -32,7 +32,7 @@ cp .env.example .env
 | Variable | Purpose |
 | --- | --- |
 | `CLOUDFLARE_API_TOKEN` | Cloudflare token with "Edit zone DNS" scope for your zone |
-| `CADDY_TS_IP` | Tailnet IP Caddy should bind (and where ttyd is reachable) |
+| `CADDY_TS_IP` | Tailnet IP Caddy should bind |
 | `CADDY_TS_BASE_DOMAIN` | Base domain under the wildcard cert, e.g. `ts.example.com` |
 
 Cloudflare must have a DNS-only wildcard A record for

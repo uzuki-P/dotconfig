@@ -30,7 +30,6 @@ http://*.{$CADDY_TS_BASE_DOMAIN:ts.example.com} {
 	}
 
 	# Advanced routes that cannot be represented by `dev-route set`.
-	# ttyd (Herdr web terminal) is the generated named route `herdr` -> 127.0.0.1:7681.
 	# draw whiteboard license toggle (draw repo: .env.example). Licensed mode
 	# is active: HTTPS lets browsers verify the tldraw key, watermark off.
 	# To revert to unlicensed (e.g. after the 2027-09-01 expiry), swap the
