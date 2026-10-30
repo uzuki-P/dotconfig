@@ -8,11 +8,12 @@ The synchronization covers these home directories:
 
 - `~/.agents/skills`
 - `~/.claude/skills`
-- `~/.codex/skills`
 - `~/.zcode/skills`
 - `~/.openwiki/skills`
 - `~/.config/goose/skills`
 - `~/.config/opencode/skills`
+
+Since 2026-10-30, `~/.codex/skills` is no longer synchronized because Codex is no longer used. Its existing links were left in place and no longer receive new skills.
 
 Every source skill has a link in every listed directory. The script removes obsolete links owned by this shared installation and prunes installation-lock entries whose skills no longer exist in the source. It refuses to overwrite independent directories or unrecognized links. Move a newly installed standalone skill into the source directory before running synchronization.
 

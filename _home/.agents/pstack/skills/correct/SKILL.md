@@ -1,6 +1,6 @@
 ---
 name: correct
-description: Find the mistakes agents keep repeating in this repo and make each one impossible. Try architecture first, then types, then a lint whose error names the fix, then a test, and write docs last. Prove each check fails on a real past mistake. Repeat this each time the operator corrects you. Use for /correct.
+description: "Find the mistakes agents keep repeating in this repo and make each one impossible. Try architecture first, then types, then a lint whose error names the fix, then a test, and write docs last. Prove each check fails on a real past mistake. Repeat this each time the operator corrects you. Use for /correct."
 disable-model-invocation: true
 metadata:
   opencode/autoinvoke: 'false'
@@ -8,7 +8,6 @@ metadata:
 ---
 
 Read `~/.agents/pstack/RUNTIME.md` and the active profile in `~/.agents/pstack/MODELS.json` before following this workflow. Their runtime mappings override the Cursor-specific tools, model defaults, paths, and permissions below.
-
 
 # Correct
 
@@ -24,7 +23,7 @@ First, read recent commits, reverts, review comments, agent instruction files, a
 
 1. **Eliminate it with architecture.** Give each piece of state one owner and each task one supported way. Hide internals so the wrong import fails. Replace hand-synced lists with one source of truth. Delete old ways and dead code an agent would copy.
 2. **Enforce it with types so the bad state can't be written.** If bad code still compiles, add a lint or CI check whose error names the file, type, or function to use instead. If the pattern is already common, fail only when a change adds more.
-3. **Test the behavior.** Fix or delete any test that would still pass if every function it calls returned nothing.
+3. **Test the behavior.** Fix or delete any test that still passes when the behavior it checks breaks, or that fails when only the internals change.
 4. **Write docs or agent rules last, only for judgment calls.** Nothing fails when an agent skips them.
 
 ## Fix and prove

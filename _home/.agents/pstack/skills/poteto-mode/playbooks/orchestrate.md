@@ -1,15 +1,25 @@
 ### Orchestrate
 
-Use for a requested program that needs several owners or sessions. Complete smaller tasks directly. Read RUNTIME.md and MODELS.json before selecting delegates or tools.
+**You run the program, never the code. Decide which agent does each piece of work, then check what each one produces.** For a standing project handed to one coordinator chat: multi-day, many stacked PRs, dozens to hundreds of subagents, few human turns. One task driven to a predicate is Autonomous run. One ambitious run that needs a bespoke workflow is figure-it-out. Work that one agent could finish inside the session's budget is not a program.
 
-1. Define the goal, scope, acceptance checks, and delivery actions the user authorized. A request to implement does not by itself request PR publication or merging.
-2. Use the handoff skill for durable state. Keep a unit list with owner, allowed paths, dependencies, current status, evidence, and remaining work. Store briefs beside the handoff unless the project specifies another location.
-3. Delegate only when the user or applicable instructions authorize it. Discover the host's actual child-task capabilities and concurrency limits. Do not require cloud placement or nested delegation. Use sequential work when those capabilities are absent. Select models from the active profile and preserve parent inheritance.
-4. Give each worker a concrete goal, exclusive write scope, context, acceptance checks, verification commands, and required report. Read-only reviewers report findings without changing files or external systems. Include standing instructions in each brief.
-5. Run independent work concurrently when supported. Resolve dependencies before starting dependent units. Keep one writer per worktree and avoid two workers editing the same files. Do not automatically launch a fixed number of workers or retry on guessed models.
-6. Inspect completion evidence and reconcile every owned task. Use task status tools to check liveness. Do not restart an idle agent merely to check on it. Retry a failed unit at most twice before reporting the blocker and adjusting the plan.
-7. Verify behavior with project commands and available browser or terminal tools. Scale review to the risk. An independent same-model attempt remains independent review, but it is not cross-model evidence. Record missing capabilities and failed checks.
-8. For authorized PR work, follow project conventions and the actual forge. Register relevant PRs with the runtime. Preserve stack bases and exclusive ownership during rebases. Use the runtime watcher for requested monitoring. Schedule recurring work only when requested and supported.
-9. Recheck the requested result, report verification and remaining blockers, and update the handoff. Do not claim persistence after the current turn unless a supported scheduler or watcher owns it.
+Run it with your own tools. Spawn workers with `Task`. Keep the program's state in the Project tracker (`notes.md`) and the Project store. Watch each PR with PR and CI event subscriptions when your harness has them. Call no scripts, run no polling loops, and never relay messages or status between agents.
 
-Keep unrelated discoveries in the local report. Messages to others, ticket changes, evaluation jobs, deployment, deletion, and merges require their own authorization. Apply authorization already given without asking again.
+#### Topology
+
+- **One owner per PR.** The owner is the only writer of its branch and carries the PR from build to merge. Only the owner pushes, rebases, or retargets it. Closing or retargeting a base PR orphans every PR above it, so the owner does that only on your call. You never author or edit code. Conflicted merges, chain rebases, and fixes go to owners.
+- **A fresh worker for each independent task.** Its kickoff carries everything it needs, including each upstream report it depends on, pasted in full. Workers can't see their siblings. Run workers locally, each in its own git worktree, since no cloud VMs are available. Pick each subagent's reasoning level and fast or standard speed for the job, per the Subagents section.
+- **A sub-coordinator only when one area has many parallel workers.** It owns that area's workers and kickoffs and sends you one rollup, never raw worker reports. Stop at three levels: you, sub-coordinators, and workers. Keep about ten workers in flight per coordinator, and start the next one as each finishes instead of waiting on a whole batch.
+- **Fork when new work needs a worker's built state,** such as its checkout, uncommitted changes, or a running process. Message a worker only for a follow-up on the same work. Never message one to check on it, because a message restarts an idle agent.
+- **Each PR gets a verifier that isn't its author,** on a different model family. The owner merges only on that verifier's pass at the current head.
+- **Start with one unit.** Take it through kickoff, owner, verifier, and merge before you fan out, so a flaw in the kickoff costs one agent instead of fifty. On near-identical cheap units, the first unit is that test.
+
+#### Supervision
+
+- **Each kickoff names the evidence that proves the work is done,** such as a command and its expected output, a control-skill check, or an artifact. It also names the goal, the paths the worker may and may not write, and the actions it must not take. If you can't name the evidence, the unit isn't scoped yet.
+- **Read the diff or the artifact, not only the worker's summary.** Green CI is an input to a verdict, not a verdict. Behavioral work needs more than a type check. A verdict covers one head SHA, so a new push needs a new verdict. Read a sample of each sub-coordinator's kickoffs while its workers run, and fix its instructions when one fails.
+- **Send back work that drifts from scope or grows past what was asked.** Keep only the fixes that block the program, and park the rest as follow-ups.
+- **Check a PR's live state before you report on it,** with `gh pr view` and `gh pr checks` or your forge's equivalents, not the worker's last report. Account for every worker you spawned as done, replaced, or absorbed into another worker's scope.
+- **Stop or replace a worker that stalls or loops.** Judge it by its pushes and PR activity, not its status text. Retry by cause: a smaller scope after a context or memory limit, the same kickoff after a dropped connection, and a different model after a tool error. After two retries, drop the unit and replan around it. When a stopped worker returns late, check its result against the PR's current state, and hand any unique findings to a fresh worker.
+- **Ask the user only for a real decision or a blocker,** such as an irreversible action, a product or preference call that no experiment settles, or a dead end that survived a replan. Rebase mechanics, retries, CI flakes, review triage, and "should I keep going" never reach the user.
+
+**Reply:** what landed against the goal, each PR's live state and verdict with its link, what was dropped and why, and the decisions waiting on the user.

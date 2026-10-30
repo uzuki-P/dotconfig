@@ -1,7 +1,5 @@
 # Word the prompt
 
-Adapt skill examples to the active host. Codex uses `$skill-name`; Claude Code and OpenCode use `/skill-name`. Follow RUNTIME.md for history access, delegation, and scheduling.
-
 A prompt states the intent and the check for done. The playbook supplies the steps, so a few plain sentences beat a spec.
 
 ## Put in
@@ -27,8 +25,8 @@ A prompt states the intent and the check for done. The playbook supplies the ste
 
 ## Design before the plan
 
-- For uncertain design choices, compare alternatives before committing. Ask for prototypes of a few options, with screenshots or videos for UI, and pick from the evidence.
-- Let prototypes answer the open questions. Use evidence from prototypes when reviewing a plan.
+- Never take the first design. Ask for prototypes of a few options, with screenshots or videos for UI, and pick from the evidence.
+- Let prototypes answer the open questions. Don't review an abstract plan adversarially, because reviewers invent risks that never happen.
 - For a shared package or API, ask for the README or a tutorial first, then work back to the code. The doc becomes the target the agent checks itself against.
 - Ask for the plan only after the design is settled. Each step of the plan ends in a check.
 
@@ -39,8 +37,8 @@ A prompt states the intent and the check for done. The playbook supplies the ste
 
 ## Before stepping away
 
-- State that you are stepping away and provide any choices needed to continue. This does not grant permission for unrelated actions.
-- Write done as checks every iteration can run. Request scheduling only when persistent recurring work is wanted and the runtime supports it.
+- Say "im going to bed" or "im stepping away" so the agent stops asking.
+- Write done as checks every iteration can run, and give `/loop` that predicate.
 - Ask for a fresh worktree off a named base.
 - Pre-answer what the agent would stop for, such as "don't ask me before committing".
 - Ask for a decision log to audit later.

@@ -1,6 +1,6 @@
 ---
 name: blast-radius
-description: Find what a change could break somewhere else before it ships, beyond the diff, and prove the one fact it's safe because of by running real code instead of writing it up. Use for 'blast radius of X', 'what could this break', or reviewing a small diff you don't trust.
+description: "Find what a change could break somewhere else before it ships, beyond the diff, and prove the one fact it's safe because of by running real code instead of writing it up. Use for 'blast radius of X', 'what could this break', or reviewing a small diff you don't trust."
 disable-model-invocation: true
 metadata:
   opencode/autoinvoke: 'false'
@@ -8,7 +8,6 @@ metadata:
 ---
 
 Read `~/.agents/pstack/RUNTIME.md` and the active profile in `~/.agents/pstack/MODELS.json` before following this workflow. Their runtime mappings override the Cursor-specific tools, model defaults, paths, and permissions below.
-
 
 # Blast radius
 
@@ -41,7 +40,7 @@ Step 4 is usually one small script that imports the same library the app ships a
 3. Look where grep stops. Read the source of the library you call, and check its pinned version and any local patch. Work out when things run: microtasks, unmount and teardown, Solid versus React. Follow what a symbol search misses: the JSON an API returns, a DB column, a wire format, another language reading the same bytes, a feature flag, code three hops downstream.
 4. Be honest about each risk. Give it a real chance of happening and a real cost if it does. Keep the risks you confirmed. List the ones you checked and cleared separately. Same rules as `why`. Cite a real `file:line`, a search that finds nothing is still an answer, and never make up a caller or an API.
 5. Prove the one fact. Write a script or test that runs the real code, run it, and paste what happened.
-6. For a broad change, use **interrogate** for an independent review when it would add evidence. Combine confirmed risks with the direct investigation. Report whether reviewers used different models.
+6. For a big or wide change, run it as an `arena`. Ask more than one model the same question and merge the answers. Different models catch different real bugs.
 
 ## What to hand back
 

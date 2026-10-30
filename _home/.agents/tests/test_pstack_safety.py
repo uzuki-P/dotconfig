@@ -111,8 +111,16 @@ class UpdateGuard(unittest.TestCase):
     def test_current_installation_passes(self):
         self.assertEqual(GUARD.validate(self.root), [])
 
-    def test_restored_pr_playbook_is_rejected(self):
-        (self.root / 'skills/poteto-mode/playbooks/opening-a-pr.md').write_text('restored')
+    def test_dropped_no_team_messages_rule_is_rejected(self):
+        skill = self.root / 'skills/poteto-mode/SKILL.md'
+        skill.write_text(skill.read_text().replace('**No team messages or ticket changes.**', ''))
+        self.assertIn('Missing local rule: skills/poteto-mode/SKILL.md', GUARD.validate(self.root))
+
+    def test_removed_resource_is_rejected(self):
+        policy = json.loads((self.root / 'LOCAL_POLICY.json').read_text())
+        policy['removedResources'] = ['skills/poteto-mode/playbooks/removed.md']
+        (self.root / 'LOCAL_POLICY.json').write_text(json.dumps(policy))
+        (self.root / 'skills/poteto-mode/playbooks/removed.md').write_text('restored')
         self.assertTrue(any('Removed resource restored' in e for e in GUARD.validate(self.root)))
 
     def test_restored_chrome_is_rejected(self):
@@ -134,23 +142,12 @@ class UpdateGuard(unittest.TestCase):
         self.assertTrue(any('Unsupported upstream instruction' in e for e in GUARD.validate(self.root)))
 
 
+@unittest.skipUnless(shutil.which('bun'), 'bun is not installed')
 class PlanCheck(unittest.TestCase):
-    def run_plan(self, content):
-        with tempfile.TemporaryDirectory(prefix='pstack-plan-') as temp:
-            path = Path(temp) / 'plan.md'
-            path.write_text(content)
-            return subprocess.run(['node', str(ROOT / 'pstack/skills/poteto-mode/scripts/check-plan.mjs'), str(path)], capture_output=True, text=True)
-
-    def valid_plan(self):
-        return "# Goal\n\n## Scope\nNamed work.\n\n## Units\n\n### First\n- Depends on: none.\n- Files: src/app.py.\n- Outcome: requested behavior.\n- Verify: run the regression recipe.\n\n## Open questions\nNone.\n"
-
-    def test_concrete_plan_passes(self):
-        self.assertEqual(self.run_plan(self.valid_plan()).returncode, 0)
-
-    def test_missing_verification_rejected(self):
-        result = self.run_plan(self.valid_plan().replace('- Verify: run the regression recipe.\n', ''))
-        self.assertEqual(result.returncode, 1)
-        self.assertIn('missing Verify', result.stderr)
+    def test_upstream_plan_checker_suite(self):
+        scripts = ROOT / 'pstack/skills/poteto-mode/scripts'
+        result = subprocess.run(['bun', 'test', 'check-plan.test.ts'], cwd=scripts, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 
 if __name__ == '__main__':

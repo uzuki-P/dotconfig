@@ -1,15 +1,14 @@
 ---
 name: principle-redesign-from-first-principles
-description: Apply when integrating a new requirement into an existing design. Redesign as if the requirement had been a foundational assumption from day one, instead of bolting it on.
+description: "Apply when integrating a new requirement into an existing design."
 disable-model-invocation: true
 ---
 
 Read `~/.agents/pstack/RUNTIME.md` and the active profile in `~/.agents/pstack/MODELS.json` before following this workflow. Their runtime mappings override the Cursor-specific tools, model defaults, paths, and permissions below.
 
-
 # Redesign From First Principles
 
-When integrating a change, don't bolt it onto the existing design. Redesign as if the requirement had been there from the start.
+When integrating a change, don't bolt it onto the existing design. Redesign as if the requirement had been a foundational assumption from the start.
 
 - Read all affected files and understand the current design
 - Ask: "if we were writing this from scratch with this new requirement, what would we build?"

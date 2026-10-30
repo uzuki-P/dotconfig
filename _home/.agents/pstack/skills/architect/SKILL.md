@@ -1,6 +1,6 @@
 ---
 name: architect
-description: Sketch types, signatures, and module structure before code, then stay in the loop while implementation fills in. Use for /architect, 'architect this', 'design this', or non-trivial work where jumping to code would lock in the wrong shape.
+description: "Sketch types, signatures, and module structure before code, then stay in the loop while implementation fills in. Use for /architect, 'architect this', 'design this', or non-trivial work where jumping to code would lock in the wrong shape."
 disable-model-invocation: true
 metadata:
   opencode/autoinvoke: 'false'
@@ -9,10 +9,9 @@ metadata:
 
 Read `~/.agents/pstack/RUNTIME.md` and the active profile in `~/.agents/pstack/MODELS.json` before following this workflow. Their runtime mappings override the Cursor-specific tools, model defaults, paths, and permissions below.
 
-
 # Architect
 
-Design before implementing. Sketch types, function signatures, class shapes, and module boundaries with `not implemented` bodies and pseudocode. Compare design alternatives, then implement the chosen sketch. If implementation proves the sketch wrong, throw it out and redesign.
+Sketch types, function signatures, class shapes, and module boundaries with `not implemented` bodies and pseudocode. Synthesize across multiple model perspectives, then fill in code against the chosen sketch.
 
 ## Start
 
@@ -26,15 +25,15 @@ Open a todolist with one entry per phase before starting.
 
 ## Phase A: Ground the problem
 
-Build a real mental model of every system the new code touches. Run the **how** skill over the relevant subsystems.
-
-Naming a file isn't grounding. Produce the traced model `how` prescribes. If the design redefines ownership or layering, also run the **why** skill on the existing shape so the rationale becomes a constraint, not a guess.
+Build a real mental model of every system the new code touches. Run the **how** skill over the relevant subsystems. Naming a file isn't grounding. Produce the architectural explanation `how` prescribes. If the design redefines ownership or layering, also run the **why** skill on the existing shape so the rationale becomes a constraint, not a guess.
 
 Skip Phase A only when the work is genuinely greenfield with no surrounding system to integrate.
 
 ## Phase B: Sketch
 
-Read `references/runner-prompt.md` for the design constraints and use the Phase A evidence. Produce design alternatives directly in this session. If the user requests independent designers, use the native delegation mechanism and the `architect runners` profile. Give each designer its own output directory and the same brief. Inherit the parent model when no selection exists. Follow RUNTIME.md for model validation and tool limits.
+Run the **arena** skill with the design-sketch task and the Phase A grounding artifacts. Pass `references/runner-prompt.md` as each runner's prompt.
+
+Take the runners from the `architect runners` line in the `pstack-models.mdc` rule, in place of the `arena runners` line. If the rule or that line is missing, use three `inherit-parent` seats. Alias and rejected entries follow the runner rules in the **arena** skill's Phase A.
 
 Design it twice. Require at least two structurally distinct candidates before synthesis, even when the first looks sufficient. This is the **exhaust-the-design-space** principle skill made concrete. Whole-shape alternatives, not point fixes inside one shape.
 
@@ -42,7 +41,7 @@ Screen every candidate against [`references/design-red-flags.md`](references/des
 
 Compare viable candidates on interface depth. Prefer the design that hides more complexity behind a smaller, simpler public surface. A rich interface can keep call chains short by concentrating capability instead of scattering it across layers.
 
-Combine the strongest supported choices into one design package. The synthesis decision populates the rationale's "Synthesis decision" section.
+Arena returns one synthesized design package. Its synthesis decision fills the rationale's "Synthesis decision" section.
 
 ## Phase C: Agree (opt-in)
 
@@ -56,9 +55,7 @@ If the human pushes back on the shape (in a checkpoint or after the fact), treat
 
 ## Phase D: Implement against the sketch
 
-Replace `not implemented` bodies with code, pseudocode with logic. The synthesized sketch is the contract.
-
-Deviations from the sketch are signal worth surfacing, not friction to absorb silently. If a function needs a parameter the sketch didn't anticipate, ask whether the sketch was wrong, the requirement was missed, or the implementation is overreaching.
+Replace `not implemented` bodies with code, pseudocode with logic. The synthesized sketch is the contract. Deviations from it are signal to surface, not friction to absorb silently. If a function needs a parameter the sketch didn't anticipate, ask whether the sketch was wrong, the requirement was missed, or the implementation is overreaching.
 
 ## Phase E: Scrap when the architecture is wrong
 
@@ -80,7 +77,7 @@ When you scrap:
 1. Re-run the **how** skill over what's been built.
 2. Redesign as if the new constraints had been day-one assumptions, per redesign-from-first-principles.
 3. Subtract before adding, per the **subtract-before-you-add** principle skill. The new sketch should be smaller than the old one before it grows.
-4. Return to Phase B and compare new design alternatives.
+4. Return to Phase B and re-run arena.
 
 ## Outputs
 

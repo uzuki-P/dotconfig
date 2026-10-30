@@ -1,6 +1,6 @@
 # Current installation
 
-The active installation has 22 public pstack skills and 24 private principle references. Teach and writing use pstack. Matt Pocock's plugin is disabled in Codex and Claude, and no Matt teach or writing skill is active. The four removed workflows and their dependent-call updates are documented below. Earlier sections describe the installation history.
+The active installation is the full upstream pstack at `4dd1d05`, with 34 public skills and 24 private principle references. Agents never post to team chat or change tickets. Unslop is no longer injected into every session. See the 2026-10-30 section at the end. Earlier sections describe the installation history.
 
 # Agent skill changes on 2026-10-01
 
@@ -131,3 +131,36 @@ For the next upstream update:
 5. Run `just validate-pstack`, then `just sync-skills` and `just validate-skills`. Restart discovery only when the host needs it.
 
 The pre-adaptation backup is `/home/uzuki_p/.local/share/agent-skill-backups/20261007-202649-poteto-portable`. The installation retains 23 public pstack skills. Chrome removal leaves 45 shared public skills. The home synchronizer preserves Claude's existing `.trash` recovery archive as a reserved directory.
+
+## Full upstream restore on 2026-10-30
+
+Reinstalled every pstack skill from upstream commit `4dd1d05818d19792e7cd6e818f1667f95f7e1dbe` and dropped the 2026-10-05 pruning and the 2026-10-07 rewrite of poteto-mode. Arena, swarm, no-comments, make-bot-ui, the opening-a-pr playbook, and the comment-sicko agent are back. New since the last install: in-your-own-words, sharpen, ketchup, ketchup-video, statechart, create-formal-verification-skill, and maintain-formal-verification-skill. Interrogate now has adversaries prove each finding with a run, and it calls arena. Orchestrate no longer uses the `orch/` scripts, which upstream deleted.
+
+The installed text is upstream with these local changes:
+
+- Every SKILL.md and agent prompt starts with the RUNTIME.md pointer. Public skills carry the OpenCode metadata and a Codex `agents/openai.yaml` that keeps them explicit-only.
+- Every Cursor model slug reads `inherit-parent`. MODELS.json picks the real model. Every profile gains `arena runners`, `arena cross-judge pool`, and `swarm workers`.
+- Swarm and Orchestrate run their workers locally, each in its own git worktree, within the three-subagent limit.
+- Agents never post to team chat or change tickets. Poteto-mode's Autonomy section and RUNTIME.md say so, and `validate-pstack.py` fails when either rule disappears. Reading those sources as evidence is still allowed. PR descriptions and review-thread replies are part of the PR workflow. Upstream's Benny automations are not installed.
+- Opening a PR, babysitting, and shipping follow upstream again. Deploys and data deletion still pause for the user.
+- Worktree cleanup keeps the local read-only `worktree-audit.py` and its approval-gated playbook.
+- setup-pstack stays native to Codex, Claude Code, OpenCode, and T3. It now lists the arena and swarm roles and offers a formal verification skill.
+- poteto-help and poteto-agent point at `~/.agents/skills/` instead of the Cursor plugin cache. Upstream's README and guide pages, without images, are under `~/.agents/pstack/`.
+
+Removed the unslop session hooks from `~/.claude/settings.json` (SessionStart and SubagentStart) and `~/.codex/hooks.json`, and set the zcode hook to `enabled: false`. The script `~/.agents/hooks/unslop-session.sh` and the `unslop` skill remain, so `/unslop` and pstack workflows that cite it still work. The global AGENTS.md no longer lists unslop as a replacement. New sessions pick up the change.
+
+Checks run: `just validate-pstack`, `python3 -m unittest discover -s _home/.agents/tests` (14 tests, including upstream's `check-plan.test.ts` through bun), upstream's watch-pr and check-plan bun suites in a temporary copy (61 pass), frontmatter and relative-link checks for all 58 skills and the agent and command wrappers, then `just sync-skills` and `just validate-skills` (57 skills across 7 home directories). The statechart tests were not run, because they install Java and TLC on first use. No paid workflow run was made.
+
+Backups of the previous pstack tree, shared links, OpenCode commands, AGENTS.md, and the three hook configs are at `/home/uzuki_p/.local/share/agent-skill-backups/20261030-064326-pstack-full-restore`. Link recovery records are at `/home/uzuki_p/.local/share/agent-skill-backups/1793317597287633387-home-sync`.
+
+To update again, stage upstream outside the repo, copy its `skills` and `agents`, then rerun the adaptation steps above. `just validate-pstack` lists every changed file and any slug, cloud, or missing-rule problem. Refresh `LOCAL_POLICY.json` with `installed_files` only after reviewing those files.
+
+## Codex removal and statechart setup on 2026-10-30
+
+Codex is no longer used. MODELS.json drops the `codex` profile and keeps `t3`, `claude`, and `opencode`. RUNTIME.md and setup-pstack no longer offer Codex as a host, and `just sync-skills` no longer manages `~/.codex/skills`. Its existing links were left in place. Outside pstack, Zed's commit-message model moved from `openai-subscribed` to Anthropic `claude-haiku-5-5`, matching T3's text generation model, Zed's `codex-acp` agent server was removed, and T3's two Codex favorites became Claude Sonnet 5.5 and Claude Fable 5.1. T3's codex provider was already disabled.
+
+Statechart's tools are installed with mise: `java@temurin-25` and `http:tla2tools@1.7.4`, the exact versions `run.ts` asks for. They are installed but not added to any mise config, which is how statechart finds them. A run on the upstream MediaPlayer example matched its committed report. The statechart suite passed 367 of 367 tests with `TLA2TOOLS` and `JAVA` set, run in a temporary copy so no `node_modules` landed in this repository.
+
+## Bitbucket pull requests
+
+This machine has SSH access to Bitbucket but no Bitbucket API token or PR tool, so agents cannot open Bitbucket PRs, such as capital-crm's. RUNTIME.md tells agents to push the branch and reply with a `pull-requests/new?source=<branch>&dest=<base>` link plus a ready-to-paste title and description. The user opens the PR. Babysit, shipping, and merge steps that need a PR wait on the user. Adding a Bitbucket API token and a small PR script later would remove this step.

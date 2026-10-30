@@ -72,6 +72,6 @@ Shared skill sources live under `~/dotconfig/_home/.agents/skills/` and are link
 
 ## Skill replacements
 
-Poteto's `interrogate` replaces the previous `code-review`, and `architect` replaces `codebase-design`. The current `tdd`, `teach`, and `unslop` are Poteto's versions. When older workflows reference the retired names, use these replacements within the user's requested scope.
+Poteto's `interrogate` replaces the previous `code-review`, and `architect` replaces `codebase-design`. The current `tdd` and `teach` are Poteto's versions. When older workflows reference the retired names, use these replacements within the user's requested scope.
 
 For every pstack skill, including `setup-pstack` and `poteto-mode`, read `~/.agents/pstack/RUNTIME.md` and the active profile in `~/.agents/pstack/MODELS.json` before executing the workflow. These mappings override upstream Cursor tools, models, paths, and permissions. The installation and usage are recorded in `~/dotconfig/docs/pstack-skills.md`.

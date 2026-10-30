@@ -8,6 +8,13 @@ import re
 import stat
 
 
+# Upstream lets agents post to team chat and change tickets. These rules must survive every update.
+REQUIRED_RULES = {
+    'RUNTIME.md': 'No team chat or ticket tracker is set up for writing.',
+    'skills/poteto-mode/SKILL.md': '**No team messages or ticket changes.**',
+}
+
+
 def installed_files(root):
     files = [root / 'RUNTIME.md']
     for directory in ('skills', 'agents'):
@@ -37,7 +44,10 @@ def validate(root):
     for resource in sorted(set(current) | set(baseline)):
         if current.get(resource) != baseline.get(resource):
             errors.append(f'Review required: {resource}')
-    prohibited = re.compile(r'opening-a-pr\.md|\*\*Opening a PR\*\*|`(?:grok[\w.-]*|claude-opus[\w.-]*|gpt-\d[\w.-]*)`|environment:\s*["\']cloud["\']', re.I)
+    for resource, marker in REQUIRED_RULES.items():
+        if marker not in (root / resource).read_text():
+            errors.append(f'Missing local rule: {resource}')
+    prohibited = re.compile(r'`(?:grok[\w.-]*|claude-opus[\w.-]*|gpt-[5-9][\w.-]*)`|environment:\s*["\']cloud["\']', re.I)
     for resource in current:
         if resource.endswith('.md'):
             for number, line in enumerate((root / resource).read_text().splitlines(), 1):
