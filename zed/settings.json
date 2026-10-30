@@ -32,16 +32,6 @@
 	"redact_private_values": false,
 	"cli_default_open_behavior": "new_window",
 	"agent_servers": {
-		"codex-acp": {
-			"favorite_config_option_values": {
-				"model": ["gpt-5.4-mini"]
-			},
-			"default_config_options": {
-				"mode": "full-access",
-				"model": "gpt-5.6-terra"
-			},
-			"type": "registry"
-		},
 		"claude-acp": {
 			"type": "registry"
 		}
@@ -152,9 +142,8 @@
 			"enable_thinking": true
 		},
 		"commit_message_model": {
-			"provider": "openai-subscribed",
-			"model": "gpt-5.6-luna",
-			"effort": "high"
+			"provider": "anthropic",
+			"model": "claude-haiku-5-5"
 		},
 		"sidebar_side": "right",
 		"default_profile": "bypass",
