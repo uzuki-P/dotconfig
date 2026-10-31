@@ -163,4 +163,15 @@ Statechart's tools are installed with mise: `java@temurin-25` and `http:tla2tool
 
 ## Bitbucket pull requests
 
-This machine has SSH access to Bitbucket but no Bitbucket API token or PR tool, so agents cannot open Bitbucket PRs, such as capital-crm's. RUNTIME.md tells agents to push the branch and reply with a `pull-requests/new?source=<branch>&dest=<base>` link plus a ready-to-paste title and description. The user opens the PR. Babysit, shipping, and merge steps that need a PR wait on the user. Adding a Bitbucket API token and a small PR script later would remove this step.
+Agents push over SSH and open Bitbucket PRs, such as capital-crm's, with `_home/.local/bin/bb-pr` (`create`, `view`, `list`, `edit`, `check`). It has no merge, decline or approve command; those stay in the Bitbucket UI.
+
+`bb-pr` authenticates with a scoped Atlassian API token (Bitbucket app passwords are retired). Setup:
+
+1. At https://id.atlassian.com/manage-profile/security/api-tokens choose "Create API token with scopes", app Bitbucket, an expiry of 90 days or less, and only these scopes: `read:user:bitbucket`, `read:repository:bitbucket`, `read:pullrequest:bitbucket`, `write:pullrequest:bitbucket`. Leave out `write:repository` (pushes use SSH), `delete:*` and `admin:*`.
+2. Run `secret-tool store --label='Bitbucket API token (bb-pr)' service bb-pr` in your own terminal and paste the token at the hidden prompt. It stays in the login keyring, never in a file or the environment.
+3. Write the Atlassian account email to `~/.config/bb-pr/email`.
+4. Run `bb-pr check` inside a Bitbucket clone.
+
+The script reads the token at call time and hands it to curl through a file descriptor, so it does not appear in `ps` output or the environment. `~/.claude/settings.json` denies `secret-tool lookup` and `secret-tool search` so agents cannot read the token directly. The token can still act on every repository the account can reach, and `write:pullrequest` allows merging through the raw API, so revoke it at the same Atlassian page if it leaks. To rotate it, create a new token and run step 2 again.
+
+When `bb-pr check` fails, RUNTIME.md tells agents to push the branch and reply with a `pull-requests/new?source=<branch>&dest=<base>` link plus a ready-to-paste title and description, and the user opens the PR.

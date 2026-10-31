@@ -1,0 +1,199 @@
+#!/usr/bin/env bash
+# Create and inspect Bitbucket Cloud pull requests for the current repository.
+#
+#   bb-pr check
+#   bb-pr create --title TITLE --body-file FILE [--dest BRANCH] [--draft]
+#   bb-pr view [ID]
+#   bb-pr list
+#   bb-pr edit ID [--title TITLE] [--body-file FILE]
+#
+# The workspace and repository come from `git remote get-url origin`. create
+# uses the current branch as the source, refuses a branch whose local HEAD is
+# not on origin, targets the repository's main branch unless --dest is given,
+# and adds the repository's default reviewers. view without ID shows the open
+# PR for the current branch. A --body-file of - reads the description from
+# stdin.
+#
+# Merging, declining and approving are left out on purpose; do those in the
+# Bitbucket UI.
+#
+# Credentials: a scoped Atlassian API token in the login keyring, and the
+# Atlassian account email in ${XDG_CONFIG_HOME:-~/.config}/bb-pr/email.
+#
+#   secret-tool store --label='Bitbucket API token (bb-pr)' service bb-pr
+#
+# The token is read at call time and handed to curl through a file descriptor,
+# so it never appears in argv, the environment or a file.
+set -euo pipefail
+
+api=https://api.bitbucket.org/2.0
+email_file=${XDG_CONFIG_HOME:-$HOME/.config}/bb-pr/email
+
+die() { echo "bb-pr: $*" >&2; exit 1; }
+
+command -v jq > /dev/null || die "jq is required."
+command -v secret-tool > /dev/null || die "secret-tool is required."
+
+credentials() {
+  [[ -s $email_file ]] || die "No Atlassian email in $email_file."
+  email=$(< "$email_file")
+  email=${email//[[:space:]]/}
+  token=$(secret-tool lookup service bb-pr) \
+    || die "No token in the keyring. Run: secret-tool store --label='Bitbucket API token (bb-pr)' service bb-pr"
+}
+
+# request METHOD PATH [JSON_BODY]; prints the response body, fails on HTTP >= 400.
+request() {
+  local method=$1 path=$2 data=${3:-} out status
+  [[ -n ${token:-} ]] || credentials
+  out=$(mktemp)
+  local args=(--silent --show-error --output "$out" --write-out '%{http_code}'
+    --request "$method" --header 'Accept: application/json')
+  [[ -n $data ]] && args+=(--header 'Content-Type: application/json' --data-binary @-)
+  status=$(curl "${args[@]}" --config <(printf 'user = "%s:%s"\n' "$email" "$token") \
+    "$api/$path" <<< "$data") || { rm -f "$out"; die "Request to $path failed."; }
+  if (( status >= 400 )); then
+    local msg
+    msg=$(jq -r '.error.message // empty, (.error.fields // {} | to_entries[] | "\(.key): \(.value)")' "$out" 2> /dev/null || true)
+    rm -f "$out"
+    die "HTTP $status from $method $path${msg:+: $msg}"
+  fi
+  cat "$out"
+  rm -f "$out"
+}
+
+repo_slug() {
+  local url
+  url=$(git remote get-url origin) || die "No origin remote."
+  [[ $url =~ bitbucket\.org[:/]([^/]+)/([^/]+)$ ]] || die "origin is not a Bitbucket repository: $url"
+  echo "${BASH_REMATCH[1]}/${BASH_REMATCH[2]%.git}"
+}
+
+current_branch() {
+  git symbolic-ref --quiet --short HEAD || die "HEAD is detached."
+}
+
+print_pr() {
+  jq -r '"#\(.id) [\(.state)\(if .draft then ", draft" else "" end)] \(.source.branch.name) -> \(.destination.branch.name)\n\(.title)\n\(.links.html.href)"'
+}
+
+read_body() {
+  local file=$1
+  [[ $file == - ]] && { cat; return; }
+  [[ -f $file ]] || die "No such file: $file"
+  cat "$file"
+}
+
+cmd_check() {
+  credentials
+  local user
+  user=$(request GET user) || exit 1
+  jq -r '"Authenticated as \(.display_name) (\(.nickname // .username // "?"))"' <<< "$user"
+  local slug
+  slug=$(repo_slug 2> /dev/null) || { echo "Not in a Bitbucket repository; skipped the repository check."; return; }
+  request GET "repositories/$slug" | jq -r '"Repository \(.full_name), main branch \(.mainbranch.name)"'
+  request GET "repositories/$slug/pullrequests?pagelen=1" > /dev/null && echo "Pull request read access OK."
+}
+
+cmd_create() {
+  local title="" body_file="" dest="" draft=false
+  while (( $# )); do
+    case $1 in
+      --title) title=${2:?}; shift 2 ;;
+      --body-file) body_file=${2:?}; shift 2 ;;
+      --dest) dest=${2:?}; shift 2 ;;
+      --draft) draft=true; shift ;;
+      *) die "create: unknown argument $1" ;;
+    esac
+  done
+  [[ -n $title ]] || die "create needs --title."
+  [[ -n $body_file ]] || die "create needs --body-file."
+
+  local slug branch head remote_head body
+  slug=$(repo_slug)
+  branch=$(current_branch)
+  head=$(git rev-parse HEAD)
+  remote_head=$(git ls-remote origin "refs/heads/$branch" | cut -f1)
+  [[ -n $remote_head ]] || die "Branch $branch is not on origin. Push it first: git push -u origin $branch"
+  [[ $remote_head == "$head" ]] || die "origin/$branch is at ${remote_head:0:8}, local HEAD is ${head:0:8}. Push first."
+  body=$(read_body "$body_file")
+
+  credentials
+  [[ -n $dest ]] || dest=$(request GET "repositories/$slug" | jq -r '.mainbranch.name')
+  [[ $dest != "$branch" ]] || die "Source and destination are both $branch."
+
+  local existing
+  existing=$(request GET "repositories/$slug/pullrequests?state=OPEN&q=$(jq -rn --arg b "$branch" '"source.branch.name=\"\($b)\"" | @uri')")
+  if [[ $(jq '.size // (.values | length)' <<< "$existing") != 0 ]]; then
+    echo "An open pull request already exists for $branch:" >&2
+    jq '.values[0]' <<< "$existing" | print_pr
+    exit 1
+  fi
+
+  local me reviewers='[]'
+  me=$(request GET user | jq -r '.uuid')
+  if defaults=$(request GET "repositories/$slug/effective-default-reviewers?pagelen=100" 2> /dev/null); then
+    reviewers=$(jq --arg me "$me" '[.values[].user | select(.uuid != $me) | {uuid}] | unique' <<< "$defaults")
+  else
+    echo "bb-pr: could not read default reviewers; creating without them." >&2
+  fi
+
+  local payload
+  payload=$(jq -n --arg title "$title" --arg body "$body" --arg src "$branch" --arg dest "$dest" \
+    --argjson draft "$draft" --argjson reviewers "$reviewers" \
+    '{title: $title, description: $body, draft: $draft, reviewers: $reviewers,
+      source: {branch: {name: $src}}, destination: {branch: {name: $dest}}}')
+  request POST "repositories/$slug/pullrequests" "$payload" | print_pr
+}
+
+cmd_view() {
+  local slug
+  slug=$(repo_slug)
+  if [[ -n ${1:-} ]]; then
+    [[ $1 =~ ^[0-9]+$ ]] || die "view: ID must be a number."
+    request GET "repositories/$slug/pullrequests/$1" | print_pr
+    return
+  fi
+  local branch list
+  branch=$(current_branch)
+  list=$(request GET "repositories/$slug/pullrequests?state=OPEN&q=$(jq -rn --arg b "$branch" '"source.branch.name=\"\($b)\"" | @uri')")
+  [[ $(jq '.values | length' <<< "$list") != 0 ]] || die "No open pull request for $branch."
+  jq '.values[0]' <<< "$list" | print_pr
+}
+
+cmd_list() {
+  local slug
+  slug=$(repo_slug)
+  request GET "repositories/$slug/pullrequests?state=OPEN&pagelen=50" \
+    | jq -r '.values[] | "#\(.id)\t\(.source.branch.name) -> \(.destination.branch.name)\t\(.author.display_name)\t\(.title)"'
+}
+
+cmd_edit() {
+  local id=${1:-}
+  [[ $id =~ ^[0-9]+$ ]] || die "edit needs a numeric pull request ID."
+  shift
+  local title="" body_file=""
+  while (( $# )); do
+    case $1 in
+      --title) title=${2:?}; shift 2 ;;
+      --body-file) body_file=${2:?}; shift 2 ;;
+      *) die "edit: unknown argument $1" ;;
+    esac
+  done
+  [[ -n $title || -n $body_file ]] || die "edit needs --title or --body-file."
+  local slug body="" payload
+  slug=$(repo_slug)
+  [[ -n $body_file ]] && body=$(read_body "$body_file")
+  payload=$(jq -n --arg title "$title" --arg body "$body" --argjson hasbody "$([[ -n $body_file ]] && echo true || echo false)" \
+    '(if $title != "" then {title: $title} else {} end) + (if $hasbody then {description: $body} else {} end)')
+  request PUT "repositories/$slug/pullrequests/$id" "$payload" | print_pr
+}
+
+case ${1:-} in
+  check) shift; cmd_check "$@" ;;
+  create) shift; cmd_create "$@" ;;
+  view) shift; cmd_view "$@" ;;
+  list) shift; cmd_list "$@" ;;
+  edit) shift; cmd_edit "$@" ;;
+  *) sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//' >&2; exit 2 ;;
+esac
