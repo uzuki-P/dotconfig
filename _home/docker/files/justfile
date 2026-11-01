@@ -1,3 +1,9 @@
+# .env (ignored) holds GOKAPI_PUBLIC_URL and the relay's domain and IDs.
+set dotenv-load
+
+# Pinned wrangler for the relay recipes; override with WRANGLER.
+wrangler := env("WRANGLER", "npx -y wrangler@4.156.0")
+
 # List the available Gokapi service commands.
 default:
     @just --list
@@ -5,12 +11,25 @@ default:
 # Validate scripts, the Quadlet source, and secret hygiene without real credentials.
 validate:
     bash -n bin/share
+    bash -n bin/pair
+    bash -n bin/setup-relay
+    node --check relay/src/worker.js
     @grep -q '^Image=docker.io/f0rc3/gokapi:v[0-9]' deploy/gokapi.container
     @grep -q '^PublishPort=127.0.0.1:53842:53842$' deploy/gokapi.container
     @grep -q '^Volume=%h/docker/files/custom:/app/custom:ro,Z$' deploy/gokapi.container
     @test -s custom/admin.js
     @grep -Eq '^[0-9]+$' custom/version.txt
     @test ! -e .env || test -f .env
+    @grep -q '^Image=docker.io/cloudflare/cloudflared:[0-9]' deploy/cloudflared.container
+    @grep -q '^Network=pasta:-T,53842$' deploy/cloudflared.container
+    @grep -q '^Volume=%h/docker/files/secrets/tunnel-token:/run/secrets/tunnel-token:ro,Z$' deploy/cloudflared.container
+    @grep -q -- '--no-autoupdate run --token-file /run/secrets/tunnel-token$' deploy/cloudflared.container
+    @! grep -Eq '^(Environment|EnvironmentFile|Secret)=' deploy/cloudflared.container
+    @grep -q '"__RELAY_DOMAIN__"' relay/wrangler.template.jsonc
+    @! git check-ignore -q relay/wrangler.template.jsonc
+    @git check-ignore -q relay/wrangler.jsonc
+    cd relay && node --test test/*.test.js
+    python3 bin/test-pair.py
     @echo "Static validation passed."
 
 # Install the rootless user Quadlet and prepare persistent directories.
@@ -48,3 +67,123 @@ share *args:
 update:
     podman pull docker.io/f0rc3/gokapi:v2.2.4
     systemctl --user restart gokapi.service
+
+# Run the relay Worker's tests (no dependencies, no network).
+relay-test:
+    cd relay && node --test test/*.test.js
+
+# Create the remotely managed tunnel the relay reaches Gokapi through. Save the printed ID as RELAY_TUNNEL_ID.
+# wrangler's OAuth login has no tunnel permission, so tunnel commands use the
+# Account > Cloudflare Tunnel > Edit API token in secrets/cf-tunnel-api-token.
+relay-tunnel name="gokapi-relay":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    [[ -s secrets/cf-tunnel-api-token ]] || { echo "Missing secrets/cf-tunnel-api-token; run just relay-setup" >&2; exit 1; }
+    account="${CLOUDFLARE_ACCOUNT_ID:-$({{wrangler}} whoami --json | jq -r 'if (.accounts | length) == 1 then .accounts[0].id else empty end')}"
+    [[ -n "${account}" ]] || { echo "wrangler sees several accounts; set CLOUDFLARE_ACCOUNT_ID" >&2; exit 1; }
+    CLOUDFLARE_API_TOKEN="$(<secrets/cf-tunnel-api-token)" CLOUDFLARE_ACCOUNT_ID="${account}" {{wrangler}} tunnel create {{quote(name)}}
+
+# Fetch the tunnel's run token into secrets/tunnel-token (mode 0600) for the cloudflared Quadlet.
+relay-tunnel-token:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    [[ "${RELAY_TUNNEL_ID:-}" =~ ^[0-9a-f-]{36}$ ]] || { echo "RELAY_TUNNEL_ID is not set in .env; run just relay-tunnel" >&2; exit 1; }
+    # No wrangler command prints the token, so ask the API with the tunnel API token.
+    [[ -s secrets/cf-tunnel-api-token ]] || { echo "Missing secrets/cf-tunnel-api-token; run just relay-setup" >&2; exit 1; }
+    account="${CLOUDFLARE_ACCOUNT_ID:-$({{wrangler}} whoami --json | jq -r 'if (.accounts | length) == 1 then .accounts[0].id else empty end')}"
+    [[ -n "${account}" ]] || { echo "wrangler sees several accounts; set CLOUDFLARE_ACCOUNT_ID" >&2; exit 1; }
+    api_token="$(<secrets/cf-tunnel-api-token)"
+    install -d -m 0700 secrets
+    tmp="$(umask 077 && mktemp secrets/.tunnel-token.XXXXXX)"
+    trap 'rm -f -- "${tmp}"' EXIT
+    printf 'Authorization: Bearer %s\n' "${api_token}" \
+      | curl --fail --silent --show-error --header @- \
+          "https://api.cloudflare.com/client/v4/accounts/${account}/cfd_tunnel/${RELAY_TUNNEL_ID}/token" \
+      | jq -er '.result | select(type == "string" and length > 0)' >"${tmp}"
+    mv -f -- "${tmp}" secrets/tunnel-token
+    trap - EXIT
+    echo "Saved the tunnel token to secrets/tunnel-token (mode 0600)."
+
+# Register Gokapi's loopback port as a Workers VPC service on the tunnel. Save the printed ID as RELAY_VPC_SERVICE_ID.
+relay-vpc name="gokapi":
+    @test -n "${RELAY_TUNNEL_ID:-}" || { echo "RELAY_TUNNEL_ID is not set in .env; run just relay-tunnel" >&2; exit 1; }
+    {{wrangler}} vpc service create {{quote(name)}} --type http --tunnel-id "${RELAY_TUNNEL_ID}" --ipv4 127.0.0.1 --http-port 53842
+
+# Create the KV namespace holding device credential hashes. Save the printed ID as RELAY_KV_NAMESPACE_ID.
+relay-kv name="gokapi-relay-devices":
+    {{wrangler}} kv namespace create {{quote(name)}}
+
+# Write relay/wrangler.jsonc (ignored) from the template and the RELAY_* values in .env.
+relay-config:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    [[ "${RELAY_DOMAIN:-}" =~ ^[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?$ && "${RELAY_DOMAIN}" == *.* ]] \
+      || { echo "RELAY_DOMAIN must be a hostname in .env, such as files-api.example.com" >&2; exit 1; }
+    [[ "${RELAY_VPC_SERVICE_ID:-}" =~ ^[0-9a-f-]{36}$ ]] || { echo "RELAY_VPC_SERVICE_ID is not set in .env; run just relay-vpc" >&2; exit 1; }
+    [[ "${RELAY_KV_NAMESPACE_ID:-}" =~ ^[0-9a-f]{32}$ ]] || { echo "RELAY_KV_NAMESPACE_ID is not set in .env; run just relay-kv" >&2; exit 1; }
+    sed -e "s/__RELAY_DOMAIN__/${RELAY_DOMAIN}/" \
+        -e "s/__RELAY_VPC_SERVICE_ID__/${RELAY_VPC_SERVICE_ID}/" \
+        -e "s/__RELAY_KV_NAMESPACE_ID__/${RELAY_KV_NAMESPACE_ID}/" \
+        -e '1,3c\// Generated by just relay-config from wrangler.template.jsonc. Edit the template.' \
+        relay/wrangler.template.jsonc >relay/wrangler.jsonc
+    ! grep -q '__RELAY_' relay/wrangler.jsonc
+
+# Test, then deploy the relay Worker to RELAY_DOMAIN.
+relay-deploy: relay-test relay-config
+    cd relay && {{wrangler}} deploy
+
+# Stream the deployed relay Worker's logs.
+relay-logs: relay-config
+    cd relay && {{wrangler}} tail
+
+# Check from this machine that the deployed relay rejects requests without credentials.
+relay-smoke:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    : "${RELAY_DOMAIN:?RELAY_DOMAIN is not set in .env}"
+    for path in /api/info/version /admin /; do
+      code="$(curl --silent --output /dev/null --write-out '%{http_code}' "https://${RELAY_DOMAIN}${path}")"
+      printf '%s %s\n' "${code}" "${path}"
+      [[ "${code}" == 401 ]] || { echo "expected 401 for ${path}" >&2; exit 1; }
+    done
+    echo "The relay rejects unauthenticated requests."
+
+# Install the cloudflared Quadlet that runs the relay tunnel; needs secrets/tunnel-token.
+tunnel-install:
+    @test -s secrets/tunnel-token || { echo "secrets/tunnel-token is missing; run just relay-tunnel-token" >&2; exit 1; }
+    chmod 0600 secrets/tunnel-token
+    install -d -m 0700 "${HOME}/.config/containers/systemd"
+    install -m 0644 deploy/cloudflared.container "${HOME}/.config/containers/systemd/cloudflared.container"
+    systemctl --user daemon-reload
+
+# Start the relay tunnel.
+tunnel-start:
+    systemctl --user start cloudflared.service
+
+# Show the relay tunnel's user-service status.
+tunnel-status:
+    systemctl --user --no-pager --full status cloudflared.service
+
+# Follow the relay tunnel's logs.
+tunnel-logs:
+    journalctl --user-unit cloudflared.service --follow --lines=100
+
+# Stop the relay tunnel; Gokapi and the tailnet route keep running.
+tunnel-stop:
+    systemctl --user stop cloudflared.service
+
+# Walk through the relay's one-time setup (interactive).
+relay-setup:
+    ./bin/setup-relay
+
+# Create a device's relay credential and Gokapi key, and print its pairing link and QR code.
+pair device:
+    ./bin/pair add {{quote(device)}}
+
+# Revoke a device's relay credential and Gokapi key.
+unpair device:
+    ./bin/pair remove {{quote(device)}}
+
+# List devices paired with the relay.
+pairs:
+    ./bin/pair list

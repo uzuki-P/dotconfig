@@ -20,7 +20,13 @@ loopback admin API.
 | `custom/` | Admin UI tweaks loaded through Gokapi's supported customization hook |
 | `secrets/api-key` | Local API key used by `bin/share` (ignored) |
 | `bin/share` | Upload and deletion helper |
-| `docs/cloudflare-api-plan.md` | Plan for publishing only the API to gokapi-android through Cloudflare (not implemented) |
+| `relay/` | Optional Cloudflare Worker relaying the app's API calls (config template, tests) |
+| `deploy/cloudflared.container` | Optional rootless Quadlet for the relay's tunnel |
+| `secrets/tunnel-token` | Relay tunnel token (ignored) |
+| `secrets/cf-tunnel-api-token` | API token for tunnel commands (ignored) |
+| `bin/setup-relay` | Wizard for the relay's Cloudflare and Gokapi setup |
+| `bin/pair` | Per-device relay credentials and pairing links |
+| `docs/relay.md` | Design and verification of the relay for gokapi-android |
 
 An optional Material 3 Expressive web UI lives in
 `~/projects/_sandbox/gokapi-admin`. It uses Gokapi's API through its own
@@ -306,6 +312,32 @@ just route
 dev-route resolve files
 bin/share /path/to/test.png
 ```
+
+## Public API relay for gokapi-android
+
+Optionally, gokapi-android can reach the API without Tailscale through a
+Cloudflare Worker on a public hostname. The Worker checks a per-device
+relay secret, allows only the API routes the app calls, and reaches Gokapi
+through a Workers VPC binding and a Cloudflare Tunnel that has no public
+hostname. Each device also gets its own limited Gokapi key. The admin UI,
+setup, and share links (`/d`, `/h`) stay tailnet-only. Everything on the
+Cloudflare side is managed with wrangler.
+
+```bash
+just relay-setup       # one-time wizard: tunnel, VPC service, KV, Worker
+just pair pixel-9      # prints a pairing link and QR code for the device
+just pairs             # list paired devices
+just unpair pixel-9    # revoke a lost device
+just relay-deploy      # test and redeploy the Worker
+just relay-logs        # stream the Worker's logs
+just tunnel-status
+```
+
+The relay's domain and IDs live in the ignored `.env`; `just relay-config`
+writes the ignored `relay/wrangler.jsonc` from `relay/wrangler.template.jsonc`.
+The pairing link carries the device's secrets in its fragment; treat it as a
+credential. See `docs/relay.md` for the design and the checks to run from
+outside the tailnet.
 
 ## Android upload notifications
 

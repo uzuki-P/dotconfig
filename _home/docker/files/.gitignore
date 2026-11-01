@@ -6,3 +6,7 @@ config/*
 !config/.gitkeep
 backups/
 *.tar.gz
+relay/wrangler.jsonc
+.wrangler/
+relay/.wrangler/
+relay/node_modules/

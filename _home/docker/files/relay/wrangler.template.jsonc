@@ -1,0 +1,23 @@
+// Template for the relay Worker's config. `just relay-config` writes the real
+// relay/wrangler.jsonc (ignored by git) from it, filling the __RELAY_*__
+// placeholders from .env, so the relay domain and account IDs stay out of git.
+{
+	"$schema": "https://unpkg.com/wrangler@4.156.0/config-schema.json",
+	"name": "gokapi-relay",
+	"main": "src/worker.js",
+	"compatibility_date": "2026-10-01",
+	"workers_dev": false,
+	"preview_urls": false,
+	"routes": [{ "pattern": "__RELAY_DOMAIN__", "custom_domain": true }],
+	// Gokapi on 127.0.0.1:53842, reached through the tunnel (just relay-vpc).
+	"vpc_services": [{ "binding": "GOKAPI", "service_id": "__RELAY_VPC_SERVICE_ID__" }],
+	// device:<id> -> {"name","hash","created"}; written by bin/pair.
+	"kv_namespaces": [{ "binding": "DEVICES", "id": "__RELAY_KV_NAMESPACE_ID__" }],
+	// Limits count per Cloudflare location and are approximate. A 1 GB upload
+	// is about 23 chunk requests, far below either limit.
+	"ratelimits": [
+		{ "name": "IP_LIMITER", "namespace_id": "53842001", "simple": { "limit": 240, "period": 60 } },
+		{ "name": "DEVICE_LIMITER", "namespace_id": "53842002", "simple": { "limit": 240, "period": 60 } }
+	],
+	"observability": { "enabled": true }
+}

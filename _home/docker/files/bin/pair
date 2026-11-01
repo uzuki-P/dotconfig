@@ -1,0 +1,303 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+readonly PROJECT_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
+readonly GOKAPI_PERMISSIONS=(PERM_VIEW PERM_UPLOAD PERM_DOWNLOAD PERM_DELETE)
+readonly DEFAULT_WRANGLER="npx -y wrangler@4.156.0"
+
+die() {
+	printf 'pair: %s\n' "$*" >&2
+	exit 1
+}
+
+warn() {
+	printf 'pair: %s\n' "$*" >&2
+}
+
+usage() {
+	cat <<'EOF'
+Usage:
+  pair add DEVICE      create relay credentials for DEVICE and print its pairing link
+  pair remove DEVICE   revoke DEVICE's relay credential and Gokapi key
+  pair list            show paired devices
+  pair help
+
+DEVICE is lowercase letters, digits, and dashes, such as pixel-9.
+add and remove need GOKAPI_PUBLIC_URL, RELAY_DOMAIN, and RELAY_KV_NAMESPACE_ID
+in .env, a Gokapi key with API management permission in secrets/admin-api-key
+(mode 0600), and a logged-in wrangler. Set WRANGLER to override the wrangler
+command. See docs/relay.md.
+EOF
+}
+
+load_environment() {
+	local env_file="${GOKAPI_ENV_FILE:-${PROJECT_DIR}/.env}"
+	if [[ -f "${env_file}" ]]; then
+		set -a
+		# This is a local, user-owned shell environment file. Do not use an untrusted file.
+		# shellcheck disable=SC1090
+		source "${env_file}"
+		set +a
+	fi
+
+	GOKAPI_API_URL="${GOKAPI_API_URL:-http://127.0.0.1:53842}"
+	GOKAPI_API_URL="${GOKAPI_API_URL%/}"
+	GOKAPI_PUBLIC_URL="${GOKAPI_PUBLIC_URL:-}"
+	GOKAPI_PUBLIC_URL="${GOKAPI_PUBLIC_URL%/}"
+	RELAY_DOMAIN="${RELAY_DOMAIN:-}"
+	RELAY_KV_NAMESPACE_ID="${RELAY_KV_NAMESPACE_ID:-}"
+	WRANGLER="${WRANGLER:-${DEFAULT_WRANGLER}}"
+	PAIR_STATE_FILE="${PAIR_STATE_FILE:-${PROJECT_DIR}/secrets/pairs.json}"
+	GOKAPI_ADMIN_API_KEY_FILE="${GOKAPI_ADMIN_API_KEY_FILE:-${PROJECT_DIR}/secrets/admin-api-key}"
+}
+
+require_relay_config() {
+	[[ "${GOKAPI_PUBLIC_URL}" =~ ^https://[^/]+$ ]] \
+		|| die "GOKAPI_PUBLIC_URL must be the https:// origin of the tailnet files host"
+	[[ "${RELAY_DOMAIN}" =~ ^[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?$ && "${RELAY_DOMAIN}" == *.* ]] \
+		|| die "RELAY_DOMAIN must be the relay Worker's hostname, such as files-api.example.com; run just relay-setup"
+	[[ "${RELAY_KV_NAMESPACE_ID}" =~ ^[0-9a-f]{32}$ ]] \
+		|| die "RELAY_KV_NAMESPACE_ID is not set; run just relay-setup"
+	GOKAPI_ADMIN_API_KEY="$(read_secret GOKAPI_ADMIN_API_KEY "${GOKAPI_ADMIN_API_KEY_FILE}")"
+}
+
+# read_secret NAME FILE prints $NAME if set, else FILE's contents after a mode check.
+read_secret() {
+	local name="$1" file="$2" value="${!1:-}"
+	if [[ -z "${value}" ]]; then
+		[[ -r "${file}" ]] || die "${name} not set and ${file} not found"
+		local mode
+		mode="$(stat -L -c '%a' "${file}")" || die "cannot inspect ${file}"
+		if (( (8#${mode}) & 077 )); then
+			die "${file} must not be accessible by group or others: chmod 600 ${file}"
+		fi
+		value="$(<"${file}")"
+	fi
+	value="${value//$'\r'/}"
+	value="${value//$'\n'/}"
+	[[ -n "${value}" ]] || die "${name} is empty"
+	printf '%s' "${value}"
+}
+
+require_commands() {
+	local command_name
+	for command_name in curl jq base64 sha256sum od mktemp; do
+		command -v "${command_name}" >/dev/null 2>&1 || die "required command not found: ${command_name}"
+	done
+}
+
+validate_device() {
+	[[ $# -eq 1 ]] || die "expected exactly one device name"
+	[[ "$1" =~ ^[a-z0-9][a-z0-9-]{0,31}$ ]] \
+		|| die "device names use lowercase letters, digits, and dashes (at most 32), such as pixel-9"
+}
+
+# call AUTH_HEADER METHOD URL [CURL_ARGS...] sets HTTP_STATUS and HTTP_BODY.
+# The credential header goes through stdin so it never shows up in argv, and
+# responses stay in memory so new secrets never touch the disk.
+call() {
+	local auth_header="$1" method="$2" url="$3" raw
+	shift 3
+	raw="$(printf '%s\n' "${auth_header}" | curl --silent --show-error \
+		--connect-timeout 10 \
+		--max-time 60 \
+		--request "${method}" \
+		--header @- \
+		--header 'accept: application/json' \
+		--write-out '\n%{http_code}' \
+		"$@" \
+		"${url}")" || {
+		HTTP_STATUS=000
+		HTTP_BODY=""
+		return 0
+	}
+	HTTP_STATUS="${raw##*$'\n'}"
+	HTTP_BODY="${raw%$'\n'*}"
+}
+
+gokapi() {
+	local method="$1" path="$2"
+	shift 2
+	call "apikey: ${GOKAPI_ADMIN_API_KEY}" "${method}" "${GOKAPI_API_URL}/api/${path}" "$@"
+}
+
+ok() {
+	[[ "${HTTP_STATUS}" =~ ^2[0-9][0-9]$ ]]
+}
+
+report() {
+	warn "$1 failed with HTTP ${HTTP_STATUS}"
+	if [[ -n "${HTTP_BODY}" ]]; then
+		jq -c '.' <<<"${HTTP_BODY}" 2>/dev/null >&2 || sed -n '1,10p' <<<"${HTTP_BODY}" >&2
+	fi
+}
+
+# kv SUBCOMMAND KEY [VALUE] runs wrangler against the relay's DEVICES namespace.
+# Values hold only a hash, never a secret. Output is shown only on failure.
+kv() {
+	local wrangler output
+	read -r -a wrangler <<<"${WRANGLER}"
+	if output="$(cd -- "${PROJECT_DIR}/relay" && "${wrangler[@]}" kv key "$@" \
+		--namespace-id "${RELAY_KV_NAMESPACE_ID}" --remote 2>&1)"; then
+		return 0
+	fi
+	printf '%s\n' "${output}" | tail -n 15 >&2
+	return 1
+}
+
+state_json() {
+	if [[ -s "${PAIR_STATE_FILE}" ]]; then
+		jq -e '.devices | type == "array"' "${PAIR_STATE_FILE}" >/dev/null || die "unexpected state in ${PAIR_STATE_FILE}"
+		cat -- "${PAIR_STATE_FILE}"
+	else
+		printf '{"devices":[]}\n'
+	fi
+}
+
+write_state() {
+	local content="$1" dir tmp
+	dir="$(dirname -- "${PAIR_STATE_FILE}")"
+	install -d -m 0700 "${dir}"
+	tmp="$(umask 077 && mktemp "${dir}/.pairs.XXXXXX")"
+	printf '%s\n' "${content}" >"${tmp}"
+	chmod 0600 "${tmp}"
+	mv -f -- "${tmp}" "${PAIR_STATE_FILE}"
+}
+
+delete_gokapi_key() {
+	gokapi DELETE auth/delete --header "targetKey: $1"
+	ok
+}
+
+rollback_key() {
+	delete_gokapi_key "$1" || report "rolling back Gokapi key $1; delete it in Gokapi's API menu"
+}
+
+base64url() {
+	base64 -w0 | tr '+/' '-_' | tr -d '='
+}
+
+add_device() {
+	validate_device "$@"
+	local device="$1" state
+	require_relay_config
+	state="$(state_json)"
+	if jq -e --arg d "${device}" '.devices | any(.name == $d)' <<<"${state}" >/dev/null; then
+		die "${device} is already paired; run pair remove ${device} first"
+	fi
+
+	gokapi POST auth/create --header "friendlyName: gokapi-${device}" --header 'basicPermissions: false'
+	ok || { report "creating the Gokapi API key"; exit 1; }
+	local key key_id
+	key="$(jq -r '.Id // empty' <<<"${HTTP_BODY}")"
+	key_id="$(jq -r '.PublicId // empty' <<<"${HTTP_BODY}")"
+	[[ -n "${key}" && -n "${key_id}" ]] || die "unexpected Gokapi auth/create response"
+
+	local permission
+	for permission in "${GOKAPI_PERMISSIONS[@]}"; do
+		gokapi PUT auth/modify --header "targetKey: ${key_id}" \
+			--header "permission: ${permission}" --header 'permissionModifier: GRANT'
+		if ! ok; then
+			report "granting ${permission}"
+			rollback_key "${key_id}"
+			exit 1
+		fi
+	done
+
+	# The relay stores only the secret's SHA-256. The secret reaches sha256sum
+	# through a pipe from a builtin, never through argv.
+	local relay_id relay_secret relay_hash created
+	relay_id="${device}-$(od -An -N4 -tx1 /dev/urandom | tr -d ' \n')"
+	relay_secret="$(head -c 32 /dev/urandom | base64url)"
+	relay_hash="$(printf '%s' "${relay_secret}" | sha256sum | cut -d' ' -f1)"
+	created="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+	if ! kv put "device:${relay_id}" "$(jq -cn --arg name "${device}" --arg hash "${relay_hash}" \
+		--arg created "${created}" '{name: $name, hash: $hash, created: $created}')"; then
+		warn "writing the relay credential to KV failed"
+		rollback_key "${key_id}"
+		exit 1
+	fi
+
+	write_state "$(jq --arg name "${device}" --arg relay_id "${relay_id}" --arg key_id "${key_id}" \
+		--arg created "${created}" \
+		'.devices += [{name: $name, relayId: $relay_id, gokapiKeyId: $key_id, created: $created}]' \
+		<<<"${state}")"
+
+	# Secrets reach jq through its environment, not argv.
+	local payload link
+	payload="$(PAIR_NAME="${device}" PAIR_URL="${GOKAPI_PUBLIC_URL}" PAIR_KEY="${key}" \
+		PAIR_RELAY="https://${RELAY_DOMAIN}" PAIR_RELAY_ID="${relay_id}" PAIR_RELAY_SECRET="${relay_secret}" \
+		jq -cjn '{v: 1, name: env.PAIR_NAME, url: env.PAIR_URL, key: env.PAIR_KEY, relay: env.PAIR_RELAY,
+			relayId: env.PAIR_RELAY_ID, relaySecret: env.PAIR_RELAY_SECRET}' | base64url)"
+	link="${GOKAPI_PUBLIC_URL}/pair#${payload}"
+
+	printf 'Paired %s. Relay ID %s, Gokapi key %s.\n\n' "${device}" "${relay_id}" "${key_id}"
+	if command -v qrencode >/dev/null 2>&1; then
+		printf '%s' "${link}" | qrencode -t ansiutf8
+		printf '\n'
+	else
+		printf 'Install qrencode to show a QR code here: sudo dnf install qrencode\n\n'
+	fi
+	printf '%s\n\n' "${link}"
+	printf 'This link is a credential: it holds the API key and the relay secret.\n'
+	printf 'Open it on %s only, do not paste it into chats, and clear the terminal\n' "${device}"
+	printf 'afterwards. Nothing secret was saved; run pair remove %s and add again\n' "${device}"
+	printf 'if the link is lost.\n'
+}
+
+remove_device() {
+	validate_device "$@"
+	local device="$1" state entry
+	require_relay_config
+	state="$(state_json)"
+	entry="$(jq -c --arg d "${device}" '.devices[] | select(.name == $d)' <<<"${state}")"
+	[[ -n "${entry}" ]] || die "${device} is not paired"
+	local key_id relay_id
+	key_id="$(jq -r '.gokapiKeyId' <<<"${entry}")"
+	relay_id="$(jq -r '.relayId' <<<"${entry}")"
+
+	kv delete "device:${relay_id}" || die "kept ${device}; deleting its relay credential failed, run pair remove ${device} again"
+	if ! delete_gokapi_key "${key_id}"; then
+		if [[ "${HTTP_STATUS}" == 404 ]]; then
+			warn "Gokapi has no key ${key_id} (or the admin key lacks API management); check the API menu"
+		else
+			report "deleting Gokapi key ${key_id}"
+			die "kept ${device}; run pair remove ${device} again"
+		fi
+	fi
+
+	write_state "$(jq --arg d "${device}" '.devices |= map(select(.name != $d))' <<<"${state}")"
+	printf 'Removed %s. Its relay credential and Gokapi key are revoked.\n' "${device}"
+	printf 'The relay may still accept the credential for up to a minute while edge caches expire.\n'
+}
+
+list_devices() {
+	[[ $# -eq 0 ]] || die "list takes no arguments"
+	local state
+	state="$(state_json)"
+	if jq -e '.devices | length == 0' <<<"${state}" >/dev/null; then
+		printf 'No paired devices.\n'
+		return
+	fi
+	{
+		printf 'DEVICE\tRELAY ID\tGOKAPI KEY\tCREATED\n'
+		jq -r '.devices[] | [.name, .relayId, .gokapiKeyId, .created] | @tsv' <<<"${state}"
+	} | column -t -s $'\t'
+}
+
+main() {
+	require_commands
+	local command_name="${1:-help}"
+	[[ $# -eq 0 ]] || shift
+	case "${command_name}" in
+		help|-h|--help) usage ;;
+		add) load_environment; add_device "$@" ;;
+		remove) load_environment; remove_device "$@" ;;
+		list) load_environment; list_devices "$@" ;;
+		*) usage >&2; exit 1 ;;
+	esac
+}
+
+main "$@"
