@@ -175,3 +175,15 @@ Agents push over SSH and open Bitbucket PRs, such as capital-crm's, with `_home/
 The script reads the token at call time and hands it to curl through a file descriptor, so it does not appear in `ps` output or the environment. `~/.claude/settings.json` denies `secret-tool lookup` and `secret-tool search` so agents cannot read the token directly. The token can still act on every repository the account can reach, and `write:pullrequest` allows merging through the raw API, so revoke it at the same Atlassian page if it leaks. To rotate it, create a new token and run step 2 again.
 
 When `bb-pr check` fails, RUNTIME.md tells agents to push the branch and reply with a `pull-requests/new?source=<branch>&dest=<base>` link plus a ready-to-paste title and description, and the user opens the PR.
+
+## Third-party skill updates on 2026-11-03
+
+Compared every installed third-party skill with its upstream. pstack had no changes since `4dd1d05`.
+
+- Updated from upstream: grilling, research, and wizard from `mattpocock/skills` at `4ae2317`, and frontend-design from `anthropics/skills` at `ca45fc4`. Their lock entries now record the new folder hashes.
+- diagnosing-bugs gained only upstream's new "Watch it fail" step. Upstream renamed `CONTEXT.md` to `GLOSSARY.md` in diagnosing-bugs, domain-modeling, and triage, but local projects use `CONTEXT.md`, so the rename was not taken. domain-modeling and triage stay at their installed versions.
+- setup-matt-pocock-skills and handoff keep their local rewrites. Upstream's setup changes target the GitHub and GitLab trackers the local version removed.
+- Removed design-taste-frontend and resolving-merge-conflicts from the source, every home skill directory including the unsynced `~/.codex/skills`, and the installation lock. Upstream had dropped resolving-merge-conflicts. Backups are at `/home/uzuki_p/.local/share/agent-skill-backups/20261103-105130-remove-taste-merge`.
+- Refreshed the `RUNTIME.md` hash in `LOCAL_POLICY.json` after reviewing the Bitbucket change from `29619b9`, which had left `just validate-pstack` failing.
+
+`just validate-pstack`, `just validate-skills`, and `just sync-skills` pass with 55 skills across 7 home directories.

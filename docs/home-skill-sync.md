@@ -8,6 +8,7 @@ The synchronization covers these home directories:
 
 - `~/.agents/skills`
 - `~/.claude/skills`
+- `~/.claude-work/skills` (second Claude Code profile, added 2026-11-02)
 - `~/.zcode/skills`
 - `~/.openwiki/skills`
 - `~/.config/goose/skills`
@@ -27,7 +28,7 @@ The lock still records `GoogleChrome/modern-web-guidance` as the upstream reposi
 
 ## Verification and recovery
 
-Validated all 26 skills across the eight directories, with no dangling user skill links or remaining `modern-web-guidance` link. A second synchronization made no changes. Just parsing and Git whitespace checks passed.
+On 2026-10-01, validated all 26 skills across the eight directories, with no dangling user skill links or remaining `modern-web-guidance` link. A second synchronization made no changes. Just parsing and Git whitespace checks passed.
 
 Original extension files and records of changed home links are backed up under `~/.local/share/agent-skill-backups/`. The synchronization writes a recovery record before changing links or pruning lock entries.
 

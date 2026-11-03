@@ -17,6 +17,7 @@ HOME = Path.home()
 TARGETS = (
     ".agents/skills",
     ".claude/skills",
+    ".claude-work/skills",
     ".zcode/skills",
     ".openwiki/skills",
     ".config/goose/skills",
@@ -25,6 +26,7 @@ TARGETS = (
 # tldraw Desktop installs and updates tldraw-offline itself (~/.config/tldraw/agent-skills.json).
 RESERVED = {
     ".claude/skills": {"synced", ".trash", "tldraw-offline"},
+    ".claude-work/skills": {"synced", ".trash", "tldraw-offline"},
 }
 REMOVED = {"modern-web-guidance", "chrome-extensions"}
 

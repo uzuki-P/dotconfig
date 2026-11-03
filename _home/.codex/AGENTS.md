@@ -58,6 +58,10 @@ Use reliable quota data as an additional trigger when available. Missing quota d
 
 When working in the `capital-crm` repository or any of its worktrees, "BE" and "backend" refer to `/home/uzuki_p/projects/crmapi/`. Inspect that repository when frontend work depends on backend behavior. Change it only when the user explicitly requests backend changes.
 
+## Bitbucket pull requests
+
+For repositories hosted on Bitbucket, such as capital-crm, open pull requests with `bb-pr` (`~/.local/bin/bb-pr`; run it without arguments for usage), not `gh` or the Bitbucket API. Push the branch first, write the description to a file, and run `bb-pr create --title <title> --body-file <file> --dest <base>`; it prints the PR URL. Use `bb-pr view` and `bb-pr edit <id>` to inspect or update a PR. It cannot merge, decline or approve, so those steps wait on the user. If `bb-pr check` fails on credentials, give the user the `pull-requests/new?source=<branch>&dest=<base>` link with a paste-ready title and description, and do not report the PR as opened.
+
 ## Development server
 
 Reuse an existing development server when one is available. If verification requires a server and none is reachable, start it only when the command is known and doing so is within the requested task. Do not stop, restart, or replace a user-owned process without permission.

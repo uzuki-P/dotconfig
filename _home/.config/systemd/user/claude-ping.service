@@ -5,4 +5,6 @@ Description=Claude quota window ping (one trivial message to anchor the 5h rolli
 Type=oneshot
 StateDirectory=claude-ping
 WorkingDirectory=%h/.local/state/claude-ping
-ExecStart=%h/.local/bin/claude --print "Reply with exactly: ok"
+ExecStart=-%h/.local/bin/claude --print "Reply with exactly: ok"
+# Work profile (separate account, separate 5h window).
+ExecStart=-/usr/bin/env CLAUDE_CONFIG_DIR=%h/.claude-work %h/.local/bin/claude --print "Reply with exactly: ok"

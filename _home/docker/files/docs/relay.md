@@ -171,6 +171,8 @@ per device and delivered by a pairing link, never built into the APK.
 4. Prints a pairing link and, when `qrencode` is installed, a terminal QR
    code.
 
+The gokapi-admin web UI has a Devices page that does the same pairing and unpairing, sharing `secrets/pairs.json` (see its README).
+
 If a step fails, the script deletes the Gokapi key it created. `just unpair
 <device>` deletes the KV entry first (which revokes relay access), then the
 Gokapi key, then the state entry. `WRANGLER` overrides the wrangler command.
