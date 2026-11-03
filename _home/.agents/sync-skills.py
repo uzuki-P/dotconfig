@@ -20,7 +20,6 @@ TARGETS = (
     ".claude-work/skills",
     ".zcode/skills",
     ".openwiki/skills",
-    ".config/goose/skills",
     ".config/opencode/skills",
 )
 # tldraw Desktop installs and updates tldraw-offline itself (~/.config/tldraw/agent-skills.json).

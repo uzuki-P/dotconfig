@@ -11,10 +11,11 @@ The synchronization covers these home directories:
 - `~/.claude-work/skills` (second Claude Code profile, added 2026-11-02)
 - `~/.zcode/skills`
 - `~/.openwiki/skills`
-- `~/.config/goose/skills`
 - `~/.config/opencode/skills`
 
 Since 2026-10-30, `~/.codex/skills` is no longer synchronized because Codex is no longer used. Its existing links were left in place and no longer receive new skills.
+
+On 2026-11-03, removed `~/.config/goose` because the Goose agent is not installed; it held only skill links, an empty config, and empty hints. The backup is at `/home/uzuki_p/.local/share/agent-skill-backups/20261103-114512-remove-goose`. `~/go/bin/goose` is the pressly/goose database migration tool and was kept. The same day, `~/.claude-work/CLAUDE.md` was linked to the shared `_home/.codex/AGENTS.md`, so the work profile reads the same global instructions as the other agents.
 
 Every source skill has a link in every listed directory. The script removes obsolete links owned by this shared installation and prunes installation-lock entries whose skills no longer exist in the source. It refuses to overwrite independent directories or unrecognized links. Move a newly installed standalone skill into the source directory before running synchronization.
 
