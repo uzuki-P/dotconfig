@@ -4,6 +4,12 @@
 
 Always respond in English unless the user explicitly asks for another language.
 
+## T3 Code tools
+
+Most sessions run inside T3 Code. Treat the session as T3 Code when the `T3CODE_THREAD_ID` environment variable is set or T3 tools (named `t3-code`, often deferred until loaded) are available. Otherwise assume a normal terminal and use your own tools.
+
+Inside T3 Code, when a T3 tool covers what you need, use it instead of your built-in or shell alternative. This includes previews and rendering, subagents and delegation, threads, PR linking and watching, background waits, scheduling, secrets, and device control. Load deferred T3 tools before deciding that one is unavailable.
+
 ## Subagent limit
 
 Run at most 3 subagents concurrently by default, unless the user explicitly requests a different limit. Count all active subagents across the task, including nested delegates and both native and T3 Code delegated tasks. The parent agent does not count toward this limit. Wait for an active subagent to finish before starting another when all 3 slots are occupied. Pass this limit to delegated agents so nested delegation respects the same shared limit.
