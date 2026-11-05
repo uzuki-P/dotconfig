@@ -2,14 +2,14 @@
   <title id="title">Document preview</title>
   <desc id="description">A compact document page with a folded corner and three content lines.</desc>
   <style>
-    .tile { fill: #f8dbe8; }
-    .page { fill: #fffafb; stroke: #d32672; }
-    .fold { fill: #f4b9d2; stroke: #d32672; }
+    .tile { fill: #fbe3ed; }
+    .page { fill: #ffffff; stroke: #c21a5e; }
+    .fold { fill: #efb3cb; stroke: #c21a5e; }
     .line { stroke: #6f5361; }
     @media (prefers-color-scheme: dark) {
-      .tile { fill: #442333; }
-      .page { fill: #282327; stroke: #e66a9e; }
-      .fold { fill: #71344e; stroke: #e66a9e; }
+      .tile { fill: #3b1e2b; }
+      .page { fill: #221d20; stroke: #f0719f; }
+      .fold { fill: #6e3550; stroke: #f0719f; }
       .line { stroke: #d6bdc8; }
     }
   </style>

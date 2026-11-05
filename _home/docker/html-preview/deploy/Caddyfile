@@ -11,6 +11,9 @@
 		Referrer-Policy no-referrer
 		X-Frame-Options SAMEORIGIN
 		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		# Revalidate every response (cheap with ETags) so a sync that rewrites
+		# published pages to new asset versions reaches browsers immediately.
+		Cache-Control "no-cache"
 	}
 
 	@health path /healthz

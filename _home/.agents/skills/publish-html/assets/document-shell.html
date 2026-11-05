@@ -4,8 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
+  <meta name="description" content="{{DOCUMENT_SUMMARY}}">
+  <script>
+    try {
+      const t = localStorage.getItem("html-response-theme");
+      const theme = ["light", "dark"].includes(t) ? t : "system";
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.dataset.resolvedTheme = theme === "system"
+        ? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : theme;
+    } catch {}
+  </script>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/document.css?v=11">
+  <link rel="stylesheet" href="/assets/document.css?v=15">
   <title>{{DOCUMENT_TITLE}}</title>
 </head>
 <body>
@@ -16,6 +26,6 @@
     </section>
     <!-- DOCUMENT_CONTENT -->
   </main>
-  <script type="module" src="/assets/document.js?v=11"></script>
+  <script type="module" src="/assets/document.js?v=15"></script>
 </body>
 </html>

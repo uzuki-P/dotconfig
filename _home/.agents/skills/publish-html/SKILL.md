@@ -18,37 +18,46 @@ reachable only from devices with tailnet access. If the runtime itself blocks
 the operation or requires a platform-level approval, report that boundary and
 follow it; skill instructions cannot override runtime safety controls.
 
-1. Read [references/document-design.md](references/document-design.md) completely before authoring. Treat its primitives as a vocabulary, not a fixed layout.
-2. Finish the underlying answer first. Research or inspect sources when the request requires current, precise, or attributed information. Keep estimates visibly separate from sourced facts.
-3. Create a temporary working directory with `mktemp -d`. Set `PUBLISH_HTML_SKILL_DIR` to the directory containing this `SKILL.md`.
-4. Create a draft from the shared shell:
+1. **Answer first.** Read [references/document-design.md](references/document-design.md)
+   completely, then finish the underlying answer. Research or inspect sources when
+   the request needs current, precise, or attributed information. Keep estimates
+   visibly separate from sourced facts.
+2. **Create the draft.** Make a working directory with `mktemp -d` and set
+   `PUBLISH_HTML_SKILL_DIR` to the directory containing this `SKILL.md`:
 
    ```bash
-   python3 "$PUBLISH_HTML_SKILL_DIR/scripts/html_preview.py" new \
+   H="$PUBLISH_HTML_SKILL_DIR/scripts/html_preview.py"
+   python3 "$H" new \
      --title "Document title" \
      --kicker "Document type or date" \
+     --summary "One or two sentences on what the reader learns." \
      --output "$PUBLISH_HTML_WORK_DIR/document.html"
    ```
 
-5. Replace `<!-- DOCUMENT_CONTENT -->` in the draft with the complete document body. Use `apply_patch` for the edit. Compose each section according to its information: prose, table, code, chart, Mermaid, callout, metrics, or a restrained combination.
-6. Validate the completed file:
+   The summary becomes the meta description and the catalog blurb, so write it
+   for someone scanning a list.
+3. **Fill the sections.** Replace `<!-- DOCUMENT_CONTENT -->` with the document
+   body using `apply_patch`. Compose each section from the vocabulary in the
+   design reference: prose, table, code, chart, Mermaid, callout, metrics, or a
+   restrained combination.
+4. **Publish.** `publish` validates the structure, prints lint warnings, and
+   publishes atomically:
 
    ```bash
-   python3 "$PUBLISH_HTML_SKILL_DIR/scripts/html_preview.py" validate \
-     "$PUBLISH_HTML_WORK_DIR/document.html"
+   python3 "$H" publish "$PUBLISH_HTML_WORK_DIR/document.html" --slug "short-topic"
    ```
 
-   Fix every reported issue. The step is complete when validation prints `valid` and no template marker remains.
-7. Publish atomically:
+   Fix every error and every `warning:` line, then publish again. To correct a
+   document that is already published, keep its URL with
+   `--update <document-id>` instead of `--slug`.
+5. **Verify and reply.** Check the returned URL with a read-only HTTP request.
+   Use browser automation only when the environment permits it and the user has
+   granted any required permission. Reply with the exact private HTTPS URL and a
+   one-line description, and state that only devices with tailnet access can
+   open it.
 
-   ```bash
-   python3 "$PUBLISH_HTML_SKILL_DIR/scripts/html_preview.py" publish \
-     "$PUBLISH_HTML_WORK_DIR/document.html" \
-     --slug "short-topic"
-   ```
-
-8. Verify the returned URL with a read-only HTTP request. Use browser automation only when the active environment permits it and the user has granted any required permission.
-9. Return a concise chat message containing the exact private HTTPS URL and a one-line description. State that the URL is available only to devices with tailnet access.
+`validate <file>` runs the same checks without publishing when you want them
+earlier.
 
 ## Lifecycle
 
@@ -60,11 +69,16 @@ follow it; skill instructions cannot override runtime safety controls.
 - Remove a document permanently with `html_preview.py remove <document-id>`. It
   works on active and archived documents. Only remove when the user explicitly
   requests removal or cleanup.
-- The catalog page has archive and delete buttons per document, plus a restore
-  list for archived documents. They call `html_preview.py serve` through Caddy
-  at `/api/*`; the `deploy` recipe in `~/docker/html-preview` applies any
-  changes to that stack.
+- The catalog page lists every document with its summary, grouped by month, with
+  search (`/`), sort, a rows or tiles layout, and an Archive tab. Archive shows
+  an undo toast; delete asks for a second click. The buttons call
+  `html_preview.py serve` through Caddy at `/api/*`; the `deploy` recipe in
+  `~/docker/html-preview` applies changes to that stack.
+- After changing anything under `assets/`, bump `ASSET_VERSION` in
+  `html_preview.py` and run `just prepare` in `~/docker/html-preview`. It copies
+  the assets, points every published document at the new version, and rebuilds
+  the catalog.
 
 ## Completion
 
-Finish only when the HTML validates, the published URL returns successfully, and the chat response contains that exact URL.
+Finish only when `publish` succeeds with no unresolved warnings, the published URL returns successfully, and the chat response contains that exact URL.

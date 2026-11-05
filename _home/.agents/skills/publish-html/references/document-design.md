@@ -18,15 +18,20 @@ Prefer prose when a visual does not materially reduce reading effort. Mix forms 
 
 ## Document character
 
-- Use a dense, minimalist document rather than an application shell.
-- Omit navigation headers and sidebars.
-- Keep the main canvas broad. Body paragraphs fill their container with natural left/start alignment; reserve narrow metadata for section headers.
+- Use a dense, minimalist document rather than an application shell. Don't add your own navigation, headers, or sidebars; the runtime supplies them.
+- Running text (paragraphs, lists, callouts, notes) stops at a 72-character measure. Tables, diagrams, code, grids, and metrics use the full width. Don't override the measure.
 - Use pink as the primary accent. Let semantic syntax colors appear inside code.
 - Preserve comfortable rhythm across a long answer. Density means low framing overhead, not cramped text.
 - Write enough context for the document to stand alone after the chat is gone.
 - Place caveats near the claim or estimate they qualify.
+- Write labels in sentence case. Eyebrows, section meta, and table headers render in the body face; don't type them in capitals.
 
-The shared shell automatically provides the docs favicon, light/dark/system controls, Maple Mono code styling, syntax highlighting, and Mermaid interaction.
+The shared shell and runtime provide:
+
+- **Outline rail.** On wide screens, a sticky left rail with the document title, every top-level section (numbered to match the page, with a fill line showing how far you have read it), and download and theme tools. On narrow screens it becomes a bottom bar with a contents sheet. The rail lists each `<section class="section">` that is a direct child of `<main class="document">` and has an `<h2>`, so give every top-level section a short, scannable `<h2>`.
+- **Generated meta line** under the title: publish date, reading time, and section count. Don't write these by hand.
+- Section numbers, `#` heading links, a reading-progress bar, Bricolage Grotesque headings, Atkinson Hyperlegible Next text, Maple Mono code, syntax highlighting, copy buttons, light/dark/system themes, and print styles.
+- **Diagram controls** for Mermaid and static SVG diagrams in `.diagram-shell > .diagram-canvas`: drag to pan, Ctrl + scroll to zoom, fullscreen, and a JPG download. Fullscreen behaves like a design canvas: scroll pans, Shift + scroll pans sideways, Ctrl + scroll or pinch zooms.
 
 ## Core markup
 
@@ -78,7 +83,7 @@ Use `.prose` for spaced paragraphs, `.columns` for long parallel prose, and grid
 
 Keep sequential arguments in normal document flow. A two-column grid is useful for alternatives or text beside code; it is weaker for a single continuous explanation.
 
-For an implementation sequence, use the supported timeline component. Each item is a compact, numbered card; do not compose a sequence from unstyled spans and loose paragraphs.
+For an implementation sequence, use the supported timeline component. Items render as numbered steps on one connected line; do not compose a sequence from unstyled spans and loose paragraphs. Use it only for real sequences.
 
 ```html
 <div class="timeline">
@@ -107,7 +112,7 @@ Use restrained framing:
 <div class="panel">A compact supporting group.</div>
 ```
 
-Use metrics for two to four headline values:
+Use metrics for two to four headline values. Each renders as a large figure with its label underneath, in an open row:
 
 ```html
 <div class="metrics">
@@ -118,7 +123,7 @@ Use metrics for two to four headline values:
 
 ## Tables
 
-Wrap tables for narrow screens. Keep prose outside the table when it explains the significance of several rows.
+Wrap tables in `.table-wrap` for narrow screens; `publish` warns about an unwrapped table. Keep prose outside the table when it explains the significance of several rows. Mark a recommended row with `<tr class="recommended">`.
 
 ```html
 <div class="table-wrap">
@@ -149,7 +154,7 @@ Escape `<`, `>`, and `&` inside code. Explain what the code proves and what it c
 
 ## Mermaid
 
-Use Mermaid when relationships are harder to understand linearly. The runtime supplies pan, zoom, 1:1 reset, and fullscreen viewing.
+Use Mermaid when relationships are harder to understand linearly. The runtime supplies pan, zoom, reset, fullscreen, and JPG download. Put a short `<strong>` title in the `figcaption`; it names the downloaded file.
 
 ```html
 <figure class="diagram">
@@ -164,7 +169,7 @@ Keep node labels short. Explain the implication in nearby prose instead of turni
 
 ## Charts
 
-Use inline SVG for a small, deterministic line or bar chart. Include a meaningful `role="img"` and `aria-label`, label axes directly, and put exact values in text or a nearby table. Keep chart colors anchored to CSS variables such as `var(--pink)`, `var(--ink)`, and `var(--muted)`.
+Use inline SVG for a small, deterministic line or bar chart. Include a meaningful `role="img"` and `aria-label` (`publish` warns when a top-level `<svg>` has no label), label axes directly, and put exact values in text or a nearby table. Keep chart colors anchored to CSS variables such as `var(--pink)`, `var(--ink)`, and `var(--muted)`.
 
 ## Sources and uncertainty
 

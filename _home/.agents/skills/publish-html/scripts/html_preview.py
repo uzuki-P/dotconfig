@@ -20,7 +20,7 @@ import tempfile
 import threading
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import quote, urlsplit
+from urllib.parse import urlsplit
 import urllib.error
 import urllib.request
 
@@ -28,13 +28,14 @@ import urllib.request
 DEFAULT_ROOT = Path.home() / "docker" / "html-preview" / "public"
 DEFAULT_BASE_URL = "https://html-preview.ts.uzuki-p.my.id"
 MAX_DOCUMENT_BYTES = 10 * 1024 * 1024
-ASSET_NAMES = ("document.css", "document.js", "favicon.svg")
-ASSET_VERSION = "12"
+ASSET_NAMES = ("document.css", "document.js", "catalog.css", "catalog.js", "favicon.svg")
+ASSET_VERSION = "15"
 SAFE_ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,95}$")
 DOCUMENT_TIMESTAMP = re.compile(r"^(\d{8}-\d{6})(?:-|$)")
 ARCHIVE_SUBDIR = ".archive"
 API_REQUIRED_HEADER = ("x-requested-with", "html-preview-catalog")
 MAX_API_BODY_BYTES = 4096
+SUMMARY_LIMIT = 240
 
 
 @dataclass(frozen=True)
@@ -43,31 +44,113 @@ class DocumentRecord:
     title: str
     created_at: datetime
     updated_at: datetime
+    kicker: str = ""
+    summary: str = ""
+
+
+VOID_TAGS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
 
 
 class DocumentInspector(HTMLParser):
+    """Collect what validation, linting, and the catalog need in one pass."""
+
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
         self.tags: set[str] = set()
         self.in_title = False
         self.title_parts: list[str] = []
+        self.description: str | None = None
+        self.kicker = ""
+        self.lede = ""
+        self.first_paragraph = ""
+        self.h1_count = 0
+        self.warnings: list[str] = []
+        self._stack: list[tuple[str, set[str]]] = []
+        self._capture: str | None = None
+        self._capture_depth = 0
+        self._buffer: list[str] = []
+
+    def _inside(self, tag: str | None = None, class_name: str | None = None) -> bool:
+        return any(
+            (tag is None or name == tag) and (class_name is None or class_name in classes)
+            for name, classes in self._stack
+        )
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         self.tags.add(tag)
+        attributes = dict(attrs)
+        classes = set((attributes.get("class") or "").split())
         if tag == "title":
             self.in_title = True
+        elif tag == "meta" and attributes.get("name") == "description":
+            self.description = " ".join((attributes.get("content") or "").split())
+        elif tag == "h1":
+            self.h1_count += 1
+        elif tag == "table" and not self._inside(class_name="table-wrap"):
+            self.warnings.append("a <table> is not wrapped in .table-wrap, so it can overflow on phones")
+        elif tag == "svg" and not self._inside("svg"):
+            labelled = attributes.get("aria-label") or attributes.get("aria-labelledby")
+            if not labelled and attributes.get("aria-hidden") != "true":
+                self.warnings.append("an <svg> has no aria-label or aria-labelledby")
+        elif tag == "img" and attributes.get("alt") is None:
+            self.warnings.append(f"an <img> has no alt text: {attributes.get('src') or '(no src)'}")
+        if self._capture:
+            if tag not in VOID_TAGS:
+                self._capture_depth += 1
+        elif tag == "p":
+            if "kicker" in classes and not self.kicker:
+                self._start_capture("kicker")
+            elif "lede" in classes and not self.lede:
+                self._start_capture("lede")
+            elif not self.first_paragraph and not classes & {"kicker", "eyebrow", "section-meta", "note"}:
+                self._start_capture("first_paragraph")
+        if tag not in VOID_TAGS:
+            self._stack.append((tag, classes))
+
+    def _start_capture(self, name: str) -> None:
+        self._capture = name
+        self._capture_depth = 0
+        self._buffer = []
 
     def handle_endtag(self, tag: str) -> None:
         if tag == "title":
             self.in_title = False
+        for index in range(len(self._stack) - 1, -1, -1):
+            if self._stack[index][0] == tag:
+                del self._stack[index:]
+                break
+        if not self._capture or tag in VOID_TAGS:
+            return
+        if self._capture_depth:
+            self._capture_depth -= 1
+            return
+        setattr(self, self._capture, " ".join("".join(self._buffer).split()))
+        self._capture = None
 
     def handle_data(self, data: str) -> None:
         if self.in_title:
             self.title_parts.append(data)
+        if self._capture:
+            self._buffer.append(data)
 
     @property
     def title(self) -> str:
         return " ".join("".join(self.title_parts).split())
+
+    @property
+    def summary(self) -> str:
+        text = self.description or self.lede or self.first_paragraph
+        if len(text) <= SUMMARY_LIMIT:
+            return text
+        return text[:SUMMARY_LIMIT].rsplit(" ", 1)[0].rstrip(",;:") + "…"
+
+    def lint(self) -> list[str]:
+        warnings = list(dict.fromkeys(self.warnings))
+        if not self.description:
+            warnings.insert(0, "no <meta name=\"description\">; pass --summary to `new` so the catalog can describe it")
+        if self.h1_count != 1:
+            warnings.insert(0, f"expected one <h1>, found {self.h1_count}")
+        return warnings
 
 
 def skill_root() -> Path:
@@ -232,6 +315,7 @@ def command_new(args: argparse.Namespace) -> int:
     template = (skill_root() / "assets" / "document-shell.html").read_text(encoding="utf-8")
     rendered = template.replace("{{DOCUMENT_TITLE}}", html.escape(args.title))
     rendered = rendered.replace("{{DOCUMENT_KICKER}}", html.escape(args.kicker or "HTML response"))
+    rendered = rendered.replace("{{DOCUMENT_SUMMARY}}", html.escape(" ".join(args.summary.split()), quote=True))
     output = Path(args.output).expanduser()
     output.parent.mkdir(parents=True, exist_ok=True)
     descriptor, temporary_name = tempfile.mkstemp(prefix=f".{output.name}.", dir=output.parent)
@@ -248,9 +332,15 @@ def command_new(args: argparse.Namespace) -> int:
     return 0
 
 
+def report_warnings(inspector: DocumentInspector) -> None:
+    for warning in inspector.lint():
+        print(f"warning: {warning}", file=sys.stderr)
+
+
 def command_validate(args: argparse.Namespace) -> int:
     path = Path(args.file).expanduser()
     _, inspector = read_html(path)
+    report_warnings(inspector)
     print(f"valid\t{inspector.title}")
     return 0
 
@@ -268,16 +358,22 @@ def command_publish(args: argparse.Namespace) -> int:
     root = Path(args.root).expanduser()
     source_path = Path(args.file).expanduser()
     source, inspector = read_html(source_path)
+    report_warnings(inspector)
     source = version_document_assets(source)
     sync_assets(root)
 
-    label = slugify(args.slug or inspector.title)
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
-    document_id = f"{stamp}-{label}-{secrets.token_hex(2)}"
     documents = root / "d"
     documents.mkdir(parents=True, exist_ok=True)
+    if args.update:
+        # Keep the URL: the id must already be published (not archived).
+        document_id = document_dir(root, "d", args.update).name
+    else:
+        label = slugify(args.slug or inspector.title)
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+        document_id = f"{stamp}-{label}-{secrets.token_hex(2)}"
     temporary = Path(tempfile.mkdtemp(prefix=".publishing-", dir=documents))
     destination = documents / document_id
+    retired: Path | None = None
     try:
         output = temporary / "index.html"
         output.write_text(source, encoding="utf-8")
@@ -285,10 +381,16 @@ def command_publish(args: argparse.Namespace) -> int:
         download = temporary / "download.html"
         download.write_text(render_standalone_document(source), encoding="utf-8")
         download.chmod(0o644)
+        temporary.chmod(0o755)
+        if destination.exists():
+            retired = documents / f".retired-{document_id}-{secrets.token_hex(2)}"
+            os.replace(destination, retired)
         os.replace(temporary, destination)
     finally:
         if temporary.exists():
             shutil.rmtree(temporary)
+        if retired is not None and retired.exists():
+            shutil.rmtree(retired)
 
     write_index(root)
     base_url = args.base_url.rstrip("/")
@@ -298,8 +400,10 @@ def command_publish(args: argparse.Namespace) -> int:
 
 def document_record(directory: Path) -> DocumentRecord:
     index = directory / "index.html"
+    kicker = summary = ""
     try:
-        title = inspect_document(index.read_text(encoding="utf-8")).title
+        inspector = inspect_document(index.read_text(encoding="utf-8"))
+        title, kicker, summary = inspector.title, inspector.kicker, inspector.summary
     except (OSError, UnicodeError):
         title = "unreadable document"
     try:
@@ -311,6 +415,8 @@ def document_record(directory: Path) -> DocumentRecord:
         title=title or "untitled",
         created_at=created_at_from_id(directory.name) or updated_at,
         updated_at=updated_at,
+        kicker=kicker,
+        summary=summary,
     )
 
 
@@ -334,77 +440,19 @@ def iter_documents(root: Path):
         yield record.document_id, record.title
 
 
-def format_date(value: datetime) -> str:
-    return value.strftime("%b %d, %Y").replace(" 0", " ")
-
-
-def document_url(document_id: str) -> str:
-    return f"d/{quote(document_id, safe='')}/"
-
-
-def render_document_card(record: DocumentRecord) -> str:
-    document_path = document_url(record.document_id)
-    href = html.escape(f"{document_path}?v={ASSET_VERSION}", quote=True)
-    download_href = html.escape(f"{document_path}download.html", quote=True)
-    title = html.escape(record.title, quote=True)
-    document_id = html.escape(record.document_id)
-    document_id_attribute = html.escape(record.document_id, quote=True)
-    search_text = html.escape(
-        f"{record.title} {record.document_id}".casefold(), quote=True
-    )
-    sort_title = html.escape(record.title.casefold(), quote=True)
-    created_timestamp = int(record.created_at.timestamp())
-    updated_timestamp = int(record.updated_at.timestamp())
-    created_iso = html.escape(record.created_at.isoformat(timespec="seconds"), quote=True)
-    updated_iso = html.escape(record.updated_at.isoformat(timespec="seconds"), quote=True)
-    created_label = html.escape(format_date(record.created_at))
-    updated_label = html.escape(format_date(record.updated_at))
-    return f"""<article class="document-card" data-search="{search_text}" data-title="{sort_title}" data-created="{created_timestamp}" data-updated="{updated_timestamp}" data-document-id="{document_id_attribute}">
-  <div class="document-thumbnail">
-    <iframe src="{href}" title="Thumbnail preview of {title}" loading="lazy" scrolling="no" sandbox="allow-same-origin" tabindex="-1"></iframe>
-    <a class="thumbnail-link" href="{href}" aria-label="Open {title}"></a>
-    <div class="thumbnail-actions" aria-label="Document actions">
-      <a class="thumbnail-action thumbnail-preview" href="{href}" aria-label="Open {title}">Open preview ↗</a>
-      <a class="thumbnail-action thumbnail-download" href="{download_href}" download title="Download HTML" aria-label="Download HTML: {title}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3a1 1 0 0 1 2 0v10.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V3Z"></path><path d="M5 19a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H6a1 1 0 0 1-1-1Z"></path></svg></a>
-      <button class="thumbnail-action thumbnail-archive" type="button" data-document-action="archive" data-document-id="{document_id_attribute}" title="Archive" aria-label="Archive {title}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="5" rx="1"></rect><path d="M5 9v11h14V9M10 13h4"></path></svg></button>
-      <button class="thumbnail-action thumbnail-delete" type="button" data-document-action="remove" data-document-id="{document_id_attribute}" title="Delete" aria-label="Delete {title}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5M14 11v5"></path></svg></button>
-    </div>
-  </div>
-  <div class="document-card__body">
-    <h3><a href="{href}">{title}</a></h3>
-    <p class="document-id">{document_id}</p>
-    <dl class="document-dates">
-      <div><dt>Created</dt><dd><time datetime="{created_iso}">{created_label}</time></dd></div>
-      <div><dt>Updated</dt><dd><time datetime="{updated_iso}">{updated_label}</time></dd></div>
-    </dl>
-  </div>
-</article>"""
-
-
-def archive_toggle_markup(count: int) -> str:
-    if count <= 0:
-        return ""
-    count_text = str(count)
-    return (
-        '<button id="archive-toggle" type="button" class="ghost-button" '
-        'aria-expanded="false" aria-controls="archive-section" '
-        f'data-count="{count_text}">Archived · '
-        f'<span id="archive-count-label">{count_text}</span></button>'
-    )
-
-
-def render_index(records: list[DocumentRecord], archived_count: int) -> str:
-    cards = "\n".join(render_document_card(record) for record in records)
-    if not cards:
-        cards = """<div class="empty-state">
-  <h3>No published HTML yet</h3>
-  <p>Publish a document to see its thumbnail and metadata here.</p>
-</div>"""
+def render_index(records: list[DocumentRecord], archived: list[DocumentRecord]) -> str:
+    payload = {
+        "assetVersion": ASSET_VERSION,
+        "documents": [record_payload(record) | {"archived": False} for record in records]
+        + [record_payload(record) | {"archived": True} for record in archived],
+    }
+    # "</" would end the inline <script>; JSON allows the escaped form.
+    data = json.dumps(payload, ensure_ascii=False).replace("</", "<\\/")
     template = (skill_root() / "assets" / "index-shell.html").read_text(encoding="utf-8")
     return (
-        template.replace("{{DOCUMENT_COUNT}}", str(len(records)))
-        .replace("{{ARCHIVE_TOGGLE}}", archive_toggle_markup(archived_count))
-        .replace("{{DOCUMENT_CARDS}}", cards)
+        template.replace("{{CATALOG_DATA}}", data)
+        .replace("{{DOCUMENT_COUNT}}", str(len(records)))
+        .replace("{{ASSET_VERSION}}", ASSET_VERSION)
     )
 
 
@@ -412,10 +460,10 @@ def write_index(root: Path) -> None:
     root.mkdir(parents=True, exist_ok=True)
     output = root / "index.html"
     records = list(iter_document_records(root))
-    archived_count = sum(1 for _ in iter_records(root, ARCHIVE_SUBDIR))
+    archived = list(iter_records(root, ARCHIVE_SUBDIR))
     for record in records:
         write_standalone_document(root / "d" / record.document_id)
-    source = render_index(records, archived_count)
+    source = render_index(records, archived)
     descriptor, temporary_name = tempfile.mkstemp(prefix=".index.", dir=root)
     temporary = Path(temporary_name)
     try:
@@ -504,6 +552,8 @@ def record_payload(record: DocumentRecord) -> dict:
     return {
         "id": record.document_id,
         "title": record.title,
+        "kicker": record.kicker,
+        "summary": record.summary,
         "created": record.created_at.isoformat(timespec="seconds"),
         "updated": record.updated_at.isoformat(timespec="seconds"),
     }
@@ -624,7 +674,10 @@ def command_self_test(args: argparse.Namespace) -> int:
         test_root = Path(temporary_name) / "public"
         draft = Path(temporary_name) / "draft.html"
         new_args = argparse.Namespace(
-            title="Self-test document", kicker="Validation", output=str(draft)
+            title="Self-test document",
+            kicker="Validation",
+            summary="Checks that publishing works end to end.",
+            output=str(draft),
         )
         with redirect_stdout(io.StringIO()):
             command_new(new_args)
@@ -633,20 +686,29 @@ def command_self_test(args: argparse.Namespace) -> int:
             '<section class="section"><h2>Ready</h2><p>The publishing path works.</p></section>',
         )
         draft.write_text(source, encoding="utf-8")
-        validate_source(source)
+        inspector = validate_source(source)
+        if inspector.summary != "Checks that publishing works end to end.":
+            raise AssertionError(f"summary was not read from the meta description: {inspector.summary!r}")
+        if inspector.lint():
+            raise AssertionError(f"clean draft produced lint warnings: {inspector.lint()}")
+        noisy = validate_source(source.replace("<p>The publishing", "<table><tr><td>x</td></tr></table><p>The publishing"))
+        if not any("table-wrap" in warning for warning in noisy.lint()):
+            raise AssertionError("lint missed an unwrapped table")
         sync_assets(test_root)
         for name in ASSET_NAMES:
             if not (test_root / "assets" / name).is_file():
                 raise AssertionError(f"asset did not synchronize: {name}")
         document_js = (test_root / "assets" / "document.js").read_text(encoding="utf-8")
         for marker in (
-            "download-document",
             "buildStandaloneDocument",
             "new Blob",
             "event.ctrlKey",
+            "event.shiftKey",
             "diagram-note",
-            "home-button",
-            "theme-menu",
+            "doc-rail",
+            "rail-outline",
+            "downloadDiagramJpg",
+            "embedFonts",
         ):
             if marker not in document_js:
                 raise AssertionError(f"document asset is missing: {marker}")
@@ -655,6 +717,7 @@ def command_self_test(args: argparse.Namespace) -> int:
             base_url="https://example.invalid",
             file=str(draft),
             slug="self-test",
+            update=None,
         )
         with redirect_stdout(io.StringIO()):
             command_publish(publish_args)
@@ -681,31 +744,38 @@ def command_self_test(args: argparse.Namespace) -> int:
         index_source = (test_root / "index.html").read_text(encoding="utf-8")
         for marker in (
             "Self-test document",
-            "document-thumbnail",
-            "document-search",
-            "document-sort",
-            "theme-picker",
-            "data-theme-choice",
-            "html-response-theme",
-            'scrolling="no"',
-            "data-search=",
-            "data-created=",
-            "data-updated=",
-            "Created",
-            "Updated",
-            "Download HTML",
-            "thumbnail-actions",
-            "thumbnail-download",
-            "thumbnail-archive",
-            "thumbnail-delete",
-            "data-document-action=",
-            "archive-bar",
-            "archive-section",
-            "archive-list",
-            f"d/{published[0][0]}/",
+            "Checks that publishing works end to end.",
+            'id="catalog-data"',
+            f"catalog.js?v={ASSET_VERSION}",
+            f'"assetVersion": "{ASSET_VERSION}"',
+            'id="search"',
+            'id="sort"',
+            'data-layout="rows"',
+            'data-view="archive"',
+            published[0][0],
         ):
             if marker not in index_source:
                 raise AssertionError(f"index is missing: {marker}")
+        catalog_js = (test_root / "assets" / "catalog.js").read_text(encoding="utf-8")
+        for marker in ("/api/archive", "/api/unarchive", "/api/remove", "html-preview-catalog", "Undo"):
+            if marker not in catalog_js:
+                raise AssertionError(f"catalog asset is missing: {marker}")
+
+        # --update replaces the document in place and keeps its id.
+        updated_draft = Path(temporary_name) / "updated.html"
+        updated_draft.write_text(source.replace("The publishing path works.", "Updated in place."), encoding="utf-8")
+        with redirect_stdout(io.StringIO()):
+            command_publish(argparse.Namespace(
+                root=str(test_root), base_url="https://example.invalid",
+                file=str(updated_draft), slug=None, update=published[0][0],
+            ))
+        after_update = list(iter_documents(test_root) or ())
+        if [item[0] for item in after_update] != [published[0][0]]:
+            raise AssertionError("--update created a new document instead of replacing it")
+        if "Updated in place." not in (test_root / "d" / published[0][0] / "index.html").read_text(encoding="utf-8"):
+            raise AssertionError("--update did not replace the document")
+        if any(path.name.startswith(".") for path in (test_root / "d").iterdir()):
+            raise AssertionError("--update left a temporary directory behind")
         if "{{" in index_source or f'"{ARCHIVE_SUBDIR}/' in index_source:
             raise AssertionError("index contains an unreplaced marker")
         archive_args = argparse.Namespace(root=str(test_root), document_id=published[0][0])
@@ -713,8 +783,12 @@ def command_self_test(args: argparse.Namespace) -> int:
             command_archive(archive_args)
         if list(iter_documents(test_root) or ()):
             raise AssertionError("archived document is still listed")
-        if "Self-test document" in (test_root / "index.html").read_text(encoding="utf-8"):
-            raise AssertionError("archived document is still present in the index")
+        index_data = json.loads(
+            (test_root / "index.html").read_text(encoding="utf-8")
+            .split('id="catalog-data">', 1)[1].split("</script>", 1)[0]
+        )
+        if [item["archived"] for item in index_data["documents"]] != [True]:
+            raise AssertionError("archived document is not marked archived in the index")
         if not (test_root / ARCHIVE_SUBDIR / published[0][0] / "index.html").is_file():
             raise AssertionError("archived document files are missing")
         archived = list(iter_records(test_root, ARCHIVE_SUBDIR))
@@ -810,6 +884,11 @@ def build_parser() -> argparse.ArgumentParser:
     new_parser = subparsers.add_parser("new", help="create a document from the shared shell")
     new_parser.add_argument("--title", required=True)
     new_parser.add_argument("--kicker")
+    new_parser.add_argument(
+        "--summary",
+        required=True,
+        help="one or two sentences for the meta description and the catalog",
+    )
     new_parser.add_argument("--output", required=True)
     new_parser.set_defaults(handler=command_new)
 
@@ -825,6 +904,11 @@ def build_parser() -> argparse.ArgumentParser:
     publish_parser = subparsers.add_parser("publish", help="publish a validated HTML document")
     publish_parser.add_argument("file")
     publish_parser.add_argument("--slug")
+    publish_parser.add_argument(
+        "--update",
+        metavar="DOCUMENT_ID",
+        help="replace an already published document and keep its URL",
+    )
     publish_parser.set_defaults(handler=command_publish)
 
     list_parser = subparsers.add_parser("list", help="list published documents")
