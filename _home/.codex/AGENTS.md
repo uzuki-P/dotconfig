@@ -18,7 +18,13 @@ Run at most 3 subagents concurrently by default, unless the user explicitly requ
 
 Choose a model for every subagent you start. Do not let it inherit the parent model by default. Pstack workflows use `~/.agents/pstack/MODELS.json` instead of this list.
 
-Use Claude Opus 5.5 with medium reasoning for every subagent task, including exploration, search, evidence gathering, code review, and implementation. Keep final decisions in the parent.
+Pick the tier by how cheaply the parent can catch a mistake. When unsure, pick the higher tier.
+
+- Claude Haiku 5.5: read-only, mechanical tasks such as codebase search, file inventory, web fetch and summarization, and log or evidence gathering.
+- Claude Sonnet 5.5: well-specified implementation where the parent has fixed the approach and target files, including tests, mechanical refactors, and fixes with a known cause. If the host does not offer Sonnet 5.5, use Opus.
+- Claude Opus 5.5 with medium reasoning: open-ended debugging, design, code review, and any task where the subagent decides what to do.
+
+The parent verifies the specific claims it relies on from a Haiku result, such as file paths, line numbers, and quoted code, before acting on them. It reviews every Sonnet diff before accepting it. Final decisions stay in the parent.
 
 In T3 Code, use native subagents when they support the chosen model and `delegate_task` otherwise. Outside T3 Code, use the closest model the host supports and report any role that had to inherit the parent model.
 

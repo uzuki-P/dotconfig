@@ -6,7 +6,7 @@
       "roles": {
         "feature, refactoring": {
           "providerInstanceId": "claudeAgent",
-          "model": "claude-opus-5-5",
+          "model": "claude-sonnet-5-5",
           "options": {
             "effort": "medium"
           }
@@ -48,7 +48,7 @@
         },
         "how explorer": {
           "providerInstanceId": "claudeAgent",
-          "model": "claude-opus-5-5",
+          "model": "claude-haiku-5-5",
           "options": {
             "effort": "medium"
           }
@@ -172,7 +172,7 @@
       "budget": "inherit",
       "roles": {
         "feature, refactoring": {
-          "model": "opus",
+          "model": "sonnet",
           "options": {
             "effort": "medium"
           }
@@ -208,7 +208,7 @@
           }
         },
         "how explorer": {
-          "model": "opus",
+          "model": "haiku",
           "options": {
             "effort": "medium"
           }
