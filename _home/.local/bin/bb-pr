@@ -123,7 +123,7 @@ cmd_create() {
   [[ $dest != "$branch" ]] || die "Source and destination are both $branch."
 
   local existing
-  existing=$(request GET "repositories/$slug/pullrequests?state=OPEN&q=$(jq -rn --arg b "$branch" '"source.branch.name=\"\($b)\"" | @uri')")
+  existing=$(request GET "repositories/$slug/pullrequests?q=$(jq -rn --arg b "$branch" '"source.branch.name=\"\($b)\" AND state=\"OPEN\"" | @uri')")
   if [[ $(jq '.size // (.values | length)' <<< "$existing") != 0 ]]; then
     echo "An open pull request already exists for $branch:" >&2
     jq '.values[0]' <<< "$existing" | print_pr
@@ -156,7 +156,7 @@ cmd_view() {
   fi
   local branch list
   branch=$(current_branch)
-  list=$(request GET "repositories/$slug/pullrequests?state=OPEN&q=$(jq -rn --arg b "$branch" '"source.branch.name=\"\($b)\"" | @uri')")
+  list=$(request GET "repositories/$slug/pullrequests?q=$(jq -rn --arg b "$branch" '"source.branch.name=\"\($b)\" AND state=\"OPEN\"" | @uri')")
   [[ $(jq '.values | length' <<< "$list") != 0 ]] || die "No open pull request for $branch."
   jq '.values[0]' <<< "$list" | print_pr
 }
