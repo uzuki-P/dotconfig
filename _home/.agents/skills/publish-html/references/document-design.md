@@ -30,7 +30,7 @@ The shared shell and runtime provide:
 
 - **Outline rail.** On wide screens, a sticky left rail with the document title, every top-level section (numbered to match the page, with a fill line showing how far you have read it), and download and theme tools. On narrow screens it becomes a bottom bar with a contents sheet. The rail lists each `<section class="section">` that is a direct child of `<main class="document">` and has an `<h2>`, so give every top-level section a short, scannable `<h2>`.
 - **Generated meta line** under the title: publish date, reading time, and section count. Don't write these by hand.
-- Section numbers, `#` heading links, a reading-progress bar, Bricolage Grotesque headings, Atkinson Hyperlegible Next text, Maple Mono code, syntax highlighting, copy buttons, light/dark/system themes, and print styles.
+- Section numbers, `#` heading links, a reading-progress bar, Inter headings and text, Maple Mono code, syntax highlighting, copy buttons, light/dark/system themes, and print styles.
 - **Diagram controls** for Mermaid and static SVG diagrams in `.diagram-shell > .diagram-canvas`: drag to pan, Ctrl + scroll to zoom, fullscreen, and a JPG download. Fullscreen behaves like a design canvas: scroll pans, Shift + scroll pans sideways, Ctrl + scroll or pinch zooms.
 
 ## Core markup
@@ -166,6 +166,15 @@ Use Mermaid when relationships are harder to understand linearly. The runtime su
 ```
 
 Keep node labels short. Explain the implication in nearby prose instead of turning the diagram into a wall of text.
+
+### State charts
+
+The runtime renders every `stateDiagram` with [Pele](https://pele.run), the renderer the `statechart` skill targets, rather than Mermaid. Pele lays state charts out more legibly and themes them with the page. It also colors the classes that `statechart` writes: the group colors (`blue`, `orange`, `purple`, `yellow`, `teal`, `tan`, `pink`), the bug marks `breaks` and `mayBreak`, and the trails `bugPath` and `repeats`. The canvas takes the chart's aspect ratio and never enlarges a small chart. If Pele fails to load, Mermaid draws the chart with the same colors.
+
+- Paste `chart.mmd` unchanged into `<pre class="mermaid">`, escaping `<`, `>`, and `&`. Keep its front-matter title, Legend, `class`, and `classDef` lines. Don't render it to SVG yourself, and don't add colors or `%%{init}%%` theme settings.
+- Use one figure per chart. Put each bug in the prose next to the chart: the rule, the reader's sentence for that rule, which state breaks it, and the path as the report numbers it. Also list the steps the chart hides, and what the model leaves out.
+- Put the command that regenerates the chart in a code block, so the reader can rerun it.
+- When the statechart command wrote no `chart.mmd` because the model has more than 500 states, show the bug paths from its report as a list or table. Don't draw a substitute chart by hand.
 
 ## Charts
 

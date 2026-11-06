@@ -5,27 +5,19 @@
  */
 
 @font-face {
-  font-family: "Bricolage Grotesque";
+  font-family: "Inter";
   font-style: normal;
-  font-weight: 200 800;
+  font-weight: 100 900;
   font-display: swap;
-  src: url("https://cdn.jsdelivr.net/npm/@fontsource-variable/bricolage-grotesque@5.2.10/files/bricolage-grotesque-latin-wght-normal.woff2") format("woff2-variations");
+  src: url("https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5.2.8/files/inter-latin-wght-normal.woff2") format("woff2-variations");
 }
 
 @font-face {
-  font-family: "Atkinson Hyperlegible Next";
-  font-style: normal;
-  font-weight: 200 800;
-  font-display: swap;
-  src: url("https://cdn.jsdelivr.net/npm/@fontsource-variable/atkinson-hyperlegible-next@5.2.6/files/atkinson-hyperlegible-next-latin-wght-normal.woff2") format("woff2-variations");
-}
-
-@font-face {
-  font-family: "Atkinson Hyperlegible Next";
+  font-family: "Inter";
   font-style: italic;
-  font-weight: 200 800;
+  font-weight: 100 900;
   font-display: swap;
-  src: url("https://cdn.jsdelivr.net/npm/@fontsource-variable/atkinson-hyperlegible-next@5.2.6/files/atkinson-hyperlegible-next-latin-wght-italic.woff2") format("woff2-variations");
+  src: url("https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5.2.8/files/inter-latin-wght-italic.woff2") format("woff2-variations");
 }
 
 @font-face {
@@ -33,7 +25,23 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("https://cdn.jsdelivr.net/fontsource/fonts/maple-mono@5.3.0/latin-400-normal.woff2") format("woff2");
+  src: local("Maple Mono"), local("Maple Mono NF"), url("https://cdn.jsdelivr.net/fontsource/fonts/maple-mono@5.3.0/latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Maple Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local("Maple Mono Bold"), local("Maple Mono NF Bold"), url("https://cdn.jsdelivr.net/fontsource/fonts/maple-mono@5.3.0/latin-700-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Maple Mono";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local("Maple Mono Italic"), local("Maple Mono NF Italic"), url("https://cdn.jsdelivr.net/fontsource/fonts/maple-mono@5.3.0/latin-400-italic.woff2") format("woff2");
 }
 
 :root {
@@ -65,9 +73,25 @@
   --radius-small: 8px;
   --content: 74rem;
   --measure: 72ch;
-  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Atkinson Hyperlegible Next", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-code: "Maple Mono", ui-monospace, "SF Mono", monospace;
+  --font-display: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-code: "Maple Mono", "Maple Mono NF", ui-monospace, "SF Mono", monospace;
+  /* State chart colors: group classes and bug marks from the statechart skill. */
+  --sc-blue: #c3e0ff;
+  --sc-orange: #f0d3bf;
+  --sc-purple: #e3d5ff;
+  --sc-yellow: #f0dcbf;
+  --sc-teal: #bfe3df;
+  --sc-tan: #e5d9ce;
+  --sc-pink: #ffcbe6;
+  --sc-breaks-fill: #ffecee;
+  --sc-breaks-line: #e72e3b;
+  --sc-breaks-ink: #cd2834;
+  --sc-may-fill: #fff3e6;
+  --sc-may-line: #e8730c;
+  --sc-may-ink: #b85a06;
+  --sc-path: #1680f3;
+  --sc-repeats: #9b35d6;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -95,6 +119,21 @@
     --syntax-comment: #988c93;
     --syntax-meta: #cfa9f3;
     --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 16px 40px rgb(0 0 0 / 0.35);
+    --sc-blue: #1b3857;
+    --sc-orange: #573117;
+    --sc-purple: #3c2e57;
+    --sc-yellow: #573d17;
+    --sc-teal: #174641;
+    --sc-tan: #3d3127;
+    --sc-pink: #57233e;
+    --sc-breaks-fill: #2e2021;
+    --sc-breaks-line: #cf2b35;
+    --sc-breaks-ink: #ff6463;
+    --sc-may-fill: #2e2619;
+    --sc-may-line: #d0700f;
+    --sc-may-ink: #ffa257;
+    --sc-path: #3b8ff0;
+    --sc-repeats: #b06ae0;
   }
 }
 
@@ -122,6 +161,21 @@ html[data-resolved-theme="dark"] {
   --syntax-comment: #988c93;
   --syntax-meta: #cfa9f3;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 16px 40px rgb(0 0 0 / 0.35);
+  --sc-blue: #1b3857;
+  --sc-orange: #573117;
+  --sc-purple: #3c2e57;
+  --sc-yellow: #573d17;
+  --sc-teal: #174641;
+  --sc-tan: #3d3127;
+  --sc-pink: #57233e;
+  --sc-breaks-fill: #2e2021;
+  --sc-breaks-line: #cf2b35;
+  --sc-breaks-ink: #ff6463;
+  --sc-may-fill: #2e2619;
+  --sc-may-line: #d0700f;
+  --sc-may-ink: #ffa257;
+  --sc-path: #3b8ff0;
+  --sc-repeats: #b06ae0;
 }
 
 /* ---------- Base ---------- */
@@ -676,8 +730,6 @@ code { font-family: var(--font-code); }
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background-color: var(--raised);
-  background-image: radial-gradient(color-mix(in srgb, var(--line-strong) 70%, transparent) 0.8px, transparent 0.8px);
-  background-size: 20px 20px;
 }
 
 .diagram-canvas {
@@ -691,6 +743,8 @@ code { font-family: var(--font-code); }
 
 .diagram-canvas.dragging { cursor: grabbing; }
 .diagram-canvas svg { display: block; width: 100%; height: 100%; max-width: none !important; }
+/* Pele state charts size the canvas to the chart's aspect ratio. */
+.diagram-canvas.is-fitted { height: auto; min-height: 22rem; max-height: min(80vh, 56rem); margin-inline: auto; }
 
 .diagram-tools {
   position: absolute;
@@ -1045,4 +1099,64 @@ dialog .diagram-shell { border: 0; border-radius: 0; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+/* ---------- Theme dropdown (theme-menu.js) ---------- */
+
+.theme-menu { position: relative; display: inline-flex; }
+
+.theme-menu-list {
+  position: absolute;
+  z-index: 50;
+  display: grid;
+  min-width: 9.5rem;
+  padding: 0.3rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--raised);
+  box-shadow: var(--shadow);
+}
+
+.theme-menu-list[hidden] { display: none; }
+.theme-menu[data-placement="down"] .theme-menu-list { top: calc(100% + 0.4rem); }
+.theme-menu[data-placement="up"] .theme-menu-list { bottom: calc(100% + 0.4rem); }
+.theme-menu[data-align="start"] .theme-menu-list { left: 0; }
+.theme-menu[data-align="end"] .theme-menu-list { right: 0; }
+
+.theme-menu-list [role="menuitemradio"] {
+  display: grid;
+  grid-template-columns: 1.1rem 1fr 1rem;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.55rem;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.theme-menu-list [role="menuitemradio"]:hover,
+.theme-menu-list [role="menuitemradio"]:focus-visible { background: var(--surface); color: var(--ink); outline: 0; }
+.theme-menu-list [role="menuitemradio"][aria-checked="true"] { color: var(--ink); font-weight: 600; }
+
+.theme-menu-list svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.theme-menu-check { display: grid; color: var(--pink); visibility: hidden; }
+[aria-checked="true"] .theme-menu-check { visibility: visible; }
+
+/* On the narrow bottom bar the rail sits centred; open the menu leftwards. */
+@media (max-width: 959px) {
+  .doc-rail .theme-menu[data-align="start"] .theme-menu-list { left: auto; right: 0; }
 }

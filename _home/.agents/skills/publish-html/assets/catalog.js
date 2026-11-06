@@ -1,5 +1,6 @@
 // publish-html catalog runtime, v2. The page embeds every record as JSON; the
 // API (html_preview.py serve, behind Caddy at /api/*) only performs changes.
+import { mountThemeMenu } from "./theme-menu.js";
 
 const data = JSON.parse(document.getElementById("catalog-data").textContent || '{"documents":[]}');
 const docs = data.documents;
@@ -9,7 +10,6 @@ const search = document.getElementById("search");
 const sort = document.getElementById("sort");
 const layoutKey = "html-preview-layout";
 const themeKey = "html-response-theme";
-const themeOrder = ["system", "light", "dark"];
 const media = matchMedia("(prefers-color-scheme: dark)");
 
 const state = {
@@ -26,10 +26,8 @@ const icons = {
   download: icon('<path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/>'),
   archive: icon('<rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10h14V9M10 13h4"/>'),
   restore: icon('<path d="M4 12a8 8 0 1 0 2.4-5.7L4 8.6"/><path d="M4 4v4.6h4.6"/>'),
+  refresh: icon('<path d="M20 12a8 8 0 1 1-2.4-5.7L20 8.6"/><path d="M20 4v4.6h-4.6"/>'),
   remove: icon('<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>'),
-  system: icon('<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>'),
-  light: icon('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'),
-  dark: icon('<path d="M20.4 15.5A9 9 0 0 1 8.5 3.6a9 9 0 1 0 11.9 11.9Z"/>'),
 };
 
 function readLayout() {
@@ -102,20 +100,35 @@ function actionsMarkup(doc) {
       <button class="action danger" type="button" data-action="remove" data-id="${escapeHtml(doc.id)}" aria-label="Delete ${label} permanently">${icons.remove}<span class="action-label">Delete</span></button>`;
   }
   return `
+    <button class="action" type="button" data-action="thumbnail" data-id="${escapeHtml(doc.id)}" title="Refresh thumbnail" aria-label="Refresh thumbnail for ${label}">${icons.refresh}</button>
     <a class="action" href="${docUrl(doc)}download.html" download title="Download HTML" aria-label="Download ${label}">${icons.download}</a>
     <button class="action" type="button" data-action="archive" data-id="${escapeHtml(doc.id)}" title="Archive" aria-label="Archive ${label}">${icons.archive}</button>
     <button class="action danger" type="button" data-action="remove" data-id="${escapeHtml(doc.id)}" title="Delete" aria-label="Delete ${label} permanently">${icons.remove}</button>`;
 }
 
+function thumbSrc(doc) {
+  const thumbs = doc.thumbs || {};
+  const dark = document.documentElement.dataset.resolvedTheme === "dark" && thumbs.dark;
+  const version = dark ? thumbs.dark : thumbs.light;
+  if (!version) return null;
+  return `${docUrl(doc)}${dark ? "thumb-dark.png" : "thumb.png"}?t=${version}`;
+}
+
 function thumbMarkup(doc) {
-  return `<div class="thumb"><iframe src="${docHref(doc)}" title="" loading="lazy" scrolling="no" sandbox="allow-same-origin" tabindex="-1" aria-hidden="true"></iframe></div>`;
+  const busy = refreshing.has(doc.id) ? " is-refreshing" : "";
+  const src = thumbSrc(doc);
+  if (src) return `<div class="thumb${busy}"><img src="${src}" alt="" loading="lazy" decoding="async"></div>`;
+  return `<div class="thumb${busy}"><iframe src="${docHref(doc)}" title="" loading="lazy" scrolling="no" sandbox="allow-same-origin" tabindex="-1" aria-hidden="true"></iframe></div>`;
 }
 
 function metaMarkup(doc) {
   const created = new Date(doc.created);
   const updated = new Date(doc.updated);
   const edited = updated - created > 3600_000 ? `<span>Edited ${relativeDay(updated).replace(/^(Today|Yesterday)$/, (w) => w.toLowerCase())}</span>` : "";
-  return `<div class="row-meta"><time datetime="${doc.created}">${relativeDay(created)}</time>${edited}<code>${highlight(doc.id)}</code></div>`;
+  // The ID is noise while scanning; show it only when the search matched it.
+  const terms = state.query.trim().toLowerCase().split(/\s+/).filter((t) => t.length > 1);
+  const idMatch = terms.some((t) => doc.id.toLowerCase().includes(t));
+  return `<div class="row-meta"><time datetime="${doc.created}">${relativeDay(created)}</time>${edited}${idMatch ? `<code>${highlight(doc.id)}</code>` : ""}</div>`;
 }
 
 function rowMarkup(doc) {
@@ -138,7 +151,8 @@ function tileMarkup(doc) {
   return `<article class="tile" data-id="${escapeHtml(doc.id)}">
     ${thumbMarkup(doc)}
     <div class="tile-actions">${actionsMarkup(doc)}</div>
-    <div>
+    <div class="tile-info">
+      ${doc.kicker ? `<p class="kicker">${highlight(doc.kicker)}</p>` : ""}
       <h3><a href="${docHref(doc)}">${highlight(doc.title)}</a></h3>
       ${metaMarkup(doc)}
     </div>
@@ -176,7 +190,7 @@ function render() {
   results.innerHTML = groups(list).map(({ label, items }) => `
     <section class="group">
       ${label ? `<h2 class="group-head">${escapeHtml(label)} <span>${items.length}</span></h2>` : ""}
-      <div class="${useTiles ? "tiles" : `rows${state.view === "archive" ? " archived" : ""}`}">
+      <div class="${useTiles ? `tiles${state.query.trim() ? " searching" : ""}` : `rows${state.view === "archive" ? " archived" : ""}`}">
         ${items.map(useTiles ? tileMarkup : rowMarkup).join("")}
       </div>
     </section>`).join("");
@@ -202,7 +216,7 @@ async function api(path, id) {
   const response = await fetch(path, {
     method: "POST",
     headers: { "Content-Type": "application/json", "X-Requested-With": "html-preview-catalog" },
-    body: JSON.stringify({ id }),
+    body: JSON.stringify(id === undefined ? {} : { id }),
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(body.error || `${response.status} ${response.statusText}`);
@@ -260,6 +274,39 @@ async function removeDoc(doc, button) {
   }
 }
 
+/* ---------- Thumbnails ---------- */
+
+const refreshing = new Set();
+const refreshAllButton = document.getElementById("refresh-thumbs");
+
+async function refreshThumbnails(doc) {
+  const targets = doc ? [doc] : docs.filter((d) => !d.archived);
+  if (!targets.length || targets.some((d) => refreshing.has(d.id))) return;
+  targets.forEach((d) => refreshing.add(d.id));
+  if (!doc) { refreshAllButton.disabled = true; refreshAllButton.classList.add("is-busy"); }
+  render();
+  if (!doc) toast(`Refreshing ${targets.length} thumbnails…`);
+  try {
+    const body = await api("/api/thumbnails", doc ? doc.id : undefined);
+    for (const [id, thumbs] of Object.entries(body.thumbs || {})) {
+      const match = docs.find((d) => d.id === id);
+      if (match) match.thumbs = thumbs;
+    }
+    const failed = Object.keys(body.errors || {}).length;
+    toast(failed
+      ? `${failed} thumbnail${failed === 1 ? "" : "s"} failed: ${Object.values(body.errors)[0]}`
+      : doc ? `Refreshed the thumbnail for “${doc.title}”` : `Refreshed ${targets.length} thumbnails`);
+  } catch (error) {
+    toast(`Could not refresh thumbnails: ${error.message}`);
+  } finally {
+    targets.forEach((d) => refreshing.delete(d.id));
+    if (!doc) { refreshAllButton.disabled = false; refreshAllButton.classList.remove("is-busy"); }
+    render();
+  }
+}
+
+refreshAllButton.addEventListener("click", () => refreshThumbnails());
+
 results.addEventListener("click", (event) => {
   const button = event.target.closest("[data-action]");
   if (event.target.closest("[data-clear]")) { search.value = ""; state.query = ""; render(); search.focus(); return; }
@@ -270,6 +317,7 @@ results.addEventListener("click", (event) => {
   if (button.dataset.action === "archive") setArchived(doc, true);
   if (button.dataset.action === "unarchive") setArchived(doc, false);
   if (button.dataset.action === "remove") removeDoc(doc, button);
+  if (button.dataset.action === "thumbnail") refreshThumbnails(doc);
 });
 
 /* ---------- Controls ---------- */
@@ -280,6 +328,7 @@ document.querySelectorAll("[role=tab]").forEach((tab) => {
     document.querySelectorAll("[role=tab]").forEach((t) => t.setAttribute("aria-selected", String(t === tab)));
     results.setAttribute("aria-labelledby", tab.id);
     document.querySelector(".segmented").hidden = state.view === "archive";
+    refreshAllButton.hidden = state.view === "archive";
     render();
   });
 });
@@ -305,20 +354,19 @@ document.addEventListener("keydown", (event) => {
 
 /* ---------- Theme ---------- */
 
-const themeButton = document.getElementById("theme-toggle");
 function applyTheme(theme, persist = true) {
   const root = document.documentElement;
   root.dataset.theme = theme;
   root.dataset.resolvedTheme = theme === "system" ? (media.matches ? "dark" : "light") : theme;
-  const next = themeOrder[(themeOrder.indexOf(theme) + 1) % 3];
-  themeButton.innerHTML = icons[theme];
-  themeButton.title = `Theme: ${theme}. Switch to ${next}`;
-  themeButton.setAttribute("aria-label", themeButton.title);
   if (persist) { try { localStorage.setItem(themeKey, theme); } catch {} }
+  render();
 }
-themeButton.addEventListener("click", () => {
-  const current = document.documentElement.dataset.theme || "system";
-  applyTheme(themeOrder[(themeOrder.indexOf(current) + 1) % 3]);
+mountThemeMenu(document.getElementById("theme-menu"), {
+  current: document.documentElement.dataset.theme || "system",
+  placement: "down",
+  align: "end",
+  buttonClass: "icon-button",
+  onSelect: (theme) => applyTheme(theme),
 });
 media.addEventListener("change", () => { if (document.documentElement.dataset.theme === "system") applyTheme("system", false); });
 applyTheme(document.documentElement.dataset.theme || "system", false);

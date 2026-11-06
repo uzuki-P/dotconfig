@@ -74,6 +74,12 @@ earlier.
   an undo toast; delete asks for a second click. The buttons call
   `html_preview.py serve` through Caddy at `/api/*`; the `deploy` recipe in
   `~/docker/html-preview` applies changes to that stack.
+- Catalog thumbnails are headless-Chrome screenshots (`thumb.png` and
+  `thumb-dark.png` in each document folder). `publish` takes one for the
+  document, `sync` fills in missing ones, and `html_preview.py thumbnails
+  [<document-id>...]` retakes them. The catalog's refresh buttons (one per
+  document, one in the header for all) call `/api/thumbnails`. Set
+  `HTML_PREVIEW_BROWSER` if Chrome is not on `PATH`.
 - After changing anything under `assets/`, bump `ASSET_VERSION` in
   `html_preview.py` and run `just prepare` in `~/docker/html-preview`. It copies
   the assets, points every published document at the new version, and rebuilds

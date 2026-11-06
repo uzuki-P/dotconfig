@@ -2,11 +2,23 @@
 // Adds the reading chrome (outline rail, progress, meta line), code
 // highlighting and copy, Mermaid rendering, and pan/zoom for every diagram.
 
+import { mountThemeMenu } from "./theme-menu.js";
+
 const media = window.matchMedia("(prefers-color-scheme: dark)");
+// The catalog screenshots pages with ?thumbnail; skip the rail so the
+// thumbnail shows the document itself.
+const thumbnailMode = new URLSearchParams(location.search).has("thumbnail");
+let themeMenu = null;
 const themeKey = "html-response-theme";
 const themeOrder = ["system", "light", "dark"];
 let mermaidApi = null;
+let peleApi = null;
+let diagramsLoaded = false;
 let diagramSerial = 0;
+const MERMAID_URL = "https://cdn.jsdelivr.net/npm/mermaid@11.16.1/dist/mermaid.esm.min.mjs";
+// Pele is the renderer the statechart skill targets. It lays out state diagrams far
+// more readably than Mermaid's dagre and themes through CSS variables.
+const PELE_URL = "https://cdn.jsdelivr.net/npm/pele@1.9.0/dist/pele.js";
 
 const icon = (paths) => `<svg viewBox="0 0 24 24" aria-hidden="true">${paths}</svg>`;
 const icons = {
@@ -41,13 +53,7 @@ function applyTheme(theme, persist = true) {
   const root = document.documentElement;
   root.dataset.theme = theme;
   root.dataset.resolvedTheme = resolvedTheme(theme);
-  const button = document.querySelector("[data-tool='theme']");
-  if (button) {
-    const next = themeOrder[(themeOrder.indexOf(theme) + 1) % themeOrder.length];
-    button.innerHTML = icons[theme];
-    button.title = `Theme: ${theme}. Switch to ${next}`;
-    button.setAttribute("aria-label", `Theme: ${theme}. Switch to ${next}`);
-  }
+  themeMenu?.update(theme);
   if (persist) {
     try { localStorage.setItem(themeKey, theme); } catch { /* storage may be blocked */ }
   }
@@ -145,16 +151,21 @@ function setupToolbar(entries) {
       : "<span></span>"}
     <div class="rail-tools">
       <button type="button" class="tool" data-tool="download" title="Download HTML" aria-label="Download HTML">${icons.download}</button>
-      <button type="button" class="tool" data-tool="theme" title="Theme" aria-label="Theme">${icons.system}</button>
+      <div data-tool="theme"></div>
     </div>`;
   document.body.prepend(rail);
   document.body.append(progress);
 
   rail.querySelector("[data-tool='download']").addEventListener("click", (event) => downloadDocument(event.currentTarget));
-  rail.querySelector("[data-tool='theme']").addEventListener("click", async () => {
-    const current = root.dataset.theme || "system";
-    applyTheme(themeOrder[(themeOrder.indexOf(current) + 1) % themeOrder.length]);
-    if (mermaidApi) await renderDiagrams();
+  themeMenu = mountThemeMenu(rail.querySelector("[data-tool='theme']"), {
+    current: storedTheme(),
+    placement: "up",
+    align: "start",
+    buttonClass: "tool",
+    onSelect: async (theme) => {
+      applyTheme(theme);
+      await renderDiagrams();
+    },
   });
 
   const toggle = rail.querySelector(".rail-toggle");
@@ -329,10 +340,10 @@ function resolveCssVariables(markup, element) {
 // An SVG drawn as an image can't fetch webfonts, and a fallback font is wider than the
 // one Mermaid measured with, which clips labels. Inline the fonts the SVG uses.
 const exportFonts = [
-  ["Atkinson Hyperlegible Next", "normal", "200 800", "https://cdn.jsdelivr.net/npm/@fontsource-variable/atkinson-hyperlegible-next@5.2.6/files/atkinson-hyperlegible-next-latin-wght-normal.woff2"],
-  ["Bricolage Grotesque", "normal", "200 800", "https://cdn.jsdelivr.net/npm/@fontsource-variable/bricolage-grotesque@5.2.10/files/bricolage-grotesque-latin-wght-normal.woff2"],
+  ["Inter", "normal", "100 900", "https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5.2.8/files/inter-latin-wght-normal.woff2"],
   ["Maple Mono", "normal", "400", "https://cdn.jsdelivr.net/fontsource/fonts/maple-mono@5.3.0/latin-400-normal.woff2"],
 ];
+
 const fontDataCache = new Map();
 
 async function fontDataUrl(url) {
@@ -589,42 +600,111 @@ function diagramThemeVariables() {
   };
 }
 
+// Matches state diagrams, including ones with front matter or %% lines before them.
+const isStateDiagram = (text) => /^\s*(?:---\r?\n[\s\S]*?\r?\n---\s*)?(?:%%[^\n]*\s*)*stateDiagram\b/.test(text);
+
+// Color classes the statechart skill writes (`class sN teal`, `breaks`, `bugPath`, ...).
+// The values are CSS variables in document.css, so they follow the page theme.
+const statechartGroups = ["blue", "orange", "purple", "yellow", "teal", "tan", "pink"];
+
+// Lives inside each Pele SVG, so the JPG export and fullscreen view keep the colors.
+// Marks use !important because Pele writes classDef colors as inline styles.
+const peleStyle = `<style>
+.pele.doc-pele{--pele-bg:var(--raised);--pele-fg:var(--ink);--pele-muted:var(--muted);--pele-line:var(--muted);--pele-surface:var(--surface);--pele-surface-alt:var(--page);--pele-border:var(--line-strong);--pele-accent:var(--pink);--pele-font:var(--font-body)}
+${statechartGroups.map((g) => `.doc-pele .${g}>rect{fill:var(--sc-${g})}`).join("\n")}
+.doc-pele .breaks>rect{fill:var(--sc-breaks-fill)!important;stroke:var(--sc-breaks-line)!important;stroke-width:2.5px!important}
+.doc-pele .breaks>text{fill:var(--sc-breaks-ink)!important}
+.doc-pele .mayBreak>rect{fill:var(--sc-may-fill)!important;stroke:var(--sc-may-line)!important;stroke-width:2.5px!important}
+.doc-pele .mayBreak>text{fill:var(--sc-may-ink)!important}
+.doc-pele .bugPath>rect{stroke:var(--sc-path)!important;stroke-width:2.5px!important}
+.doc-pele .repeats>rect{stroke:var(--sc-repeats)!important;stroke-width:2.5px!important;stroke-dasharray:6 3}
+</style>`;
+
+function renderWithPele(text, canvas) {
+  diagramSerial += 1;
+  const font = getComputedStyle(document.documentElement).getPropertyValue("--font-body").trim();
+  const result = peleApi.render(text, {
+    limit: 1_000_000,
+    outputLimit: 8_000_000,
+    maxEdges: 10_000,
+    idPrefix: `doc-pele-${diagramSerial}-`,
+    ...(font ? { fontFamily: font } : {}),
+  });
+  canvas.innerHTML = result.svg;
+  const svg = canvas.querySelector("svg");
+  svg.classList.add("doc-pele");
+  svg.insertAdjacentHTML("afterbegin", peleStyle);
+  Object.assign(svg.style, { width: "100%", height: "100%", maxWidth: "none" });
+  // Size the canvas to the chart's shape so a tall chart isn't squeezed into a strip,
+  // and cap it at the natural width so a small chart isn't blown up.
+  canvas.classList.add("is-fitted");
+  canvas.style.aspectRatio = `${result.width} / ${result.height}`;
+  canvas.style.maxWidth = `${Math.ceil(result.width)}px`;
+}
+
+// Fallback when Pele can't load: Mermaid ignores classes without a classDef, so add
+// the statechart color classes the source leaves to the renderer.
+function withStatechartClasses(text) {
+  if (!isStateDiagram(text)) return text;
+  const styles = getComputedStyle(document.documentElement);
+  const v = (name) => styles.getPropertyValue(name).trim();
+  const defs = Object.fromEntries(statechartGroups.map((g) => [g, `fill:${v(`--sc-${g}`)}`]));
+  defs.bugPath = `stroke:${v("--sc-path")},stroke-width:2.5px`;
+  defs.repeats = `stroke:${v("--sc-repeats")},stroke-width:2.5px,stroke-dasharray:6 3`;
+  const used = new Set([...text.matchAll(/^\s*class\s+\S+\s+(\w+)\s*$/gm)].map((m) => m[1]));
+  const defined = new Set([...text.matchAll(/^\s*classDef\s+(\w+)/gm)].map((m) => m[1]));
+  const lines = [...used].filter((c) => defs[c] && !defined.has(c)).map((c) => `  classDef ${c} ${defs[c]}`);
+  return lines.length ? text.replace(/^(\s*stateDiagram(?:-v2)?[^\n]*)$/m, `$1\n${lines.join("\n")}`) : text;
+}
+
 async function renderDiagrams() {
+  if (!diagramsLoaded) return;
   const sources = [...document.querySelectorAll("pre.mermaid")];
   if (!sources.length) return;
-  if (!mermaidApi) {
-    sources.forEach((source) => {
-      if (source.parentElement?.querySelector(":scope > .diagram-error")) return;
+  if (mermaidApi) {
+    mermaidApi.initialize({
+      startOnLoad: false,
+      securityLevel: "strict",
+      theme: "base",
+      themeVariables: diagramThemeVariables(),
+      flowchart: { htmlLabels: false, curve: "basis" },
+    });
+  }
+  for (const source of sources) {
+    source.dataset.diagramSource ||= source.textContent || "";
+    const text = source.dataset.diagramSource;
+    const usePele = Boolean(peleApi) && isStateDiagram(text);
+    const existing = source.parentElement?.querySelector(":scope > .diagram-shell");
+    // Pele colors are CSS variables, so a theme change needs no re-render and the view keeps its zoom.
+    if (usePele && existing && source.dataset.renderer === "pele") continue;
+    if (!usePele && !mermaidApi) {
+      if (source.parentElement?.querySelector(":scope > .diagram-error")) continue;
       const error = document.createElement("div");
       error.className = "diagram-error";
       error.textContent = "Mermaid did not load, so the diagram source is shown instead.";
       source.before(error);
-    });
-    return;
-  }
-  mermaidApi.initialize({
-    startOnLoad: false,
-    securityLevel: "strict",
-    theme: "base",
-    themeVariables: diagramThemeVariables(),
-    flowchart: { htmlLabels: false, curve: "basis" },
-  });
-  for (const source of sources) {
-    source.dataset.diagramSource ||= source.textContent || "";
-    source.parentElement?.querySelector(":scope > .diagram-shell")?.remove();
+      continue;
+    }
+    existing?.remove();
     source.parentElement?.querySelector(":scope > .diagram-error")?.remove();
     source.hidden = true;
+    const shell = document.createElement("div");
+    shell.className = "diagram-shell";
+    const canvas = document.createElement("div");
+    canvas.className = "diagram-canvas";
+    shell.append(canvas);
     try {
-      diagramSerial += 1;
-      const result = await mermaidApi.render(`doc-diagram-${diagramSerial}`, source.dataset.diagramSource);
-      const shell = document.createElement("div");
-      shell.className = "diagram-shell";
-      const canvas = document.createElement("div");
-      canvas.className = "diagram-canvas";
-      canvas.innerHTML = result.svg;
-      shell.append(canvas);
+      if (usePele) {
+        renderWithPele(text, canvas);
+      } else {
+        diagramSerial += 1;
+        const result = await mermaidApi.render(`doc-diagram-${diagramSerial}`, withStatechartClasses(text));
+        canvas.innerHTML = result.svg;
+      }
+      source.dataset.renderer = usePele ? "pele" : "mermaid";
+      const markup = canvas.innerHTML;
       source.after(shell);
-      setupViewport(canvas, () => openDiagramFullscreen(result.svg));
+      setupViewport(canvas, () => openDiagramFullscreen(markup));
     } catch (error) {
       source.hidden = false;
       const message = document.createElement("div");
@@ -641,24 +721,34 @@ async function boot() {
   const entries = topSections();
   setupAnchors(entries);
   setupMetaLine(entries);
-  setupToolbar(entries);
+  if (!thumbnailMode) setupToolbar(entries);
   applyTheme(storedTheme(), false);
   media.addEventListener("change", async () => {
     if (document.documentElement.dataset.theme !== "system") return;
     applyTheme("system", false);
-    if (mermaidApi) await renderDiagrams();
+    await renderDiagrams();
   });
   setupStaticDiagrams();
 
   const needsHighlight = document.querySelector("pre code:not(.mermaid code)");
-  const needsMermaid = document.querySelector("pre.mermaid");
-  const [highlightResult, mermaidResult] = await Promise.allSettled([
+  const diagramTexts = [...document.querySelectorAll("pre.mermaid")].map((source) => source.textContent || "");
+  const needsPele = diagramTexts.some(isStateDiagram);
+  const needsMermaid = diagramTexts.some((text) => !isStateDiagram(text));
+  const [highlightResult, mermaidResult, peleResult] = await Promise.allSettled([
     needsHighlight ? import("https://cdn.jsdelivr.net/npm/highlight.js@11.12.0/+esm") : Promise.resolve(null),
-    needsMermaid ? import("https://cdn.jsdelivr.net/npm/mermaid@11.16.1/dist/mermaid.esm.min.mjs") : Promise.resolve(null),
+    needsMermaid ? import(MERMAID_URL) : Promise.resolve(null),
+    needsPele ? import(PELE_URL) : Promise.resolve(null),
   ]);
   const highlighter = highlightResult.status === "fulfilled" ? highlightResult.value?.default : null;
   mermaidApi = mermaidResult.status === "fulfilled" ? mermaidResult.value?.default : null;
+  peleApi = peleResult.status === "fulfilled" && typeof peleResult.value?.render === "function" ? peleResult.value : null;
+  if (needsPele && !peleApi && !mermaidApi) {
+    mermaidApi = await import(MERMAID_URL).then((module) => module.default, () => null);
+  }
   setupCodeBlocks(highlighter);
+  // Pele measures labels with the page font, so wait for it.
+  if (peleApi) await document.fonts?.ready;
+  diagramsLoaded = true;
   await renderDiagrams();
 }
 

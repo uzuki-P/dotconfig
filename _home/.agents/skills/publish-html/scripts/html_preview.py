@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import argparse
-from contextlib import redirect_stdout
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager, redirect_stdout
 from dataclasses import dataclass
+import functools
 import html
 from html.parser import HTMLParser
 import io
@@ -15,11 +17,12 @@ from pathlib import Path
 import re
 import secrets
 import shutil
+import subprocess
 import sys
 import tempfile
 import threading
 from datetime import datetime, timezone
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler, SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit
 import urllib.error
 import urllib.request
@@ -28,14 +31,21 @@ import urllib.request
 DEFAULT_ROOT = Path.home() / "docker" / "html-preview" / "public"
 DEFAULT_BASE_URL = "https://html-preview.ts.uzuki-p.my.id"
 MAX_DOCUMENT_BYTES = 10 * 1024 * 1024
-ASSET_NAMES = ("document.css", "document.js", "catalog.css", "catalog.js", "favicon.svg")
-ASSET_VERSION = "15"
+ASSET_NAMES = ("document.css", "document.js", "theme-menu.js", "catalog.css", "catalog.js", "favicon.svg")
+ASSET_VERSION = "22"
 SAFE_ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,95}$")
 DOCUMENT_TIMESTAMP = re.compile(r"^(\d{8}-\d{6})(?:-|$)")
 ARCHIVE_SUBDIR = ".archive"
 API_REQUIRED_HEADER = ("x-requested-with", "html-preview-catalog")
 MAX_API_BODY_BYTES = 4096
 SUMMARY_LIMIT = 240
+# Thumbnails are screenshots of the first 1280x800 of a page, saved at half size.
+THUMB_FILES = {"light": "thumb.png", "dark": "thumb-dark.png"}
+THUMB_VIEWPORT = (1280, 800)
+THUMB_SCALE = 0.5
+THUMB_TIMEOUT_SECONDS = 60
+THUMB_WORKERS = 3
+BROWSER_CANDIDATES = ("google-chrome-stable", "google-chrome", "chromium", "chromium-browser")
 
 
 @dataclass(frozen=True)
@@ -46,6 +56,7 @@ class DocumentRecord:
     updated_at: datetime
     kicker: str = ""
     summary: str = ""
+    thumbs: tuple[tuple[str, int], ...] = ()
 
 
 VOID_TAGS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
@@ -182,6 +193,9 @@ def validate_source(source: str) -> DocumentInspector:
         errors.append("empty <title>")
     if "<!-- DOCUMENT_CONTENT -->" in source:
         errors.append("unreplaced document-content marker")
+    leftover = sorted(set(re.findall(r"\{\{DOCUMENT_[A-Z_]+\}\}", source)))
+    if leftover:
+        errors.append(f"unreplaced shell placeholder: {', '.join(leftover)}")
     if errors:
         raise ValueError("; ".join(errors))
     return inspector
@@ -280,7 +294,10 @@ def refresh_document_assets(root: Path) -> None:
         source = index.read_text(encoding="utf-8")
         refreshed = version_document_assets(source)
         if refreshed != source:
+            # An asset bump is not an edit: keep the catalog's "Edited" date.
+            stat = index.stat()
             atomic_write_text(index, refreshed)
+            os.utime(index, ns=(stat.st_atime_ns, stat.st_mtime_ns))
 
 
 def write_standalone_document(directory: Path) -> None:
@@ -288,6 +305,123 @@ def write_standalone_document(directory: Path) -> None:
     output = directory / "download.html"
     rendered = render_standalone_document(source)
     atomic_write_text(output, rendered)
+
+
+def find_browser() -> str | None:
+    configured = os.environ.get("HTML_PREVIEW_BROWSER")
+    if configured:
+        return configured
+    for name in BROWSER_CANDIDATES:
+        found = shutil.which(name)
+        if found:
+            return found
+    shells = sorted(
+        (Path.home() / ".cache" / "ms-playwright").glob(
+            "chromium_headless_shell-*/chrome-headless-shell-*/chrome-headless-shell"
+        )
+    )
+    return str(shells[-1]) if shells else None
+
+
+class QuietFileHandler(SimpleHTTPRequestHandler):
+    def log_message(self, format: str, *args) -> None:
+        pass
+
+
+@contextmanager
+def serve_static(root: Path):
+    """Serve the document root on an ephemeral loopback port for screenshots."""
+    handler = functools.partial(QuietFileHandler, directory=str(root))
+    server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        yield f"http://127.0.0.1:{server.server_address[1]}"
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
+def capture_thumbnail(browser: str, url: str, output: Path, scheme: str) -> None:
+    width, height = THUMB_VIEWPORT
+    # Chrome helpers can still be writing the profile as it exits; leftovers are harmless.
+    with tempfile.TemporaryDirectory(prefix="html-preview-browser-", ignore_cleanup_errors=True) as profile:
+        shot = Path(profile) / "shot.png"
+        command = [
+            browser,
+            "--headless",
+            "--disable-gpu",
+            "--no-first-run",
+            "--no-default-browser-check",
+            "--hide-scrollbars",
+            "--mute-audio",
+            f"--user-data-dir={profile}/profile",
+            f"--window-size={width},{height}",
+            f"--force-device-scale-factor={THUMB_SCALE}",
+            "--virtual-time-budget=4000",
+            f"--blink-settings=preferredColorScheme={0 if scheme == 'dark' else 1}",
+            f"--screenshot={shot}",
+            url,
+        ]
+        try:
+            completed = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                timeout=THUMB_TIMEOUT_SECONDS,
+                check=False,
+            )
+        except subprocess.TimeoutExpired as error:
+            raise OSError(f"browser timed out after {THUMB_TIMEOUT_SECONDS}s") from error
+        if not shot.is_file() or shot.stat().st_size == 0:
+            detail = (completed.stderr or completed.stdout).strip().splitlines()[-1:] or ["no output"]
+            raise OSError(f"browser did not write a screenshot: {detail[0]}")
+        shot.chmod(0o644)
+        temporary = output.with_name(f".{output.name}.{secrets.token_hex(3)}")
+        shutil.copyfile(shot, temporary)
+        temporary.chmod(0o644)
+        os.replace(temporary, output)
+
+
+def render_thumbnails(
+    root: Path, document_ids: list[str] | None = None, missing_only: bool = False
+) -> dict[str, str]:
+    """Screenshot documents and return {id: error} for the ones that failed."""
+    root = root.expanduser().resolve()
+    if document_ids is None:
+        document_ids = [record.document_id for record in iter_document_records(root)]
+    directories = [document_dir(root, "d", document_id) for document_id in document_ids]
+    jobs = [
+        (directory, scheme, directory / name)
+        for directory in directories
+        for scheme, name in THUMB_FILES.items()
+        if not (missing_only and (directory / name).is_file())
+    ]
+    if not jobs:
+        return {}
+    browser = find_browser()
+    if browser is None:
+        raise FileNotFoundError(
+            "no Chrome or Chromium found for thumbnails; set HTML_PREVIEW_BROWSER"
+        )
+    errors: dict[str, str] = {}
+    with serve_static(root) as base:
+        def run(job: tuple[Path, str, Path]) -> None:
+            directory, scheme, output = job
+            try:
+                capture_thumbnail(browser, f"{base}/d/{directory.name}/?thumbnail", output, scheme)
+            except OSError as error:
+                errors[directory.name] = str(error)
+
+        with ThreadPoolExecutor(max_workers=THUMB_WORKERS) as pool:
+            list(pool.map(run, jobs))
+    return errors
+
+
+def report_thumbnail_errors(errors: dict[str, str]) -> None:
+    for document_id, error in errors.items():
+        print(f"warning: thumbnail failed for {document_id}: {error}", file=sys.stderr)
 
 
 def created_at_from_id(document_id: str) -> datetime | None:
@@ -349,9 +483,21 @@ def command_sync(args: argparse.Namespace) -> int:
     root = Path(args.root).expanduser()
     sync_assets(root)
     refresh_document_assets(root)
+    try:
+        report_thumbnail_errors(render_thumbnails(root, missing_only=True))
+    except FileNotFoundError as error:
+        print(f"warning: {error}", file=sys.stderr)
     write_index(root)
     print(root / "assets")
     return 0
+
+
+def command_thumbnails(args: argparse.Namespace) -> int:
+    root = Path(args.root).expanduser()
+    errors = render_thumbnails(root, args.document_ids or None, missing_only=args.missing)
+    report_thumbnail_errors(errors)
+    write_index(root)
+    return 1 if errors else 0
 
 
 def command_publish(args: argparse.Namespace) -> int:
@@ -392,6 +538,11 @@ def command_publish(args: argparse.Namespace) -> int:
         if retired is not None and retired.exists():
             shutil.rmtree(retired)
 
+    if not getattr(args, "skip_thumbnail", False):
+        try:
+            report_thumbnail_errors(render_thumbnails(root, [document_id]))
+        except FileNotFoundError as error:
+            print(f"warning: {error}", file=sys.stderr)
     write_index(root)
     base_url = args.base_url.rstrip("/")
     print(f"{base_url}/d/{document_id}/")
@@ -410,6 +561,12 @@ def document_record(directory: Path) -> DocumentRecord:
         updated_at = datetime.fromtimestamp(index.stat().st_mtime, timezone.utc)
     except OSError:
         updated_at = datetime.now(timezone.utc)
+    thumbs = []
+    for scheme, name in THUMB_FILES.items():
+        try:
+            thumbs.append((scheme, int((directory / name).stat().st_mtime)))
+        except OSError:
+            continue
     return DocumentRecord(
         document_id=directory.name,
         title=title or "untitled",
@@ -417,6 +574,7 @@ def document_record(directory: Path) -> DocumentRecord:
         updated_at=updated_at,
         kicker=kicker,
         summary=summary,
+        thumbs=tuple(thumbs),
     )
 
 
@@ -556,12 +714,14 @@ def record_payload(record: DocumentRecord) -> dict:
         "summary": record.summary,
         "created": record.created_at.isoformat(timespec="seconds"),
         "updated": record.updated_at.isoformat(timespec="seconds"),
+        "thumbs": dict(record.thumbs),
     }
 
 
 def build_api_server(root: Path, host: str, port: int) -> ThreadingHTTPServer:
     root = root.expanduser().resolve()
     guard = threading.Lock()
+    thumb_guard = threading.Lock()
 
     class ApiHandler(BaseHTTPRequestHandler):
         server_version = "html-preview-api/1"
@@ -624,8 +784,47 @@ def build_api_server(root: Path, host: str, port: int) -> ThreadingHTTPServer:
                 return
             self.send_json(404, {"error": "not found"})
 
+        def refresh_thumbnails(self) -> None:
+            try:
+                body = self.read_json_object()
+                document_id = body.get("id")
+                if document_id is not None:
+                    document_ids = [str(document_id)]
+                    document_dir(root, "d", document_ids[0])
+                else:
+                    document_ids = None
+                if not thumb_guard.acquire(blocking=False):
+                    self.send_json(409, {"error": "a thumbnail refresh is already running"})
+                    return
+                try:
+                    errors = render_thumbnails(root, document_ids)
+                finally:
+                    thumb_guard.release()
+                with guard:
+                    write_index(root)
+                    records = {
+                        record.document_id: dict(record.thumbs)
+                        for record in iter_records(root, "d")
+                    }
+            except FileNotFoundError as error:
+                self.send_json(404, {"error": str(error)})
+                return
+            except ValueError as error:
+                self.send_json(400, {"error": str(error)})
+                return
+            except (OSError, UnicodeError) as error:
+                self.send_json(500, {"error": str(error)})
+                return
+            if document_ids is not None:
+                records = {key: value for key, value in records.items() if key in document_ids}
+            self.send_json(200, {"ok": not errors, "thumbs": records, "errors": errors})
+
         def do_POST(self) -> None:
             path = urlsplit(self.path).path
+            if path == "/api/thumbnails":
+                if not self.forbidden():
+                    self.refresh_thumbnails()
+                return
             actions = {
                 "/api/archive": archive_document,
                 "/api/unarchive": unarchive_document,
@@ -694,6 +893,12 @@ def command_self_test(args: argparse.Namespace) -> int:
         noisy = validate_source(source.replace("<p>The publishing", "<table><tr><td>x</td></tr></table><p>The publishing"))
         if not any("table-wrap" in warning for warning in noisy.lint()):
             raise AssertionError("lint missed an unwrapped table")
+        try:
+            validate_source(source.replace("Checks that publishing works end to end.", "{{DOCUMENT_SUMMARY}}"))
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("validation accepted an unreplaced shell placeholder")
         sync_assets(test_root)
         for name in ASSET_NAMES:
             if not (test_root / "assets" / name).is_file():
@@ -718,6 +923,7 @@ def command_self_test(args: argparse.Namespace) -> int:
             file=str(draft),
             slug="self-test",
             update=None,
+            skip_thumbnail=True,
         )
         with redirect_stdout(io.StringIO()):
             command_publish(publish_args)
@@ -757,7 +963,7 @@ def command_self_test(args: argparse.Namespace) -> int:
             if marker not in index_source:
                 raise AssertionError(f"index is missing: {marker}")
         catalog_js = (test_root / "assets" / "catalog.js").read_text(encoding="utf-8")
-        for marker in ("/api/archive", "/api/unarchive", "/api/remove", "html-preview-catalog", "Undo"):
+        for marker in ("/api/archive", "/api/unarchive", "/api/remove", "/api/thumbnails", "html-preview-catalog", "Undo"):
             if marker not in catalog_js:
                 raise AssertionError(f"catalog asset is missing: {marker}")
 
@@ -768,6 +974,7 @@ def command_self_test(args: argparse.Namespace) -> int:
             command_publish(argparse.Namespace(
                 root=str(test_root), base_url="https://example.invalid",
                 file=str(updated_draft), slug=None, update=published[0][0],
+                skip_thumbnail=True,
             ))
         after_update = list(iter_documents(test_root) or ())
         if [item[0] for item in after_update] != [published[0][0]]:
@@ -856,6 +1063,12 @@ def command_self_test(args: argparse.Namespace) -> int:
             status, payload = api_request("/api/documents")
             if status != 200 or payload["active"] or payload["archived"]:
                 raise AssertionError("api remove did not update the listing")
+            status, _ = api_request("/api/thumbnails", {"id": "../escape"})
+            if status != 400:
+                raise AssertionError("api thumbnails accepted an unsafe id")
+            status, _ = api_request("/api/thumbnails", {"id": "missing-document"}, header=False)
+            if status != 403:
+                raise AssertionError("api thumbnails accepted a request without the guard header")
             status, _ = api_request("/api/health")
             if status != 200:
                 raise AssertionError("api health check failed")
@@ -909,7 +1122,19 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="DOCUMENT_ID",
         help="replace an already published document and keep its URL",
     )
+    publish_parser.add_argument(
+        "--skip-thumbnail", action="store_true", help="do not screenshot the catalog thumbnail"
+    )
     publish_parser.set_defaults(handler=command_publish)
+
+    thumbs_parser = subparsers.add_parser(
+        "thumbnails", help="screenshot catalog thumbnails for published documents"
+    )
+    thumbs_parser.add_argument("document_ids", nargs="*", help="documents to refresh (default: all)")
+    thumbs_parser.add_argument(
+        "--missing", action="store_true", help="only documents without thumbnails"
+    )
+    thumbs_parser.set_defaults(handler=command_thumbnails)
 
     list_parser = subparsers.add_parser("list", help="list published documents")
     list_parser.add_argument(

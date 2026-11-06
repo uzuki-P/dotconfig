@@ -44,6 +44,13 @@
 }
 
 .icon-button:hover { color: var(--ink); background: var(--surface); }
+.icon-button:disabled { cursor: progress; opacity: 0.7; }
+.icon-button[hidden] { display: none; }
+
+.head-actions { display: flex; flex: none; gap: 0.5rem; }
+
+@keyframes thumb-spin { to { transform: rotate(360deg); } }
+.icon-button.is-busy svg { animation: thumb-spin 0.9s linear infinite; }
 
 :is(.icon-button, .segmented, .search, .row-actions, .tile-actions) svg {
   width: 1.1rem;
@@ -225,6 +232,37 @@ kbd {
   pointer-events: none;
 }
 
+.thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top left;
+}
+
+.thumb.is-refreshing img,
+.thumb.is-refreshing iframe { opacity: 0.35; transition: opacity 0.2s; }
+
+.thumb.is-refreshing::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  width: 1.4rem;
+  height: 1.4rem;
+  margin: -0.7rem 0 0 -0.7rem;
+  border: 2px solid var(--line-strong);
+  border-top-color: var(--ink);
+  border-radius: 50%;
+  animation: thumb-spin 0.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icon-button.is-busy svg,
+  .thumb.is-refreshing::before { animation-duration: 2.4s; }
+}
+
 .thumb::after {
   content: "";
   position: absolute;
@@ -249,10 +287,10 @@ kbd {
 .row {
   position: relative;
   display: grid;
-  grid-template-columns: 11rem minmax(0, 1fr) auto;
-  gap: 1.3rem;
+  grid-template-columns: 9rem minmax(0, 1fr) auto;
+  gap: 1.2rem;
   align-items: start;
-  padding: 1.1rem 0.75rem;
+  padding: 0.9rem 0.75rem;
   margin: 0 -0.75rem;
   border-radius: 12px;
 }
@@ -270,10 +308,10 @@ kbd {
 .row:hover::before, .row:hover + .row::before { border-color: transparent; }
 
 .row h3 {
-  margin: 0 0 0.3rem;
-  font-size: 1.18rem;
+  margin: 0 0 0.25rem;
+  font-size: 1.12rem;
   font-weight: 650;
-  line-height: 1.25;
+  line-height: 1.3;
 }
 
 .row h3 a, .tile h3 a { color: var(--ink); text-decoration: none; }
@@ -281,16 +319,26 @@ kbd {
 .row h3 a:focus-visible { outline: 0; }
 .row:has(h3 a:focus-visible), .tile:has(h3 a:focus-visible) { outline: 2px solid var(--pink); outline-offset: 2px; }
 
-.row .kicker, .tile .kicker { margin: 0 0 0.25rem; font-size: 0.84rem; }
+.row .kicker, .tile .kicker {
+  margin: 0 0 0.2rem;
+  overflow: hidden;
+  color: var(--faint);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
 
 .row .summary {
   display: -webkit-box;
   max-width: 70ch;
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.4rem;
   overflow: hidden;
   color: var(--muted);
-  font-size: 0.95rem;
-  line-height: 1.5;
+  font-size: 0.9rem;
+  line-height: 1.45;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
@@ -298,9 +346,9 @@ kbd {
 .row-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.2rem 1.1rem;
+  gap: 0.2rem 0.9rem;
   color: var(--faint);
-  font-size: 0.84rem;
+  font-size: 0.8rem;
 }
 
 .row-meta code { font-size: 0.8rem; background: none; padding: 0; color: inherit; }
@@ -356,9 +404,9 @@ html[data-resolved-theme="dark"] .action.danger:hover { color: #ff8a7a; }
   gap: 1.6rem 1.2rem;
 }
 
-.tile { position: relative; display: grid; gap: 0.7rem; align-content: start; border-radius: 12px; }
-.tile h3 { margin: 0; font-size: 1.04rem; line-height: 1.3; }
-.tile .row-meta { margin-top: 0.15rem; }
+.tile { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.65rem; align-content: start; min-width: 0; border-radius: 12px; }
+.tile h3 { margin: 0; font-size: 1.02rem; line-height: 1.3; }
+.tile .row-meta { margin-top: 0.3rem; }
 .tile:hover .thumb { border-color: var(--line-strong); box-shadow: var(--shadow); }
 
 .tile-actions {
@@ -376,6 +424,35 @@ html[data-resolved-theme="dark"] .action.danger:hover { color: #ff8a7a; }
 @media (hover: hover) {
   .tile .tile-actions { opacity: 0; }
   .tile:hover .tile-actions, .tile:focus-within .tile-actions { opacity: 1; }
+
+  /* The thumbnail already shows the title, so tiles are just the picture;
+     the text fades in over it on hover or focus. While searching it stays
+     visible so matches can be seen. */
+  .tiles { row-gap: 1.2rem; }
+  .tile-info {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0.8rem 0.95rem 0.75rem;
+    border-radius: 10px;
+    background: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--raised) 97%, transparent) 42%,
+      color-mix(in srgb, var(--raised) 70%, transparent) 70%,
+      transparent
+    );
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .tile:hover .tile-info,
+  .tile:focus-within .tile-info,
+  .tiles.searching .tile-info { opacity: 1; }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: reduce) {
+  .tile-info { transition: none; }
 }
 
 /* ---------- Empty and toast ---------- */
@@ -433,6 +510,7 @@ html[data-resolved-theme="dark"] .action.danger:hover { color: #ff8a7a; }
   .search { flex: 1; width: auto; }
   .search kbd { display: none; }
   .row { grid-template-columns: 6.5rem minmax(0, 1fr); gap: 0.9rem; }
+  .tiles { gap: 1.4rem 1rem; }
   .row .row-actions { grid-column: 2; }
   .rows.archived .row { grid-template-columns: minmax(0, 1fr); }
   .rows.archived .row .row-actions { grid-column: 1; }

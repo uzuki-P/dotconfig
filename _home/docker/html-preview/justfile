@@ -15,6 +15,7 @@ validate:
     python3 "$HOME/.agents/skills/publish-html/scripts/html_preview.py" self-test
     node --check "$HOME/.agents/skills/publish-html/assets/document.js"
     node --check "$HOME/.agents/skills/publish-html/assets/catalog.js"
+    node --check "$HOME/.agents/skills/publish-html/assets/theme-menu.js"
     xmllint --noout "$HOME/.agents/skills/publish-html/assets/favicon.svg"
     @grep -q '^Image=docker.io/library/caddy:2.11.4-alpine$' deploy/html-preview.container
     @grep -q '^Network=pasta:--map-host-loopback=169.254.1.2$' deploy/html-preview.container

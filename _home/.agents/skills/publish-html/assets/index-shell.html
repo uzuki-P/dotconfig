@@ -25,9 +25,12 @@
         <h1>Published HTML</h1>
         <p class="catalog-summary" id="catalog-summary">{{DOCUMENT_COUNT}} documents</p>
       </div>
-      <button class="icon-button" type="button" id="theme-toggle" aria-label="Theme">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>
-      </button>
+      <div class="head-actions">
+        <button class="icon-button" type="button" id="refresh-thumbs" title="Refresh all thumbnails" aria-label="Refresh all thumbnails">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.4-5.7L20 8.6"/><path d="M20 4v4.6h-4.6"/></svg>
+        </button>
+        <div id="theme-menu"></div>
+      </div>
     </header>
 
     <div class="catalog-controls">
