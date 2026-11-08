@@ -1,3 +1,4 @@
 interface:
   display_name: "Domain Modeling"
-  short_description: "Build and sharpen a domain model"
+  short_description: "Keep CONTEXT.md and ADRs current"
+  default_prompt: "Use $domain-modeling to sharpen the terms we just discussed and record any decision that qualifies as an ADR."

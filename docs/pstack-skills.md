@@ -18,7 +18,7 @@ Installed eight skills from [Poteto's original pstack](https://github.com/cursor
 
 The previous code-review, codebase-design, and tdd were provided by the Matt Pocock plugin. That plugin also contained a teach duplicate. To retire only the replaced workflows, disabled the bundle in Codex and Claude and retained its other workflows as standalone skills. Existing standalone versions remain unchanged. Newly restored standalone skills are ask-matt, improve-codebase-architecture, to-spec, to-tickets, wayfinder, implement, handoff, to-questionnaire.
 
-Other skills, including diagnosing-bugs, domain-modeling, research, prototype, resolving-merge-conflicts, and frontend-design, remain installed.
+Other skills, including diagnosing-bugs, prototype, and frontend-design, remain installed. domain-modeling is now a local rewrite, and research, grilling, grill-me, grill-with-docs, setup-matt-pocock-skills, and triage were removed on 2026-11-08.
 
 ## Vercel removal
 
@@ -187,3 +187,12 @@ Compared every installed third-party skill with its upstream. pstack had no chan
 - Refreshed the `RUNTIME.md` hash in `LOCAL_POLICY.json` after reviewing the Bitbucket change from `29619b9`, which had left `just validate-pstack` failing.
 
 `just validate-pstack`, `just validate-skills`, and `just sync-skills` pass with 55 skills across 7 home directories.
+
+## Skill pruning on 2026-11-08
+
+A usage scan of the last 30 days of Claude transcripts found no sessions for seven Matt Pocock skills. Removed research, grilling, grill-me, grill-with-docs, setup-matt-pocock-skills, and triage. No other skill links to them. The built-in deep-research skill covers research, and Jira replaces the local Markdown issue tracker that setup and triage configured.
+
+Replaced domain-modeling with a local version. It keeps the `CONTEXT.md` and `docs/adr/` locations and the three-part ADR test that existing projects use. It now preserves each glossary's existing layout and defaults new files to the table layout. It allows the code or API identifier that differs from a term, as the capital-crm, crmapi, and spendr-kt glossaries already do. The ADR template matches capital-crm's dated Context, Decision, and Consequences form. Two new sections carry glossary terms into code through principle-model-the-domain and set up domain docs for a new project.
+
+Projects whose `AGENTS.md` mentions `docs/agents/triage-labels.md` keep those files. They are inert without the triage skill.
+
