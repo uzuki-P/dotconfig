@@ -18,9 +18,15 @@ export const API_ROUTES = [
 	["POST", new RegExp("^/api/chunk/(add|complete)$")],
 ];
 
-// Only the Host header and TLS SNI come from this URL; the VPC service
+// Previews from gokapi-thumbs (../../thumbs), a separate service behind its
+// own VPC binding. Only `size=s` or `size=l` may follow.
+const THUMBNAIL_ROUTE = new RegExp(`^/api/thumbnail/${FILE_ID}$`);
+const THUMBNAIL_QUERY = /^(\?size=[sl])?$/;
+
+// Only the Host header and TLS SNI come from these URLs; the VPC service
 // configuration decides where the request goes.
 const DEFAULT_UPSTREAM_ORIGIN = "http://127.0.0.1:53842";
+const DEFAULT_THUMBS_ORIGIN = "http://127.0.0.1:53845";
 
 const DEVICE_ID = /^[a-z0-9][a-z0-9-]{0,63}$/;
 const MAX_SECRET_LENGTH = 256;
@@ -118,12 +124,12 @@ export function forwardHeaders(incoming) {
 	return headers;
 }
 
-async function proxyApi(request, env, url) {
-	const upstream = new URL(url.pathname + url.search, env.UPSTREAM_ORIGIN || DEFAULT_UPSTREAM_ORIGIN);
+async function proxyApi(request, env, url, service = env.GOKAPI, origin = env.UPSTREAM_ORIGIN || DEFAULT_UPSTREAM_ORIGIN) {
+	const upstream = new URL(url.pathname + url.search, origin);
 	const hasBody = request.body !== null && request.method !== "GET" && request.method !== "HEAD";
 	let response;
 	try {
-		response = await env.GOKAPI.fetch(upstream.toString(), {
+		response = await service.fetch(upstream.toString(), {
 			method: request.method,
 			headers: forwardHeaders(request.headers),
 			body: hasBody ? request.body : undefined,
@@ -160,6 +166,9 @@ export async function handleRequest(request, env) {
 
 	// A future login page or other routes would be dispatched here, before
 	// the API allowlist.
+	if (request.method === "GET" && THUMBNAIL_ROUTE.test(url.pathname) && THUMBNAIL_QUERY.test(url.search) && env.THUMBS) {
+		return proxyApi(request, env, url, env.THUMBS, env.THUMBS_ORIGIN || DEFAULT_THUMBS_ORIGIN);
+	}
 	if (url.pathname.startsWith("/api/") && isAllowedRoute(request.method, url.pathname)) {
 		return proxyApi(request, env, url);
 	}

@@ -13,26 +13,37 @@ import json
 import os
 import re
 import shutil
+import struct
+import subprocess
 import sys
 import threading
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import zipfile
 from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from PIL import Image, ImageOps
 
+import apk_icon
+
 # Bump when the output of any generator changes; old cache entries and client ETags expire.
-GENERATOR_VERSION = 1
+GENERATOR_VERSION = 4
 
 SIZES = {"s": 160, "l": 960}
 FILE_ID = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 ROUTE = re.compile(r"^/api/thumbnail/([^/]+)$")
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tif", ".tiff", ".heic"}
 TEXT_EXTENSIONS = {".md", ".markdown", ".txt", ".log"}
+VIDEO_EXTENSIONS = {".mp4", ".m4v", ".mov", ".mkv", ".webm", ".avi", ".3gp"}
+PE_EXTENSIONS = {".exe", ".dll", ".msi"}
+APK_CONTENT_TYPE = "application/vnd.android.package-archive"
+MAX_PDF_BYTES = 40 * 1024 * 1024
+MAX_ICON_BYTES = 4 * 1024 * 1024
+VIDEO_TIMEOUT = 60
 MAX_IMAGE_BYTES = 40 * 1024 * 1024
 TEXT_BYTES = 8192
 TEXT_LINES = 3
@@ -88,6 +99,16 @@ def kind_of(meta: dict) -> str | None:
         return "text"
     if ext in IMAGE_EXTENSIONS or (content_type.startswith("image/") and content_type != "image/svg+xml"):
         return "image"
+    if ext == ".apk" or content_type == APK_CONTENT_TYPE:
+        return "apk"
+    if ext in VIDEO_EXTENSIONS or content_type.startswith("video/"):
+        return "video"
+    if ext == ".pdf" or content_type == "application/pdf":
+        return "pdf"
+    if ext == ".zip" or content_type in ("application/zip", "application/x-zip-compressed"):
+        return "zip"
+    if ext in PE_EXTENSIONS - {".msi"} or content_type in ("application/x-msdownload", "application/vnd.microsoft.portable-executable"):
+        return "exe"
     return None
 
 
@@ -169,7 +190,8 @@ def text_preview(data: bytes, markdown: bool) -> str:
 # Images ------------------------------------------------------------------------------------
 
 
-def image_thumbnail(data: bytes, size: str) -> bytes:
+def image_thumbnail(data: bytes, size: str, crop: bool = True, top: bool = False) -> bytes:
+    """A WebP of the image: cropped square for `s` (when [crop]), fitted for `l`. Never upscaled."""
     side = SIZES[size]
     with Image.open(io.BytesIO(data)) as img:
         if img.format == "JPEG":
@@ -178,13 +200,281 @@ def image_thumbnail(data: bytes, size: str) -> bytes:
         frame = ImageOps.exif_transpose(img)
         has_alpha = frame.mode in ("RGBA", "LA", "PA") or (frame.mode == "P" and "transparency" in frame.info)
         frame = frame.convert("RGBA" if has_alpha else "RGB")
-        if size == "s":
-            frame = ImageOps.fit(frame, (side, side), Image.Resampling.LANCZOS)
+        if size == "s" and crop:
+            frame = ImageOps.fit(frame, (side, side), Image.Resampling.LANCZOS, centering=(0.5, 0.0 if top else 0.5))
         else:
             frame.thumbnail((side, side), Image.Resampling.LANCZOS)
         out = io.BytesIO()
         frame.save(out, "WEBP", quality=80, method=4)
         return out.getvalue()
+
+
+# Windows executables -----------------------------------------------------------------------
+
+RT_ICON = 3
+RT_GROUP_ICON = 14
+
+
+def _u16(b: bytes, o: int) -> int:
+    return struct.unpack_from("<H", b, o)[0]
+
+
+def _u32(b: bytes, o: int) -> int:
+    return struct.unpack_from("<I", b, o)[0]
+
+
+def pe_icon(read, file_size: int) -> bytes | None:
+    """The largest image of the first icon group in a PE file's resources, as an .ico file.
+
+    [read] (offset, length) -> bytes reads part of the file, so only the headers and the
+    resource section are fetched. None when the file has no icon.
+    """
+    head = read(0, 4096)
+    if len(head) < 0x40 or head[:2] != b"MZ":
+        return None
+    pe = _u32(head, 0x3C)
+    if pe + 24 > len(head):
+        if pe > 1 << 20:
+            return None
+        head = read(0, pe + 4096)
+    if head[pe:pe + 4] != b"PE\0\0":
+        return None
+    coff = pe + 4
+    sections, opt_size = _u16(head, coff + 2), _u16(head, coff + 16)
+    opt = coff + 20
+    magic = _u16(head, opt)
+    dirs = opt + (96 if magic == 0x10B else 112 if magic == 0x20B else -1)
+    if dirs < opt or _u32(head, dirs - 4) < 3:  # NumberOfRvaAndSizes
+        return None
+    rsrc_rva, rsrc_size = _u32(head, dirs + 16), _u32(head, dirs + 20)
+    if not rsrc_rva:
+        return None
+    table = opt + opt_size
+    if table + sections * 40 > len(head):
+        head = read(0, table + sections * 40)
+    start = length = None
+    for i in range(sections):
+        sec = table + i * 40
+        vsize, va, raw_size, raw_ptr = _u32(head, sec + 8), _u32(head, sec + 12), _u32(head, sec + 16), _u32(head, sec + 20)
+        if va <= rsrc_rva < va + max(vsize, raw_size):
+            start = raw_ptr + (rsrc_rva - va)
+            length = min(raw_size - (rsrc_rva - va), max(rsrc_size, 1))
+            break
+    if start is None or length <= 0 or start + length > file_size:
+        return None
+
+    # Installers often keep their payload in the resource section, so it can be hundreds of
+    # megabytes. Only the 64 KB blocks the directory walk and the icon touch are fetched.
+    blocks: dict[int, bytes] = {}
+
+    def at(offset: int, size: int) -> bytes:
+        if offset < 0 or size < 0 or offset + size > length:
+            raise ValueError("resource offset outside the section")
+        out = bytearray()
+        while size > 0:
+            block = offset // 65536
+            if block not in blocks:
+                if len(blocks) > 128:
+                    raise ValueError("resource directory too large")
+                blocks[block] = read(start + block * 65536, min(65536, length - block * 65536))
+            chunk = blocks[block][offset % 65536:offset % 65536 + size]
+            if not chunk:
+                raise ValueError("short read")
+            out += chunk
+            offset += len(chunk)
+            size -= len(chunk)
+        return bytes(out)
+
+    def entries(offset: int):
+        header = at(offset, 16)
+        count = _u16(header, 12) + _u16(header, 14)
+        table = at(offset + 16, count * 8) if count else b""
+        for i in range(min(count, 4096)):
+            name, target = _u32(table, i * 8), _u32(table, i * 8 + 4)
+            yield (None if name & 0x80000000 else name), bool(target & 0x80000000), target & 0x7FFFFFFF
+
+    def first_leaf(offset: int, depth: int = 0) -> bytes | None:
+        # Name and language levels: take the first entry that resolves to data.
+        for _, is_dir, target in entries(offset):
+            if is_dir and depth < 3:
+                found = first_leaf(target, depth + 1)
+                if found is not None:
+                    return found
+            elif not is_dir:
+                leaf = at(target, 8)
+                rva, size = _u32(leaf, 0), _u32(leaf, 4)
+                if 0 < size <= MAX_ICON_BYTES:
+                    return at(rva - rsrc_rva, size)
+        return None
+
+    def by_type(type_id: int) -> dict:
+        for name, is_dir, target in entries(0):
+            if name == type_id and is_dir:
+                return {n: t for n, d, t in entries(target) if d}
+        return {}
+
+    groups, icons = by_type(RT_GROUP_ICON), by_type(RT_ICON)
+    if not groups or not icons:
+        return None
+    group = first_leaf(next(iter(groups.values())))
+    if not group or len(group) < 6:
+        return None
+    best = None
+    for i in range(_u16(group, 4)):
+        e = 6 + i * 14
+        if e + 14 > len(group):
+            break
+        width = group[e] or 256
+        bits = _u16(group, e + 6)
+        icon_id = _u16(group, e + 12)
+        key = (width, bits)
+        if icon_id in icons and (best is None or key > best[0]):
+            best = (key, group[e:e + 12], icon_id)
+    if best is None:
+        return None
+    image = first_leaf(icons[best[2]])
+    if not image:
+        return None
+    # An .ico with one entry: ICONDIR, then the ICONDIRENTRY with the image's offset.
+    entry = best[1][:8] + struct.pack("<II", len(image), 22)
+    return struct.pack("<HHH", 0, 1, 1) + entry + image
+
+
+def ico_thumbnail(ico: bytes, size: str) -> bytes:
+    with Image.open(io.BytesIO(ico)) as img:
+        img.load()
+        return icon_thumbnail(img, size)
+
+
+class RangeFile(io.RawIOBase):
+    """A read-only, seekable file over partial reads, for zipfile. Reads whole 256 KB blocks
+    and keeps up to 64 of them, so the ZIP directory and a few entries cost a few requests."""
+
+    BLOCK = 256 * 1024
+
+    def __init__(self, read, size: int):
+        super().__init__()
+        self._read, self._size, self._pos = read, size, 0
+        self._blocks: dict[int, bytes] = {}
+        self.fetched = 0
+
+    def readable(self):
+        return True
+
+    def seekable(self):
+        return True
+
+    def tell(self):
+        return self._pos
+
+    def seek(self, offset, whence=io.SEEK_SET):
+        base = {io.SEEK_SET: 0, io.SEEK_CUR: self._pos, io.SEEK_END: self._size}[whence]
+        self._pos = max(0, base + offset)
+        return self._pos
+
+    def _block(self, index: int) -> bytes:
+        if index not in self._blocks:
+            if len(self._blocks) >= 64:
+                self._blocks.pop(next(iter(self._blocks)))
+            start = index * self.BLOCK
+            data = self._read(start, min(self.BLOCK, self._size - start))
+            self.fetched += len(data)
+            self._blocks[index] = data
+        return self._blocks[index]
+
+    def read(self, size=-1):
+        if size is None or size < 0:
+            size = self._size - self._pos
+        size = max(0, min(size, self._size - self._pos))
+        out = bytearray()
+        while size > 0:
+            block = self._block(self._pos // self.BLOCK)
+            chunk = block[self._pos % self.BLOCK:self._pos % self.BLOCK + size]
+            if not chunk:
+                break
+            out += chunk
+            self._pos += len(chunk)
+            size -= len(chunk)
+        return bytes(out)
+
+    def readinto(self, buffer):
+        data = self.read(len(buffer))
+        buffer[:len(data)] = data
+        return len(data)
+
+
+def icon_thumbnail(img: Image.Image, size: str) -> bytes:
+    side = SIZES["s"] if size == "s" else 256
+    frame = img.convert("RGBA")
+    if frame.size != (side, side):
+        frame = frame.resize((side, side), Image.Resampling.LANCZOS)
+    out = io.BytesIO()
+    frame.save(out, "WEBP", quality=85, method=4)
+    return out.getvalue()
+
+
+# Documents ---------------------------------------------------------------------------------
+
+
+def human_size(n: float) -> str:
+    for unit in ("B", "kB", "MB", "GB"):
+        if n < 1000 or unit == "GB":
+            return f"{n:.0f} {unit}" if unit == "B" else f"{n:.1f} {unit}"
+        n /= 1000
+    return f"{n:.1f} GB"
+
+
+def zip_listing(fileobj) -> str | None:
+    """'N files · size' and the first entries, from the ZIP's central directory only."""
+    try:
+        with zipfile.ZipFile(fileobj) as archive:
+            files = [i for i in archive.infolist() if not i.is_dir()]
+    except (zipfile.BadZipFile, OSError, ValueError):
+        return None
+    if not files:
+        return "Empty archive"
+    total = sum(i.file_size for i in files)
+    count = f"{len(files)} file{'s' if len(files) != 1 else ''} · {human_size(total)}"
+    names = [i.filename for i in files[: TEXT_LINES - 1]]
+    return "\n".join([count, *names])[:TEXT_CHARS]
+
+
+def pdf_first_page(data: bytes) -> bytes:
+    """A PNG of page 1, at most 960 px on its long side."""
+    result = subprocess.run(["pdftoppm", "-png", "-f", "1", "-l", "1", "-scale-to", "960", "-singlefile", "-"],
+                            input=data, capture_output=True, timeout=VIDEO_TIMEOUT, check=False)
+    if result.returncode != 0 or not result.stdout:
+        raise RuntimeError(f"pdftoppm exited {result.returncode}")
+    return result.stdout
+
+
+# Video -------------------------------------------------------------------------------------
+
+
+def video_frame(url: str, key: str) -> bytes | None:
+    """A PNG of one frame, 10% in (at most 5 s), read over HTTP with partial requests."""
+    headers = f"apikey: {key}\r\n"
+    # The key is in ffmpeg's arguments, visible only inside this container; never log the command.
+    probe = subprocess.run(
+        ["ffprobe", "-v", "error", "-headers", headers, "-show_entries", "format=duration:stream=codec_type",
+         "-of", "json", url],
+        capture_output=True, timeout=VIDEO_TIMEOUT, check=False,
+    )
+    if probe.returncode != 0:
+        raise RuntimeError(f"ffprobe exited {probe.returncode}")
+    info = json.loads(probe.stdout or b"{}")
+    if not any(s.get("codec_type") == "video" for s in info.get("streams", [])):
+        return None
+    duration = float(info.get("format", {}).get("duration") or 0)
+    at = min(duration * 0.1, 5.0) if duration > 0 else 0
+    grab = subprocess.run(
+        ["ffmpeg", "-v", "error", "-nostdin", "-ss", f"{at:.2f}", "-headers", headers, "-i", url,
+         "-frames:v", "1", "-an", "-f", "image2pipe", "-c:v", "png", "-"],
+        capture_output=True, timeout=VIDEO_TIMEOUT, check=False,
+    )
+    if grab.returncode != 0 or not grab.stdout:
+        raise RuntimeError(f"ffmpeg exited {grab.returncode}")
+    return grab.stdout
 
 
 # Service -----------------------------------------------------------------------------------
@@ -236,9 +526,12 @@ class Thumbnailer:
     def list_files(self) -> list[dict]:
         return json.loads(self._request("files/list", self.config.service_key))
 
-    def read_file(self, file_id: str, limit: int | None = None) -> bytes:
-        headers = {"Range": f"bytes=0-{limit - 1}"} if limit else None
+    def read_file(self, file_id: str, limit: int | None = None, offset: int = 0) -> bytes:
+        headers = {"Range": f"bytes={offset}-{offset + limit - 1}"} if limit else None
         return self._request(f"files/download/{urllib.parse.quote(file_id)}", self.config.service_key, headers, limit)
+
+    def download_url(self, file_id: str) -> str:
+        return f"{self.config.gokapi_url}/api/files/download/{urllib.parse.quote(file_id)}"
 
     # Cache
 
@@ -317,6 +610,25 @@ class Thumbnailer:
             if int(meta.get("SizeBytes") or 0) > MAX_IMAGE_BYTES:
                 return Result("none")
             return Result("image", image_thumbnail(self.read_file(file_id), size))
+        if kind == "video":
+            frame = video_frame(self.download_url(file_id), self.config.service_key)
+            return Result("image", image_thumbnail(frame, size)) if frame else Result("none")
+        if kind == "pdf":
+            if int(meta.get("SizeBytes") or 0) > MAX_PDF_BYTES:
+                return Result("none")
+            # Pages show from the top in the square tile, where the title is.
+            return Result("image", image_thumbnail(pdf_first_page(self.read_file(file_id)), size, top=True))
+        if kind == "zip":
+            listing = zip_listing(RangeFile(lambda offset, length: self.read_file(file_id, length, offset), int(meta.get("SizeBytes") or 0)))
+            return Result("text", listing.encode()) if listing else Result("none")
+        if kind == "apk":
+            source = RangeFile(lambda offset, length: self.read_file(file_id, length, offset), int(meta.get("SizeBytes") or 0))
+            icon = apk_icon.apk_icon(source)
+            return Result("image", icon_thumbnail(icon, size)) if icon else Result("none")
+        if kind == "exe":
+            ico = pe_icon(lambda offset, length: self.read_file(file_id, length, offset), int(meta.get("SizeBytes") or 0))
+            # Icons keep their whole square, never cropped.
+            return Result("image", ico_thumbnail(ico, size)) if ico else Result("none")
         return Result("none")
 
     # Housekeeping
@@ -329,9 +641,14 @@ class Thumbnailer:
             # Don't hold up requests from people: give up a slot quickly when busy.
             self.thumbnail(f, "s", wait=1.0)
         if ids and self.config.cache_dir.exists():
+            current = f"v{GENERATOR_VERSION}-"
             for entry in self.config.cache_dir.iterdir():
                 if entry.is_dir() and entry.name not in ids:
                     shutil.rmtree(entry, ignore_errors=True)
+                elif entry.is_dir():
+                    for old in entry.iterdir():
+                        if not old.name.startswith((current, ".")):
+                            old.unlink(missing_ok=True)
 
     def prewarm_forever(self) -> None:
         while True:

@@ -6,13 +6,14 @@ After=network-online.target gokapi.service
 [Container]
 Image=docker.io/cloudflare/cloudflared:2026.10.7
 ContainerName=gokapi-cloudflared
-# Gokapi publishes only on the host's 127.0.0.1:53842. Rootless pasta gives the
-# container its own network namespace; -T 53842 forwards the container's
-# loopback port 53842 to the host's loopback port 53842 and nothing else. The
+# Gokapi publishes only on the host's 127.0.0.1:53842, and gokapi-thumbs on
+# 127.0.0.1:53845. Rootless pasta gives the container its own network
+# namespace; each -T forwards the container's loopback port to the same host
+# loopback port, and nothing else (not 53843-53844, other services). The
 # tunnel's outbound connections use pasta's normal NAT. This is narrower than
 # Network=host, which would let a compromised cloudflared, or a route added to
 # this remotely managed tunnel, reach every host loopback service.
-Network=pasta:-T,53842
+Network=pasta:-T,53842,-T,53845
 # The image runs as 65532. keep-id maps the host user to that UID, so the
 # user-owned mode 0600 token file stays readable inside.
 UserNS=keep-id:uid=65532,gid=65532

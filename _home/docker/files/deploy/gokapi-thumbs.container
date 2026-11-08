@@ -5,7 +5,7 @@ After=network-online.target gokapi.service
 
 [Container]
 # Built locally by `just thumbs-build` from thumbs/Containerfile.
-Image=localhost/gokapi-thumbs:1
+Image=localhost/gokapi-thumbs:4
 ContainerName=gokapi-thumbs
 # Reached through the dev-router's files-thumbs route on the tailnet.
 PublishPort=127.0.0.1:53845:53845

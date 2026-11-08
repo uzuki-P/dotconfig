@@ -338,6 +338,20 @@ else
 fi
 pause
 
+stage "Register the thumbnail service as a VPC service"
+RELAY_THUMBS_VPC_SERVICE_ID=$(_existing RELAY_THUMBS_VPC_SERVICE_ID || true)
+if [[ -n "$RELAY_THUMBS_VPC_SERVICE_ID" ]]; then
+  note "RELAY_THUMBS_VPC_SERVICE_ID is already set: $RELAY_THUMBS_VPC_SERVICE_ID"
+else
+  say "Creates a second VPC service on the same tunnel: HTTP to gokapi-thumbs on 127.0.0.1:53845."
+  confirm "Run just relay-vpc-thumbs" || exit 1
+  run_capture OUT just relay-vpc-thumbs
+  RELAY_THUMBS_VPC_SERVICE_ID=$(grep -oE "Created VPC service: $UUID_RE" <<<"$OUT" | head -n1 | awk '{print $NF}')
+  [[ -n "$RELAY_THUMBS_VPC_SERVICE_ID" ]] || { warn "Couldn't read the VPC service ID from the output."; exit 1; }
+  write_env RELAY_THUMBS_VPC_SERVICE_ID "$RELAY_THUMBS_VPC_SERVICE_ID"
+fi
+pause
+
 # ── 7 ─────────────────────────────────────────────────────────────────────
 stage "Create the device KV namespace"
 RELAY_KV_NAMESPACE_ID=$(_existing RELAY_KV_NAMESPACE_ID || true)

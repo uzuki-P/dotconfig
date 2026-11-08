@@ -106,9 +106,12 @@ request it:
    | GET | `/api/files/list`, `/api/files/list/{id}`, `/api/files/download/{id}` |
    | DELETE | `/api/files/delete` |
    | POST | `/api/chunk/add`, `/api/chunk/complete` |
+   | GET | `/api/thumbnail/{id}`, with no query or `?size=s` / `?size=l` |
 
    `{id}` is `[A-Za-z0-9_-]{1,128}`, which keeps percent-encoded slashes and
-   dots out.
+   dots out. `/api/thumbnail/...` goes to the thumbnail service
+   (`docs/thumbnails.md`) through a second binding, `THUMBS`: a VPC service on
+   the same tunnel for `127.0.0.1:53845`. Everything else goes to Gokapi.
 5. Forwards method, path, query, and the streamed body to
    `http://127.0.0.1:53842` through the binding with `redirect: "manual"`.
    It drops hop-by-hop headers, `X-Relay-*`, `CF-*`, `X-Forwarded-*`,
@@ -235,7 +238,8 @@ skips the ones already done:
    `secrets/cf-tunnel-api-token`, then `just relay-tunnel`, saved as
    `RELAY_TUNNEL_ID`.
 5. `just relay-tunnel-token` into `secrets/tunnel-token`.
-6. `just relay-vpc`, saved as `RELAY_VPC_SERVICE_ID`.
+6. `just relay-vpc`, saved as `RELAY_VPC_SERVICE_ID`, and
+   `just relay-vpc-thumbs`, saved as `RELAY_THUMBS_VPC_SERVICE_ID`.
 7. `just relay-kv`, saved as `RELAY_KV_NAMESPACE_ID`.
 8. `just relay-deploy`.
 9. `just tunnel-install` and `just tunnel-start`.

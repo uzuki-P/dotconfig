@@ -1,9 +1,14 @@
 # gokapi-thumbs: built locally by `just thumbs-build`; see ../docs/thumbnails.md.
 FROM docker.io/library/python:3.13.18-slim
+# ffmpeg/ffprobe grab video frames over HTTP range requests; resvg draws adaptive APK
+# icons; pdftoppm (poppler-utils) draws the first page of PDFs.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ffmpeg resvg poppler-utils \
+ && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir --no-compile -r /app/requirements.txt \
  && useradd --system --uid 10001 --home-dir /nonexistent --shell /usr/sbin/nologin thumbs
-COPY server.py /app/server.py
+COPY server.py apk_icon.py /app/
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 THUMBS_CACHE_DIR=/cache
 USER 10001:10001
 EXPOSE 53845

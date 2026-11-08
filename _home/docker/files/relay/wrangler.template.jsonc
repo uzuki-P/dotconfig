@@ -10,7 +10,11 @@
 	"preview_urls": false,
 	"routes": [{ "pattern": "__RELAY_DOMAIN__", "custom_domain": true }],
 	// Gokapi on 127.0.0.1:53842, reached through the tunnel (just relay-vpc).
-	"vpc_services": [{ "binding": "GOKAPI", "service_id": "__RELAY_VPC_SERVICE_ID__" }],
+	// gokapi-thumbs on 127.0.0.1:53845, the same tunnel (just relay-vpc-thumbs).
+	"vpc_services": [
+		{ "binding": "GOKAPI", "service_id": "__RELAY_VPC_SERVICE_ID__" },
+		{ "binding": "THUMBS", "service_id": "__RELAY_THUMBS_VPC_SERVICE_ID__" }
+	],
 	// device:<id> -> {"name","hash","created"}; written by bin/pair.
 	"kv_namespaces": [{ "binding": "DEVICES", "id": "__RELAY_KV_NAMESPACE_ID__" }],
 	// Limits count per Cloudflare location and are approximate. A 1 GB upload

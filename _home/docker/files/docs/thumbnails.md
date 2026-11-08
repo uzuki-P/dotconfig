@@ -1,7 +1,8 @@
 # Thumbnail service
 
-Status, 2026-11-08: stage 1 is running (text and image previews on the tailnet,
-`https://files-thumbs.<tailnet base>`). Stages 2 to 5 are still design.
+Status, 2026-11-08: running, on the tailnet (`https://files-thumbs.<tailnet base>`)
+and through the relay. Previews: text and Markdown, images, video frames, EXE
+and APK icons, PDF first pages, and ZIP listings.
 
 A small loopback service, `gokapi-thumbs`, that makes previews for files on the
 Gokapi server: an icon for APK and EXE files, a frame for videos, a scaled image
@@ -93,10 +94,12 @@ download count unless asked to (checked in Gokapi v2.2.4,
 | Kind | Detection | How |
 |---|---|---|
 | Image | `image/*` | Download (cap 40 MB), Pillow: EXIF rotate, crop or fit, WebP |
-| Video | `video/*` or `.mp4/.mkv/.mov/.webm` | `ffmpeg -ss <10% of duration, max 5 s> -i <download URL with headers> -frames:v 1`. ffmpeg uses partial requests, so it reads only the index and a few frames. |
-| APK | `.apk` or the APK content type | Download to a temp file. androguard reads the manifest and follows `android:icon`/`roundIcon` through `resources.arsc`. Bitmap icons: the highest density PNG/WebP. Adaptive icons: each layer is a bitmap or a VectorDrawable; vector layers are converted to SVG (colors and `@color` references resolved from `resources.arsc`) and rasterized, then foreground and background are composited on a rounded square. Clients only ever get WebP: they could not draw a VectorDrawable fetched at runtime, and a rasterized icon costs only a few KB more. |
-| EXE | `.exe/.dll`, PE magic | Download to a temp file. pefile reads `RT_GROUP_ICON`/`RT_ICON`, takes the largest image (PNG or BMP entry), and encodes WebP. |
+| Video | `video/*` or `.mp4/.m4v/.mov/.mkv/.webm/.avi/.3gp` | ffprobe for the duration and a video stream (audio only gives 204), then `ffmpeg -ss <10% of duration, max 5 s> -i <download URL> -frames:v 1`, 60 s limit each. Both read over HTTP with partial requests, so only the index and a few frames are fetched (about 1 s for a 7 MB clip). The service key goes in ffmpeg's `-headers` argument: visible only inside the container, and never logged. |
+| APK | `.apk` or the APK content type | `apk_icon.py` (no androguard): the APK is opened as a ZIP over partial requests (`RangeFile`, 256 KB blocks), so only the directory, manifest, `resources.arsc`, and icon files are fetched (0.1–3.9 MB of 3–51 MB APKs here). It parses the binary manifest and resource table itself (sparse and compact entries, shortened resource paths) and follows `android:icon`/`roundIcon`. Bitmap icons: the highest density PNG/WebP. Adaptive icons: each layer is a bitmap or a VectorDrawable; vector layers are converted to SVG (colors and `@color` references resolved from `resources.arsc`) and rasterized, then foreground and background are composited on a rounded square. Clients only ever get WebP: they could not draw a VectorDrawable fetched at runtime, and a rasterized icon costs only a few KB more. |
+| EXE | `.exe/.dll` | `pe_icon` in `server.py` (no pefile): reads the PE headers, then walks the resource directory in 64 KB blocks fetched with partial requests, takes the first `RT_GROUP_ICON`, and its largest `RT_ICON` (PNG or BMP). Installers keep their payload in the resource section (106–195 MB here), so lazy reads matter: 7–8 requests, under 0.5 MB per EXE. Icons are never cropped. |
 | Text | `.md/.markdown/.txt/.log` or `text/*` | Partial request for the first 8 KB, then the text rules above |
+| PDF | `.pdf` or `application/pdf` | Download (cap 40 MB), `pdftoppm` page 1 at 960 px from stdin; the small size is cropped from the top |
+| ZIP | `.zip` or the ZIP content types | Text: `N files · size` and the first entries, from the central directory read with partial requests |
 | Other | anything else | 204 |
 
 Encrypted files (`IsEncrypted` or `RequiresClientSideDecryption`) and files
@@ -112,8 +115,8 @@ still being processed get 204 without a download.
   before anyone opens the list. The same pass deletes cache folders for IDs no
   longer listed (deleted or expired).
 - Two workers at a time, 512 MB of memory for the container. Images over 40 MB
-  are skipped. Later stages add per-job time limits for ffmpeg and APK
-  parsing. A failed job leaves a `failed` marker that is retried after
+  are skipped; ffmpeg and ffprobe stop after 60 s.
+- The pre-warming pass also deletes cache files of older generator versions. A failed job leaves a `failed` marker that is retried after
   an hour.
 - Raising the generator version (`GENERATOR_VERSION`) changes the ETag and
   invalidates old thumbnails after a change to how they are made.
@@ -127,7 +130,7 @@ New files under `~/docker/files`:
 
 | Path | Purpose |
 |---|---|
-| `thumbs/` | Service source (`server.py`: Python 3 stdlib HTTP server and Pillow; later androguard, pefile, ffmpeg), `Containerfile`, `test_server.py` |
+| `thumbs/` | Service source (`server.py`: Python 3 stdlib HTTP server, Pillow, ffmpeg; later androguard), `Containerfile`, `test_server.py` |
 | `deploy/gokapi-thumbs.container` | Rootless Quadlet, image `localhost/gokapi-thumbs:<n>` |
 | `thumbs-cache/` | Cache directory (ignored) |
 | `secrets/thumbs-api-key` | The service's VIEW+DOWNLOAD key (ignored) |
@@ -158,8 +161,8 @@ record and certificate already cover it, so no Tailscale, DNS, or Caddyfile
 change was needed.
 
 The apps find the thumbnail host by adding `-thumbs` to the first label of
-`serverUrl` (`files.<base>` becomes `files-thumbs.<base>`). Later, pairing links
-carry it as an optional `thumbs` field, and server settings get an override.
+`serverUrl` (`files.<base>` becomes `files-thumbs.<base>`). Through the relay
+they use the relay's host, so pairing needs no new field.
 
 Because it is a different origin from the files UI, the service answers CORS
 requests from the origins listed in `THUMBS_CORS_ORIGINS` (none by default).
@@ -168,9 +171,10 @@ requests from the origins listed in `THUMBS_CORS_ORIGINS` (none by default).
 
 The Worker already passes the `apikey` header through and strips `X-Relay-*`.
 
-1. `just relay-vpc` gains a second VPC service, `gokapi-thumbs`: HTTP, the same
-   tunnel, `127.0.0.1:53845`. Saved as `RELAY_THUMBS_VPC_SERVICE_ID`. This adds
-   no new tunnel or public hostname, and VPC services are free during the beta.
+1. `just relay-vpc-thumbs` creates a second VPC service, `gokapi-thumbs`: HTTP,
+   the same tunnel, `127.0.0.1:53845`. Saved as `RELAY_THUMBS_VPC_SERVICE_ID`.
+   This adds no new tunnel or public hostname, and VPC services are free during
+   the beta. A new VPC service answered 502 for about a minute after creation.
 2. `cloudflared.container`: `Network=pasta:-T,53842,-T,53845`, so the tunnel
    can reach the new port. Not a port range: 53843 and 53844 belong to other
    services.
@@ -179,7 +183,10 @@ The Worker already passes the `apikey` header through and strips `X-Relay-*`.
    `size=s|l` query, and send it to `env.THUMBS`. Everything else stays on
    `env.GOKAPI`. Tests cover the new route, a bad `size`, and an unreachable
    service (502).
-5. `docs/relay.md`: the new route and the port.
+5. `docs/relay.md` and `bin/setup-relay`: the new route, port, and setup step.
+
+All done 2026-11-08 and checked with a temporary pairing: every file type
+answered through the relay.
 
 Load: about 40 requests per device to fill an empty cache, then about one per
 new upload. Relay traffic for 2026-11-01 to 2026-11-08 peaked at 938 requests
@@ -189,8 +196,10 @@ CPU time stays near today's (p99 4–7 ms, limit 10 ms).
 
 ## Client changes (gokapi-android and desktop)
 
-- `GokapiClient.thumbnail(c, file, size)`: the same tailnet-then-relay
-  routing as other calls. Returns `Image(bytes)`, `Text(lines)`, or `None`.
+- `GokapiClient.preview(c, file, size)`: `files-thumbs` on the tailnet; the
+  relay when the file list already found the tailnet unreachable, or when
+  connecting fails. Returns `Image`, `Text`, `None` (204), or null when the
+  answer is unknown.
 - A shared disk cache: `thumbs/<id>-<size>` with the ETag. Negative answers
   are kept for a day. Entries are dropped when the ID leaves the file list.
 - Android: decode the bytes into a Coil image (a small custom fetcher keyed by
@@ -208,11 +217,16 @@ CPU time stays near today's (p99 4–7 ms, limit 10 ms).
 
 1. Service with text and image previews, Quadlet, `files-thumbs` route (done
    2026-11-08). Apps use it on the tailnet only.
-2. Video frames and EXE icons.
-3. APK icons: bitmap, adaptive, and vector layers rasterized.
-4. Relay: VPC service, tunnel port, Worker route and tests.
-5. Optional: PDF first pages, ZIP file lists, pairing `thumbs` field and
-   settings override.
+2. Video frames and EXE icons (done 2026-11-08). The apps also detect video,
+   audio, and image files by extension, since uploads often arrive as
+   `application/octet-stream`, and draw a play mark over video frames.
+3. APK icons: bitmap, adaptive, and vector layers rasterized (done 2026-11-08;
+   fixtures in `thumbs/testdata/`, rebuilt by `build.sh` with aapt2).
+4. Relay: VPC service, tunnel port, Worker route and tests (done 2026-11-08).
+5. PDF first pages and ZIP listings (done 2026-11-08). Not done: a pairing
+   `thumbs` field and a settings override for the thumbnail host. The
+   `-thumbs` naming covers this server; add them if a server ever needs a
+   different host.
 
 ## Decisions
 
@@ -222,6 +236,10 @@ CPU time stays near today's (p99 4–7 ms, limit 10 ms).
 - APK icons: vector layers are rasterized on the server; clients get WebP.
 
 ## Open questions
+
+- Image size: Debian's ffmpeg, resvg, and poppler make the image 626 MB, against
+  151 MB without them.
+  A static ffmpeg build with only the decoders needed would shrink it.
 
 - Whether pre-warming should also make `l` thumbnails, or only on demand. Today
   `l` is made on demand.

@@ -57,6 +57,7 @@ beforeEach(() => {
 			[`device:${DEVICE_ID}`]: JSON.stringify({ name: "pixel-9", hash: hash(SECRET), created: "2026-10-31T00:00:00Z" }),
 		}),
 		GOKAPI: new FakeVpc(),
+		THUMBS: new FakeVpc(),
 		IP_LIMITER: new FakeLimiter(),
 		DEVICE_LIMITER: new FakeLimiter(),
 	};
@@ -254,5 +255,66 @@ describe("rate limits", () => {
 		assert.equal(response.headers.get("x-relay-error"), "rate-limited");
 		assert.equal(env.GOKAPI.calls.length, 0);
 		assert.deepEqual(env.DEVICE_LIMITER.keys, [`device:${DEVICE_ID}`]);
+	});
+});
+
+describe("thumbnails", () => {
+	test("go to the thumbnail service with apikey and without relay headers", async () => {
+		env.THUMBS.respond = async () => new Response("png", { headers: { "content-type": "image/webp", etag: '"a-s-v3"' } });
+		for (const path of ["/api/thumbnail/abcDEF123", "/api/thumbnail/abcDEF123?size=s", "/api/thumbnail/abc_D-1?size=l"]) {
+			const response = await send(path, { headers: { apikey: "gokapi-key", cookie: "session=x" } });
+			assert.equal(response.status, 200, path);
+			assert.equal(response.headers.get("content-type"), "image/webp");
+			assert.equal(response.headers.get("cache-control"), "no-store");
+		}
+		assert.equal(env.GOKAPI.calls.length, 0);
+		assert.equal(env.THUMBS.calls.length, 3);
+		const call = env.THUMBS.calls[1];
+		assert.equal(call.url, "http://127.0.0.1:53845/api/thumbnail/abcDEF123?size=s");
+		assert.equal(call.headers.get("apikey"), "gokapi-key");
+		for (const name of ["x-relay-id", "x-relay-secret", "cookie"]) assert.equal(call.headers.has(name), false, name);
+	});
+
+	test("passes 204 through", async () => {
+		env.THUMBS.respond = async () => new Response(null, { status: 204 });
+		assert.equal((await send("/api/thumbnail/abc")).status, 204);
+	});
+
+	test("other sizes, queries, methods, and paths are refused", async () => {
+		for (const [path, method] of [
+			["/api/thumbnail/abc?size=xl", "GET"],
+			["/api/thumbnail/abc?size=s&x=1", "GET"],
+			["/api/thumbnail/abc?other=1", "GET"],
+			["/api/thumbnail/a.b", "GET"],
+			["/api/thumbnail/abc/extra", "GET"],
+			["/api/thumbnail/%2e%2e", "GET"],
+			["/api/thumbnail/abc", "DELETE"],
+			["/healthz", "GET"],
+		]) {
+			const response = await send(path, { method });
+			assert.equal(response.status, 404, `${method} ${path}`);
+			assert.equal(response.headers.get("x-relay-error"), "not-allowed");
+		}
+		assert.equal(env.THUMBS.calls.length, 0);
+	});
+
+	test("need relay credentials", async () => {
+		const response = await send("/api/thumbnail/abc", { auth: false });
+		assert.equal(response.status, 401);
+		assert.equal(env.THUMBS.calls.length, 0);
+	});
+
+	test("an unreachable thumbnail service is a 502", async () => {
+		env.THUMBS.respond = async () => {
+			throw new Error("down");
+		};
+		const response = await send("/api/thumbnail/abc");
+		assert.equal(response.status, 502);
+		assert.equal(response.headers.get("x-relay-error"), "upstream-unreachable");
+	});
+
+	test("without the THUMBS binding the route is refused", async () => {
+		delete env.THUMBS;
+		assert.equal((await send("/api/thumbnail/abc")).status, 404);
 	});
 });
