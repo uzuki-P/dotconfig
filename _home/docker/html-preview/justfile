@@ -16,6 +16,7 @@ validate:
     node --check "$HOME/.agents/skills/publish-html/assets/document.js"
     node --check "$HOME/.agents/skills/publish-html/assets/catalog.js"
     node --check "$HOME/.agents/skills/publish-html/assets/theme-menu.js"
+    node --check "$HOME/.agents/skills/publish-html/scripts/mobile_check.mjs"
     xmllint --noout "$HOME/.agents/skills/publish-html/assets/favicon.svg"
     @grep -q '^Image=docker.io/library/caddy:2.11.4-alpine$' deploy/html-preview.container
     @grep -q '^Network=pasta:--map-host-loopback=169.254.1.2$' deploy/html-preview.container
@@ -28,6 +29,19 @@ validate:
     @grep -q 'respond @archived 404' deploy/Caddyfile
     @grep -q 'serve --bind 127.0.0.1 --port 4179' deploy/html-preview-api.service
     @echo "Static validation passed."
+
+# Load documents at phone width (390px) in headless Chrome and fail on sideways scrolling.
+# Pass document ids to check only those; with none, checks every published document.
+mobile-check *ids:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    ids=({{ids}})
+    if [ ${#ids[@]} -eq 0 ]; then
+        mapfile -t ids < <(python3 "$HOME/.agents/skills/publish-html/scripts/html_preview.py" list | cut -f1)
+    fi
+    urls=()
+    for id in "${ids[@]}"; do urls+=("http://127.0.0.1:4178/d/${id}/"); done
+    node "$HOME/.agents/skills/publish-html/scripts/mobile_check.mjs" "${urls[@]}"
 
 # Install the rootless Quadlet and prepare the document directory.
 install: prepare

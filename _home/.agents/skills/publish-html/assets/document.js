@@ -5,6 +5,9 @@
 import { mountThemeMenu } from "./theme-menu.js";
 
 const media = window.matchMedia("(prefers-color-scheme: dark)");
+// Touch-first devices get tap-to-fullscreen diagrams and wrapped code.
+const coarsePointer = window.matchMedia("(pointer: coarse)");
+const narrowScreen = window.matchMedia("(max-width: 640px)");
 // The catalog screenshots pages with ?thumbnail; skip the rail so the
 // thumbnail shows the document itself.
 const thumbnailMode = new URLSearchParams(location.search).has("thumbnail");
@@ -234,7 +237,19 @@ function setupCodeBlocks(highlighter) {
       pre.before(block);
       block.append(pre);
     }
-    if (block.querySelector(":scope > .copy-code")) return;
+    if (block.querySelector(":scope > .copy-code, :scope > .code-tools")) return;
+    const tools = document.createElement("div");
+    tools.className = "code-tools";
+    const wrap = document.createElement("button");
+    wrap.type = "button";
+    wrap.className = "copy-code";
+    wrap.textContent = "Wrap";
+    const setWrapped = (on) => {
+      block.classList.toggle("is-wrapped", on);
+      wrap.setAttribute("aria-pressed", String(on));
+    };
+    setWrapped(narrowScreen.matches);
+    wrap.addEventListener("click", () => setWrapped(!block.classList.contains("is-wrapped")));
     const button = document.createElement("button");
     button.type = "button";
     button.className = "copy-code";
@@ -250,7 +265,28 @@ function setupCodeBlocks(highlighter) {
       }
       setTimeout(() => { button.textContent = "Copy"; delete button.dataset.state; }, 1400);
     });
-    block.append(button);
+    tools.append(wrap, button);
+    block.append(tools);
+  });
+}
+
+/* ---------- Tables ---------- */
+// On phones a table turns into one card per row (CSS .table-wrap.stack), so each cell
+// carries its column name. A .table-wrap.scroll keeps the scrolling grid instead.
+function setupTables() {
+  document.querySelectorAll(".table-wrap").forEach((wrap) => {
+    const table = wrap.querySelector(":scope > table");
+    if (!table || wrap.classList.contains("scroll")) return;
+    const headers = [...(table.tHead?.rows[0]?.cells || [])].map((cell) => cell.textContent.trim());
+    if (!headers.length || table.querySelector("[colspan], [rowspan]")) return;
+    for (const body of table.tBodies) {
+      for (const row of body.rows) {
+        [...row.cells].forEach((cell, index) => {
+          if (!cell.hasAttribute("data-label")) cell.dataset.label = headers[index] ?? "";
+        });
+      }
+    }
+    wrap.classList.add("stack");
   });
 }
 
@@ -266,7 +302,7 @@ function buildStandaloneDocument() {
   const stylesheets = [...document.querySelectorAll('link[rel~="stylesheet"]')].map(stylesheetSource);
   const copy = document.documentElement.cloneNode(true);
   copy.querySelectorAll(
-    'script, link[rel~="stylesheet"], link[rel~="icon"], .doc-rail, .read-progress, .copy-code, .diagram-tools, .diagram-note, .heading-anchor, .toast, dialog',
+    'script, link[rel~="stylesheet"], link[rel~="icon"], .doc-rail, .read-progress, .copy-code, .code-tools, .diagram-tools, .diagram-note, .heading-anchor, .toast, dialog',
   ).forEach((element) => element.remove());
   copy.querySelectorAll("pre.mermaid[hidden]").forEach((source) => {
     if (source.parentElement?.querySelector(":scope > .diagram-shell")) source.remove();
@@ -444,18 +480,34 @@ function diagramButton(html, title, action) {
 // mode "canvas" (fullscreen): Figma-style. Wheel pans vertically, Shift + wheel pans
 // horizontally, trackpad two-finger swipes pan both ways, Ctrl/Cmd + wheel (and
 // trackpad pinch, which browsers report as Ctrl + wheel) zooms at the pointer.
+// mode "inline": the page keeps normal scrolling; Ctrl/Cmd + wheel zooms. On a touch
+// screen an inline diagram doesn't pan at all (that would trap the page scroll): a tap
+// opens it fullscreen.
+// mode "canvas" (fullscreen): Figma-style. Wheel pans vertically, Shift + wheel pans
+// horizontally, trackpad two-finger swipes pan both ways, Ctrl/Cmd + wheel (and
+// trackpad pinch, which browsers report as Ctrl + wheel) zooms at the pointer. On touch,
+// one finger pans and two fingers pinch-zoom; a double tap resets.
 function setupViewport(canvas, openFullscreen, mode = "inline") {
   const svg = canvas.querySelector("svg");
   if (!svg || canvas.dataset.viewport) return;
   canvas.dataset.viewport = "ready";
-  const state = { x: 0, y: 0, scale: 1, dragging: false, px: 0, py: 0 };
+  const touchInline = mode === "inline" && coarsePointer.matches && Boolean(openFullscreen);
+  canvas.classList.toggle("is-touch", touchInline);
+  if (touchInline) {
+    const hint = canvas.closest("figure")?.querySelector("figcaption span");
+    if (hint && /pan|zoom|fullscreen/i.test(hint.textContent || "")) hint.textContent = "Tap to expand";
+  }
+  const state = { x: 0, y: 0, scale: 1 };
+  const pointers = new Map();
+  let gesture = null;
+  let lastTap = 0;
   const apply = () => {
     svg.style.transformOrigin = "0 0";
     svg.style.transform = `translate(${state.x}px, ${state.y}px) scale(${state.scale})`;
   };
-  const zoom = (factor, clientX, clientY) => {
+  const zoomTo = (next, clientX, clientY) => {
     const previous = state.scale;
-    const next = Math.min(5, Math.max(0.3, previous * factor));
+    next = Math.min(8, Math.max(0.3, next));
     const bounds = canvas.getBoundingClientRect();
     const ax = clientX === undefined ? bounds.width / 2 : clientX - bounds.left;
     const ay = clientY === undefined ? bounds.height / 2 : clientY - bounds.top;
@@ -464,6 +516,7 @@ function setupViewport(canvas, openFullscreen, mode = "inline") {
     state.scale = next;
     apply();
   };
+  const zoom = (factor, clientX, clientY) => zoomTo(state.scale * factor, clientX, clientY);
   const reset = () => { Object.assign(state, { x: 0, y: 0, scale: 1 }); apply(); };
 
   canvas.addEventListener("wheel", (event) => {
@@ -497,49 +550,76 @@ function setupViewport(canvas, openFullscreen, mode = "inline") {
       if ((event.ctrlKey || event.metaKey) && event.key === "0") { reset(); event.preventDefault(); }
     });
   }
-  canvas.addEventListener("pointerdown", (event) => {
-    state.dragging = true;
-    state.px = event.clientX;
-    state.py = event.clientY;
-    canvas.classList.add("dragging");
-    canvas.setPointerCapture(event.pointerId);
-  });
-  canvas.addEventListener("pointermove", (event) => {
-    if (!state.dragging) return;
-    state.x += event.clientX - state.px;
-    state.y += event.clientY - state.py;
-    state.px = event.clientX;
-    state.py = event.clientY;
-    apply();
-  });
-  const stop = (event) => {
-    state.dragging = false;
-    canvas.classList.remove("dragging");
-    if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
-  };
-  canvas.addEventListener("pointerup", stop);
-  canvas.addEventListener("pointercancel", stop);
-  canvas.addEventListener("dblclick", reset);
+
+  if (touchInline) {
+    canvas.addEventListener("click", openFullscreen);
+  } else {
+    // One pointer pans; two pointers (touch) pinch-zoom around their midpoint.
+    const snapshot = () => {
+      const points = [...pointers.values()];
+      if (points.length < 2) return { x: points[0].x, y: points[0].y, distance: 0 };
+      const [a, b] = points;
+      return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, distance: Math.hypot(a.x - b.x, a.y - b.y) };
+    };
+    canvas.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      canvas.setPointerCapture(event.pointerId);
+      canvas.classList.add("dragging");
+      gesture = snapshot();
+      if (event.pointerType === "touch" && pointers.size === 1) {
+        const now = Date.now();
+        if (now - lastTap < 300) { reset(); lastTap = 0; } else { lastTap = now; }
+      }
+    });
+    canvas.addEventListener("pointermove", (event) => {
+      if (!pointers.has(event.pointerId)) return;
+      pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      const next = snapshot();
+      if (gesture && next.distance && gesture.distance) {
+        zoomTo(state.scale * (next.distance / gesture.distance), next.x, next.y);
+      }
+      if (gesture) {
+        state.x += next.x - gesture.x;
+        state.y += next.y - gesture.y;
+        apply();
+      }
+      gesture = next;
+    });
+    const stop = (event) => {
+      pointers.delete(event.pointerId);
+      if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+      gesture = pointers.size ? snapshot() : null;
+      if (!pointers.size) canvas.classList.remove("dragging");
+    };
+    canvas.addEventListener("pointerup", stop);
+    canvas.addEventListener("pointercancel", stop);
+    canvas.addEventListener("dblclick", reset);
+  }
 
   const shell = canvas.closest(".diagram-shell");
   const tools = document.createElement("div");
   tools.className = "diagram-tools";
   tools.setAttribute("role", "toolbar");
   tools.setAttribute("aria-label", "Diagram controls");
-  tools.append(
-    diagramButton(icons.minus, "Zoom out", () => zoom(0.82)),
-    diagramButton(icons.plus, "Zoom in", () => zoom(1.22)),
-    diagramButton("1:1", "Reset view", reset),
-  );
+  const zoomOut = diagramButton(icons.minus, "Zoom out", () => zoom(0.82));
+  const zoomIn = diagramButton(icons.plus, "Zoom in", () => zoom(1.22));
+  const resetButton = diagramButton("1:1", "Reset view", reset);
+  for (const button of [zoomOut, zoomIn, resetButton]) button.dataset.zoom = "";
+  tools.append(zoomOut, zoomIn, resetButton);
   if (openFullscreen) tools.append(diagramButton(icons.expand, "Open fullscreen", openFullscreen));
   const jpg = diagramButton(`${icons.image}<span>JPG</span>`, "Download diagram as JPG", () => downloadDiagramJpg(svg, canvas, jpg));
   jpg.classList.add("with-label");
   tools.append(jpg);
   const note = document.createElement("p");
   note.className = "diagram-note";
-  note.textContent = mode === "canvas"
-    ? "Scroll to pan. Shift + scroll pans sideways. Ctrl + scroll or pinch to zoom. Ctrl + 0 resets."
-    : "Drag to pan. Ctrl + scroll to zoom. Double-click resets.";
+  note.textContent = touchInline
+    ? "Tap to open fullscreen"
+    : mode === "canvas"
+      ? (coarsePointer.matches
+        ? "Drag to pan. Pinch to zoom. Double-tap resets."
+        : "Scroll to pan. Shift + scroll pans sideways. Ctrl + scroll or pinch to zoom. Ctrl + 0 resets.")
+      : "Drag to pan. Ctrl + scroll to zoom. Double-click resets.";
   shell?.append(tools, note);
   reset();
 }
@@ -559,10 +639,18 @@ function openDiagramFullscreen(svgMarkup) {
     stage.className = "dialog-stage";
     dialog.append(close, stage);
     document.body.append(dialog);
+    // The phone back button closes the diagram instead of leaving the page.
+    dialog.addEventListener("close", () => {
+      if (history.state?.diagramDialog) history.back();
+    });
+    addEventListener("popstate", () => {
+      if (dialog.open) dialog.close();
+    });
   }
   const stage = dialog.querySelector(".dialog-stage");
   stage.innerHTML = `<div class="diagram-shell"><div class="diagram-canvas">${svgMarkup}</div></div>`;
   dialog.showModal();
+  if (!history.state?.diagramDialog) history.pushState({ diagramDialog: true }, "");
   setupViewport(stage.querySelector(".diagram-canvas"), null, "canvas");
   stage.querySelector(".diagram-canvas")?.focus({ preventScroll: true });
   }
@@ -728,6 +816,7 @@ async function boot() {
     applyTheme("system", false);
     await renderDiagrams();
   });
+  setupTables();
   setupStaticDiagrams();
 
   const needsHighlight = document.querySelector("pre code:not(.mermaid code)");

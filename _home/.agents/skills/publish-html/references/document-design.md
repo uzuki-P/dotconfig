@@ -2,6 +2,8 @@
 
 Build one coherent document from section-level decisions. The available components are a vocabulary, not page templates.
 
+Write documents in Markdown by default; [markdown.md](markdown.md) shows the Markdown form of every component below. The HTML here is what Markdown renders to, and what to write when a document drops to raw HTML.
+
 ## Start with the information
 
 For every section, identify its job before choosing its form:
@@ -31,7 +33,8 @@ The shared shell and runtime provide:
 - **Outline rail.** On wide screens, a sticky left rail with the document title, every top-level section (numbered to match the page, with a fill line showing how far you have read it), and download and theme tools. On narrow screens it becomes a bottom bar with a contents sheet. The rail lists each `<section class="section">` that is a direct child of `<main class="document">` and has an `<h2>`, so give every top-level section a short, scannable `<h2>`.
 - **Generated meta line** under the title: publish date, reading time, and section count. Don't write these by hand.
 - Section numbers, `#` heading links, a reading-progress bar, Inter headings and text, Maple Mono code, syntax highlighting, copy buttons, light/dark/system themes, and print styles.
-- **Diagram controls** for Mermaid and static SVG diagrams in `.diagram-shell > .diagram-canvas`: drag to pan, Ctrl + scroll to zoom, fullscreen, and a JPG download. Fullscreen behaves like a design canvas: scroll pans, Shift + scroll pans sideways, Ctrl + scroll or pinch zooms.
+- **Diagram controls** for Mermaid and static SVG diagrams in `.diagram-shell > .diagram-canvas`: drag to pan, Ctrl + scroll to zoom, fullscreen, and a JPG download. Fullscreen behaves like a design canvas: scroll pans, Shift + scroll pans sideways, Ctrl + scroll or pinch zooms. On touch screens the inline diagram is a tap-to-expand preview that never traps page scrolling; fullscreen takes one-finger pan and two-finger pinch, and the back button closes it.
+- **Phone layout.** Below 640px, tables in `.table-wrap` become one labelled card per row (add `.scroll` to the wrapper to keep a scrolling grid, for example for a wide numeric matrix), and code blocks wrap with a Wrap toggle.
 
 ## Core markup
 
@@ -159,13 +162,13 @@ Use Mermaid when relationships are harder to understand linearly. The runtime su
 ```html
 <figure class="diagram">
   <figcaption><strong>Request path</strong><span>Pan, zoom, or open fullscreen</span></figcaption>
-  <pre class="mermaid">flowchart LR
+  <pre class="mermaid">flowchart TD
     A[Agent] --> B[Preview service]
     B --> C[Private URL]</pre>
 </figure>
 ```
 
-Keep node labels short. Explain the implication in nearby prose instead of turning the diagram into a wall of text.
+Keep node labels short. Explain the implication in nearby prose instead of turning the diagram into a wall of text. Prefer top-down layouts (`flowchart TD`): a tall diagram stays legible on a phone, while a long left-to-right chain shrinks to unreadable text.
 
 ### State charts
 
@@ -199,4 +202,4 @@ Use `<p class="note">` for model assumptions, exclusions, dates, and uncertainty
 - Add captions or accessible labels to tables and charts.
 - Retain visible prose for the central conclusion; interactive content is supporting material.
 - Keep essential meaning available if Mermaid, the webfont, or syntax highlighting cannot load.
-- Check narrow layouts for horizontal overflow except inside intentional table and code scrollers.
+- Check narrow layouts for horizontal overflow except inside intentional table and code scrollers. `scripts/mobile_check.mjs <url>` does this at 390px.

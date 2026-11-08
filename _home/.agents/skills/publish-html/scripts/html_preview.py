@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Create, validate, publish, list, archive, remove, and serve private HTML documents."""
+"""Create, validate, publish, list, archive, remove, and serve private HTML documents.
+
+Documents are written either as Markdown (preferred; rendered by markdown_doc.py into the
+shared shell) or as a full HTML file made from the shell with `new --output doc.html`.
+"""
 
 from __future__ import annotations
 
@@ -27,12 +31,14 @@ from urllib.parse import urlsplit
 import urllib.error
 import urllib.request
 
+from markdown_doc import fill_shell, render_markdown
+
 
 DEFAULT_ROOT = Path.home() / "docker" / "html-preview" / "public"
 DEFAULT_BASE_URL = "https://html-preview.ts.uzuki-p.my.id"
 MAX_DOCUMENT_BYTES = 10 * 1024 * 1024
 ASSET_NAMES = ("document.css", "document.js", "theme-menu.js", "catalog.css", "catalog.js", "favicon.svg")
-ASSET_VERSION = "22"
+ASSET_VERSION = "23"
 SAFE_ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,95}$")
 DOCUMENT_TIMESTAMP = re.compile(r"^(\d{8}-\d{6})(?:-|$)")
 ARCHIVE_SUBDIR = ".archive"
@@ -40,6 +46,21 @@ API_REQUIRED_HEADER = ("x-requested-with", "html-preview-catalog")
 MAX_API_BODY_BYTES = 4096
 SUMMARY_LIMIT = 240
 # Thumbnails are screenshots of the first 1280x800 of a page, saved at half size.
+MARKDOWN_SUFFIXES = {".md", ".markdown"}
+MARKDOWN_SOURCE_NAME = "source.md"
+MARKDOWN_TEMPLATE = """---
+title: {title}
+kicker: {kicker}
+summary: {summary}
+---
+
+Open with one or two sentences that state the answer. This paragraph becomes the lede.
+
+## First section
+
+Write the section here. See references/markdown.md for tables, Mermaid, callouts,
+metrics, timelines, grids, and raw HTML.
+"""
 THUMB_FILES = {"light": "thumb.png", "dark": "thumb-dark.png"}
 THUMB_VIEWPORT = (1280, 800)
 THUMB_SCALE = 0.5
@@ -436,21 +457,62 @@ def created_at_from_id(document_id: str) -> datetime | None:
         return None
 
 
-def read_html(path: Path) -> tuple[str, DocumentInspector]:
+@dataclass
+class LoadedDocument:
+    html: str
+    inspector: DocumentInspector
+    markdown: str | None = None
+    warnings: tuple[str, ...] = ()
+
+
+def is_markdown(path: Path) -> bool:
+    return path.suffix.lower() in MARKDOWN_SUFFIXES
+
+
+def render_markdown_source(markdown: str) -> tuple[str, list[str]]:
+    document = render_markdown(markdown)
+    shell = (skill_root() / "assets" / "document-shell.html").read_text(encoding="utf-8")
+    return fill_shell(shell, document), document.warnings
+
+
+def load_document(path: Path) -> LoadedDocument:
+    """Read an HTML or Markdown draft and return validated HTML plus every lint warning."""
     if not path.is_file():
         raise FileNotFoundError(path)
     if path.stat().st_size > MAX_DOCUMENT_BYTES:
         raise ValueError("document exceeds the 10 MiB publication limit")
     source = path.read_text(encoding="utf-8")
-    return source, validate_source(source)
+    markdown = None
+    extra: list[str] = []
+    if is_markdown(path):
+        markdown = source
+        source, extra = render_markdown_source(markdown)
+    inspector = validate_source(source)
+    warnings = [*inspector.lint(), *extra]
+    if markdown is not None:
+        # The front matter summary check replaces the HTML meta-description hint.
+        warnings = [w for w in warnings if "meta name=" not in w]
+    return LoadedDocument(source, inspector, markdown, tuple(dict.fromkeys(warnings)))
+
+
+def front_matter_value(value: str) -> str:
+    value = " ".join(value.split())
+    return json.dumps(value, ensure_ascii=False) if re.search(r"[:#\"']|^[-?!&*|>%@`]", value) else value
 
 
 def command_new(args: argparse.Namespace) -> int:
-    template = (skill_root() / "assets" / "document-shell.html").read_text(encoding="utf-8")
-    rendered = template.replace("{{DOCUMENT_TITLE}}", html.escape(args.title))
-    rendered = rendered.replace("{{DOCUMENT_KICKER}}", html.escape(args.kicker or "HTML response"))
-    rendered = rendered.replace("{{DOCUMENT_SUMMARY}}", html.escape(" ".join(args.summary.split()), quote=True))
     output = Path(args.output).expanduser()
+    if is_markdown(output):
+        rendered = MARKDOWN_TEMPLATE.format(
+            title=front_matter_value(args.title),
+            kicker=front_matter_value(args.kicker or "Notes"),
+            summary=front_matter_value(args.summary),
+        )
+    else:
+        template = (skill_root() / "assets" / "document-shell.html").read_text(encoding="utf-8")
+        rendered = template.replace("{{DOCUMENT_TITLE}}", html.escape(args.title))
+        rendered = rendered.replace("{{DOCUMENT_KICKER}}", html.escape(args.kicker or "HTML response"))
+        rendered = rendered.replace("{{DOCUMENT_SUMMARY}}", html.escape(" ".join(args.summary.split()), quote=True))
     output.parent.mkdir(parents=True, exist_ok=True)
     descriptor, temporary_name = tempfile.mkstemp(prefix=f".{output.name}.", dir=output.parent)
     temporary = Path(temporary_name)
@@ -466,16 +528,28 @@ def command_new(args: argparse.Namespace) -> int:
     return 0
 
 
-def report_warnings(inspector: DocumentInspector) -> None:
-    for warning in inspector.lint():
+def report_warnings(document: LoadedDocument) -> None:
+    for warning in document.warnings:
         print(f"warning: {warning}", file=sys.stderr)
 
 
 def command_validate(args: argparse.Namespace) -> int:
     path = Path(args.file).expanduser()
-    _, inspector = read_html(path)
-    report_warnings(inspector)
-    print(f"valid\t{inspector.title}")
+    document = load_document(path)
+    report_warnings(document)
+    print(f"valid\t{document.inspector.title}")
+    return 0
+
+
+def command_render(args: argparse.Namespace) -> int:
+    path = Path(args.file).expanduser()
+    if not is_markdown(path):
+        raise ValueError("render takes a Markdown file (.md)")
+    document = load_document(path)
+    report_warnings(document)
+    output = Path(args.output).expanduser()
+    atomic_write_text(output, document.html)
+    print(output)
     return 0
 
 
@@ -503,9 +577,10 @@ def command_thumbnails(args: argparse.Namespace) -> int:
 def command_publish(args: argparse.Namespace) -> int:
     root = Path(args.root).expanduser()
     source_path = Path(args.file).expanduser()
-    source, inspector = read_html(source_path)
-    report_warnings(inspector)
-    source = version_document_assets(source)
+    document = load_document(source_path)
+    report_warnings(document)
+    inspector = document.inspector
+    source = version_document_assets(document.html)
     sync_assets(root)
 
     documents = root / "d"
@@ -527,6 +602,10 @@ def command_publish(args: argparse.Namespace) -> int:
         download = temporary / "download.html"
         download.write_text(render_standalone_document(source), encoding="utf-8")
         download.chmod(0o644)
+        if document.markdown is not None:
+            markdown = temporary / MARKDOWN_SOURCE_NAME
+            markdown.write_text(document.markdown, encoding="utf-8")
+            markdown.chmod(0o644)
         temporary.chmod(0o755)
         if destination.exists():
             retired = documents / f".retired-{document_id}-{secrets.token_hex(2)}"
@@ -1076,8 +1155,123 @@ def command_self_test(args: argparse.Namespace) -> int:
             server.shutdown()
             server.server_close()
             api_thread.join(timeout=5)
+        markdown_self_test(Path(temporary_name), test_root)
     print("self-test passed")
     return 0
+
+
+MARKDOWN_SAMPLE = """---
+title: Markdown self-test
+kicker: Validation
+summary: "Checks the Markdown path: sections, tables, Mermaid, and containers."
+---
+
+The opening paragraph is the lede.
+
+{eyebrow="Decision" meta="Scope"}
+## Gate first
+
+::: verdict Ship the gate
+Reverse this if **billing** slips.
+:::
+
+::: metrics
+- Monthly cost: **$247**
+- Agents: 100
+:::
+
+| Option | Cost |
+|---|---:|
+| Cloud | $247 |
+
+## Flow
+
+```mermaid title="Request path"
+flowchart TD
+  A --> B
+```
+
+```ts title="Cost model"
+const total = a < b && c;
+```
+
+::: timeline
+1. **Align** - confirm the boundary.
+2. **Ship** - watch it.
+:::
+
+:::: grid two
+::: panel Left
+One.
+:::
+::: panel Right
+Two.
+:::
+::::
+
+::: details Raw payload
+Hidden by default.
+:::
+
+<x-custom data-ok="1">raw HTML passes through</x-custom>
+"""
+
+
+def markdown_self_test(workspace: Path, test_root: Path) -> None:
+    draft = workspace / "draft.md"
+    draft.write_text(MARKDOWN_SAMPLE, encoding="utf-8")
+    document = load_document(draft)
+    if document.warnings:
+        raise AssertionError(f"clean Markdown produced warnings: {list(document.warnings)}")
+    rendered = document.html
+    for marker in (
+        "<title>Markdown self-test</title>",
+        'content="Checks the Markdown path: sections, tables, Mermaid, and containers."',
+        '<p class="lede">The opening paragraph is the lede.</p>',
+        '<p class="eyebrow">Decision</p><h2>Gate first</h2></div><p class="section-meta">Scope</p>',
+        '<div class="verdict">\n<h3>Ship the gate</h3>',
+        '<strong class="accent">$247</strong>',
+        '<div class="table-wrap">',
+        '<th class="numeric">Cost</th>',
+        '<figcaption><strong>Request path</strong>',
+        '<pre class="mermaid">flowchart TD\n  A --&gt; B</pre>',
+        '<div class="code-caption"><h3>Cost model</h3>',
+        'const total = a &lt; b &amp;&amp; c;',
+        '<span class="timeline-index">2</span><div><h3>Ship</h3>',
+        '<div class="grid two">',
+        "<summary>Raw payload</summary>",
+        '<x-custom data-ok="1">raw HTML passes through</x-custom>',
+    ):
+        if marker not in rendered:
+            raise AssertionError(f"rendered Markdown is missing: {marker}")
+    if rendered.count('<section class="section">') != 2:
+        raise AssertionError("Markdown did not split into two sections")
+    if document.inspector.summary != "Checks the Markdown path: sections, tables, Mermaid, and containers.":
+        raise AssertionError("Markdown summary did not reach the meta description")
+    noisy = workspace / "noisy.md"
+    noisy.write_text("# Only a title\n\n```mermaid\nflowchart TD\n```\n", encoding="utf-8")
+    warnings = " ".join(load_document(noisy).warnings)
+    for expected in ("no ## sections", "no summary", "title="):
+        if expected not in warnings:
+            raise AssertionError(f"Markdown lint missed: {expected}")
+    with redirect_stdout(io.StringIO()):
+        command_publish(argparse.Namespace(
+            root=str(test_root), base_url="https://example.invalid", file=str(draft),
+            slug="markdown", update=None, skip_thumbnail=True,
+        ))
+    published = [item for item in iter_documents(test_root) if item[1] == "Markdown self-test"]
+    if len(published) != 1:
+        raise AssertionError("Markdown document was not published")
+    directory = test_root / "d" / published[0][0]
+    if (directory / MARKDOWN_SOURCE_NAME).read_text(encoding="utf-8") != MARKDOWN_SAMPLE:
+        raise AssertionError("Markdown source was not kept next to the page")
+    skeleton = workspace / "skeleton.md"
+    with redirect_stdout(io.StringIO()):
+        command_new(argparse.Namespace(
+            title="Skeleton: test", kicker=None, summary="A summary with: colon.", output=str(skeleton),
+        ))
+    if load_document(skeleton).inspector.title != "Skeleton: test":
+        raise AssertionError("new --output .md produced an unreadable skeleton")
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -1094,7 +1288,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    new_parser = subparsers.add_parser("new", help="create a document from the shared shell")
+    new_parser = subparsers.add_parser(
+        "new", help="start a Markdown (.md output) or HTML (.html output) draft"
+    )
     new_parser.add_argument("--title", required=True)
     new_parser.add_argument("--kicker")
     new_parser.add_argument(
@@ -1105,16 +1301,21 @@ def build_parser() -> argparse.ArgumentParser:
     new_parser.add_argument("--output", required=True)
     new_parser.set_defaults(handler=command_new)
 
-    validate_parser = subparsers.add_parser("validate", help="validate a completed HTML document")
+    validate_parser = subparsers.add_parser("validate", help="validate a completed HTML or Markdown document")
     validate_parser.add_argument("file")
     validate_parser.set_defaults(handler=command_validate)
+
+    render_parser = subparsers.add_parser("render", help="render a Markdown document to HTML without publishing")
+    render_parser.add_argument("file")
+    render_parser.add_argument("--output", required=True)
+    render_parser.set_defaults(handler=command_render)
 
     sync_parser = subparsers.add_parser(
         "sync", help="synchronize shared browser assets and the document index"
     )
     sync_parser.set_defaults(handler=command_sync)
 
-    publish_parser = subparsers.add_parser("publish", help="publish a validated HTML document")
+    publish_parser = subparsers.add_parser("publish", help="publish a validated HTML or Markdown document")
     publish_parser.add_argument("file")
     publish_parser.add_argument("--slug")
     publish_parser.add_argument(

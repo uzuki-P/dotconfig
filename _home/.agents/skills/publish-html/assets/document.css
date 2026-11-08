@@ -270,6 +270,8 @@ em { font-style: italic; }
 hr { margin: 0; border: 0; border-top: 1px solid var(--line); }
 
 h1, h2, h3, p, li, td, th { overflow-wrap: anywhere; }
+/* Bare text in a div (callouts, panels) breaks long paths and identifiers too. */
+.document { overflow-wrap: break-word; }
 
 /* Reading measure: running text stays readable; wide components break out. */
 .document :where(.section, .prose) > :where(p, ul, ol, blockquote, h3),
@@ -340,6 +342,11 @@ h1, h2, h3, p, li, td, th { overflow-wrap: anywhere; }
   border-top: 1px solid var(--line);
   border-bottom: 0;
 }
+
+/* One flexible track: a wide table, code block, or diagram scrolls inside its own
+   wrapper instead of stretching the section past the screen. */
+.hero, .section, .prose, .diagram { grid-template-columns: minmax(0, 1fr); }
+:where(.section, .prose, .grid, .diagram, .panel, .callout, .verdict) > * { min-width: 0; }
 
 .document > .section { counter-increment: section; }
 .section:last-child { padding-bottom: 0; }
@@ -418,6 +425,64 @@ h1, h2, h3, p, li, td, th { overflow-wrap: anywhere; }
 .prose p { margin: 0; }
 
 .columns { columns: 2 26rem; column-gap: 2.6rem; }
+
+/* Collapsible detail: raw payloads, long logs, secondary tables. */
+details {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--raised);
+}
+
+summary {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.9rem;
+  padding: 0.6rem 1rem;
+  color: var(--ink);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+summary::-webkit-details-marker { display: none; }
+
+summary::before {
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  flex: none;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg);
+  transition: transform 120ms ease;
+}
+
+details[open] > summary::before { transform: rotate(45deg); }
+details[open] > summary { border-bottom: 1px solid var(--line); }
+details > :not(summary) { margin: 0; }
+.details-body { display: grid; gap: 0.9rem; padding: 1rem; }
+.details-body > * { min-width: 0; margin-bottom: 0; }
+details > :is(pre, .code-block, .table-wrap) { border: 0; border-radius: 0 0 var(--radius) var(--radius); }
+
+/* Task lists from Markdown checkboxes. */
+.contains-task-list { padding-inline-start: 0; list-style: none; }
+.task-list-item { display: flex; gap: 0.55rem; align-items: baseline; }
+.task-list-item-checkbox { flex: none; accent-color: var(--pink); }
+
+dl { display: grid; gap: 0.25rem; margin: 0; max-width: var(--measure); }
+dt { font-weight: 650; }
+dt:not(:first-child) { margin-top: 0.6rem; }
+dd { margin: 0 0 0 1rem; color: var(--ink); line-height: 1.6; }
+
+blockquote {
+  margin: 0;
+  padding-left: 1rem;
+  border-left: 3px solid var(--line-strong);
+  color: var(--muted);
+}
+
+blockquote > :last-child { margin-bottom: 0; }
 .columns p { break-inside: avoid; }
 
 .panel, .callout, .verdict {
@@ -476,7 +541,11 @@ h1, h2, h3, p, li, td, th { overflow-wrap: anywhere; }
 
 .panel > :last-child,
 .callout > :last-child,
-.verdict > :last-child { margin-bottom: 0; }
+.verdict > :last-child,
+.note > :last-child { margin-bottom: 0; }
+
+.note > p, .note > ul, .note > ol { color: inherit; font-size: inherit; line-height: inherit; }
+.note > :not(:last-child) { margin-bottom: 0.5rem; }
 
 /* Timeline: a connected sequence, not a stack of cards. */
 .timeline {
@@ -628,6 +697,31 @@ tbody tr:hover td { background: color-mix(in srgb, var(--pink-soft) 35%, transpa
 .recommend { color: var(--pink); font-weight: 650; }
 tr.recommended td { background: color-mix(in srgb, var(--pink-soft) 55%, transparent); }
 
+/* Phones: tables marked .stack by the runtime become one card per row, each value
+   labelled with its column. Add .scroll to a .table-wrap to keep the grid instead. */
+@media (max-width: 640px) {
+  .table-wrap.stack { border: 0; border-radius: 0; background: none; overflow: visible; }
+  .table-wrap.stack table, .table-wrap.stack tbody, .table-wrap.stack tr, .table-wrap.stack td { display: block; min-width: 0; width: auto; }
+  .table-wrap.stack caption { display: block; padding: 0 0 0.5rem; }
+  .table-wrap.stack thead { display: none; }
+  .table-wrap.stack tbody { display: grid; gap: 0.6rem; }
+  .table-wrap.stack tr {
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--raised);
+  }
+  .table-wrap.stack td { display: grid; grid-template-columns: minmax(6.5rem, 38%) minmax(0, 1fr); gap: 0.75rem; padding: 0.35rem 0; border: 0; text-align: left; white-space: normal; }
+  .table-wrap.stack td::before { content: attr(data-label); color: var(--faint); font-size: 0.8rem; font-weight: 600; line-height: 1.5; }
+  .table-wrap.stack td:first-child { display: block; padding: 0 0 0.45rem; margin-bottom: 0.25rem; border-bottom: 1px solid var(--line); color: var(--ink); font-size: 0.98rem; font-weight: 650; }
+  .table-wrap.stack td:first-child::before { content: none; }
+  .table-wrap.stack td[data-label=""] { grid-template-columns: minmax(0, 1fr); }
+  .table-wrap.stack td[data-label=""]::before { content: none; }
+  .table-wrap.stack tbody tr:hover td { background: none; }
+  .table-wrap.stack tr.recommended { border-color: var(--pink-line); background: var(--pink-soft); }
+  .table-wrap.stack tr.recommended td { background: none; }
+}
+
 /* ---------- Code ---------- */
 
 .code-caption {
@@ -692,13 +786,33 @@ code { font-family: var(--font-code); }
   transition: opacity 120ms ease;
 }
 
+.code-tools {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  z-index: 2;
+  display: flex;
+  gap: 0.3rem;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.code-tools .copy-code { position: static; opacity: 1; }
+.code-block:hover .code-tools,
+.code-tools:focus-within,
+.code-tools:has([data-state]) { opacity: 1; }
+.copy-code[aria-pressed="true"] { color: var(--pink); border-color: var(--pink-line); }
+
+/* Wrapped code reads on a phone without sideways scrolling; the Wrap button toggles it. */
+.code-block.is-wrapped pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+
 .code-block:hover .copy-code,
 .copy-code:focus-visible,
 .copy-code[data-state] { opacity: 1; }
 
 .copy-code[data-state="done"] { color: var(--pink); border-color: var(--pink-line); }
 
-@media (hover: none) { .copy-code { opacity: 1; } }
+@media (hover: none) { .copy-code, .code-tools { opacity: 1; } }
 
 .hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-built_in { color: var(--syntax-keyword); }
 .hljs-string, .hljs-regexp, .hljs-template-tag, .hljs-template-variable { color: var(--syntax-string); }
@@ -742,6 +856,27 @@ code { font-family: var(--font-code); }
 }
 
 .diagram-canvas.dragging { cursor: grabbing; }
+
+/* On touch screens an inline diagram never traps the page scroll: a tap opens it
+   fullscreen, where one finger pans and two fingers pinch to zoom. The controls sit
+   in a strip under the diagram instead of covering it. */
+.diagram-canvas.is-touch { cursor: zoom-in; touch-action: pan-y; }
+.diagram-shell:has(> .diagram-canvas.is-touch) { display: flex; flex-direction: column; min-height: 0; }
+.diagram-shell:has(> .diagram-canvas.is-touch) .diagram-tools {
+  position: static;
+  order: 2;
+  align-self: stretch;
+  justify-content: flex-end;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.diagram-shell:has(> .diagram-canvas.is-touch) .diagram-tools [data-zoom] { display: none; }
+.diagram-shell:has(> .diagram-canvas.is-touch) .diagram-note { display: none; }
+dialog .diagram-canvas { touch-action: none; }
+dialog .diagram-tools { bottom: max(0.8rem, env(safe-area-inset-bottom)); }
 .diagram-canvas svg { display: block; width: 100%; height: 100%; max-width: none !important; }
 /* Pele state charts size the canvas to the chart's aspect ratio. */
 .diagram-canvas.is-fitted { height: auto; min-height: 22rem; max-height: min(80vh, 56rem); margin-inline: auto; }
@@ -1082,10 +1217,20 @@ dialog .diagram-shell { border: 0; border-radius: 0; }
 }
 
 @media (max-width: 520px) {
+  .document { width: calc(100% - 2rem); }
+  h1 { font-size: clamp(2rem, 9vw, 2.6rem); line-height: 1.02; }
   .lede { padding-left: 0.9rem; }
+  .metrics { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .timeline-item { grid-template-columns: 1.75rem minmax(0, 1fr); gap: 0.75rem; }
+  .timeline-index { width: 1.75rem; height: 1.75rem; font-size: 0.8rem; }
+  .timeline-item:not(:last-child)::before { left: calc(0.875rem - 1px); top: 1.9rem; }
+  .verdict { padding: 1rem 1.05rem; }
+  .sources { grid-template-columns: minmax(0, 1fr); }
+  .diagram figcaption { flex-direction: column; gap: 0.15rem; }
   .code-caption { flex-direction: column; gap: 0.2rem; }
   pre { padding: 0.85rem; font-size: 0.8rem; }
   .diagram-note { display: none; }
+  .code-block pre { padding-top: 2.6rem; }
 }
 
 @media print {

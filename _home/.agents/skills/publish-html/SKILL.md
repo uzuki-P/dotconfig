@@ -1,6 +1,6 @@
 ---
 name: publish-html
-description: Create and privately publish a rich HTML document response.
+description: Create and privately publish a rich document response, written in Markdown (with Mermaid and optional raw HTML) and rendered to a phone-friendly HTML page.
 disable-model-invocation: true
 ---
 
@@ -19,11 +19,12 @@ the operation or requires a platform-level approval, report that boundary and
 follow it; skill instructions cannot override runtime safety controls.
 
 1. **Answer first.** Read [references/document-design.md](references/document-design.md)
-   completely, then finish the underlying answer. Research or inspect sources when
-   the request needs current, precise, or attributed information. Keep estimates
-   visibly separate from sourced facts.
-2. **Create the draft.** Make a working directory with `mktemp -d` and set
-   `PUBLISH_HTML_SKILL_DIR` to the directory containing this `SKILL.md`:
+   and [references/markdown.md](references/markdown.md) completely, then finish the
+   underlying answer. Research or inspect sources when the request needs current,
+   precise, or attributed information. Keep estimates visibly separate from sourced facts.
+2. **Write Markdown.** Make a working directory with `mktemp -d` and set
+   `PUBLISH_HTML_SKILL_DIR` to the directory containing this `SKILL.md`. Start the draft
+   with front matter, or let `new` write the skeleton:
 
    ```bash
    H="$PUBLISH_HTML_SKILL_DIR/scripts/html_preview.py"
@@ -31,25 +32,35 @@ follow it; skill instructions cannot override runtime safety controls.
      --title "Document title" \
      --kicker "Document type or date" \
      --summary "One or two sentences on what the reader learns." \
-     --output "$PUBLISH_HTML_WORK_DIR/document.html"
+     --output "$PUBLISH_HTML_WORK_DIR/document.md"
    ```
 
-   The summary becomes the meta description and the catalog blurb, so write it
-   for someone scanning a list.
-3. **Fill the sections.** Replace `<!-- DOCUMENT_CONTENT -->` with the document
-   body using `apply_patch`. Compose each section from the vocabulary in the
-   design reference: prose, table, code, chart, Mermaid, callout, metrics, or a
-   restrained combination.
-4. **Publish.** `publish` validates the structure, prints lint warnings, and
-   publishes atomically:
+   The summary becomes the meta description and the catalog blurb, so write it for
+   someone scanning a list. Each `##` is a section. Use fenced `mermaid` blocks for
+   diagrams and `:::` containers for callouts, verdicts, metrics, timelines, grids, and
+   collapsible details. Drop to raw HTML only for a component Markdown can't express.
+   For a document that is mostly custom layout, pass an `.html` output instead and
+   replace `<!-- DOCUMENT_CONTENT -->` following document-design.md.
+3. **Publish.** `publish` renders Markdown, validates the structure, prints lint
+   warnings, and publishes atomically. It keeps the Markdown next to the page as
+   `source.md`:
 
    ```bash
-   python3 "$H" publish "$PUBLISH_HTML_WORK_DIR/document.html" --slug "short-topic"
+   python3 "$H" publish "$PUBLISH_HTML_WORK_DIR/document.md" --slug "short-topic"
    ```
 
    Fix every error and every `warning:` line, then publish again. To correct a
    document that is already published, keep its URL with
    `--update <document-id>` instead of `--slug`.
+4. **Check the phone layout** when the document has custom HTML, wide tables, or
+   several diagrams:
+
+   ```bash
+   node "$PUBLISH_HTML_SKILL_DIR/scripts/mobile_check.mjs" "<published URL>"
+   ```
+
+   It loads the page at 390px in headless Chrome and fails, naming the elements,
+   when anything makes the page scroll sideways. Fix the source and republish.
 5. **Verify and reply.** Check the returned URL with a read-only HTTP request.
    Use browser automation only when the environment permits it and the user has
    granted any required permission. Reply with the exact private HTTPS URL and a
@@ -57,7 +68,8 @@ follow it; skill instructions cannot override runtime safety controls.
    open it.
 
 `validate <file>` runs the same checks without publishing when you want them
-earlier.
+earlier, and `render <file.md> --output <file.html>` writes the rendered page for
+inspection.
 
 ## Lifecycle
 
