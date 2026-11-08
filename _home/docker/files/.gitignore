@@ -10,3 +10,5 @@ relay/wrangler.jsonc
 .wrangler/
 relay/.wrangler/
 relay/node_modules/
+thumbs-cache/
+thumbs/__pycache__/

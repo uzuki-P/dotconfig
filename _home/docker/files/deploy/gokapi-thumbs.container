@@ -1,0 +1,30 @@
+[Unit]
+Description=Thumbnails and text previews for Gokapi files
+Wants=network-online.target gokapi.service
+After=network-online.target gokapi.service
+
+[Container]
+# Built locally by `just thumbs-build` from thumbs/Containerfile.
+Image=localhost/gokapi-thumbs:1
+ContainerName=gokapi-thumbs
+# Reached through the dev-router's files-thumbs route on the tailnet.
+PublishPort=127.0.0.1:53845:53845
+# As in cloudflared.container: -T 53842 forwards the container's loopback port 53842
+# to Gokapi on the host's loopback and nothing else on the host.
+Network=pasta:-T,53842
+UserNS=keep-id:uid=10001,gid=10001
+Volume=%h/docker/files/thumbs-cache:/cache:Z
+Volume=%h/docker/files/secrets/thumbs-api-key:/run/secrets/thumbs-api-key:ro,Z
+Environment=THUMBS_GOKAPI_URL=http://127.0.0.1:53842
+ReadOnly=true
+NoNewPrivileges=true
+DropCapability=all
+PodmanArgs=--memory=512m --pids-limit=128
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+TimeoutStartSec=180
+
+[Install]
+WantedBy=default.target

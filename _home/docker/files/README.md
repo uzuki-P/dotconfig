@@ -27,6 +27,9 @@ loopback admin API.
 | `bin/setup-relay` | Wizard for the relay's Cloudflare and Gokapi setup |
 | `bin/pair` | Per-device relay credentials and pairing links |
 | `docs/relay.md` | Design and verification of the relay for gokapi-android |
+| `thumbs/` | Thumbnail and text-preview service for the apps (`docs/thumbnails.md`) |
+| `deploy/gokapi-thumbs.container` | Rootless Quadlet for it, on `127.0.0.1:53845` |
+| `secrets/thumbs-api-key` | Its VIEW+DOWNLOAD Gokapi key (ignored) |
 
 An optional Material 3 Expressive web UI lives in
 `~/projects/_sandbox/gokapi-admin`. It uses Gokapi's API through its own

@@ -30,6 +30,11 @@ validate:
     @git check-ignore -q relay/wrangler.jsonc
     cd relay && node --test test/*.test.js
     python3 bin/test-pair.py
+    @grep -q '^Image=localhost/gokapi-thumbs:[0-9]' deploy/gokapi-thumbs.container
+    @grep -q '^PublishPort=127.0.0.1:53845:53845$' deploy/gokapi-thumbs.container
+    @grep -q '^Network=pasta:-T,53842$' deploy/gokapi-thumbs.container
+    @git check-ignore -q thumbs-cache/
+    cd thumbs && python3 -m unittest
     @echo "Static validation passed."
 
 # Install the rootless user Quadlet and prepare persistent directories.
@@ -187,3 +192,51 @@ unpair device:
 # List devices paired with the relay.
 pairs:
     ./bin/pair list
+
+# Create the thumbnail service's Gokapi key (VIEW and DOWNLOAD only) in secrets/thumbs-api-key.
+# Uses secrets/admin-api-key, which needs Gokapi's API_MOD permission (as gokapi-admin's pairing does).
+thumbs-key:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    [[ ! -s secrets/thumbs-api-key ]] || { echo "secrets/thumbs-api-key already exists; delete the old key in Gokapi's API menu and the file first" >&2; exit 1; }
+    [[ -s secrets/admin-api-key ]] || { echo "Missing secrets/admin-api-key (needs API_MOD)" >&2; exit 1; }
+    api="${GOKAPI_API_URL:-http://127.0.0.1:53842}"; api="${api%/}/api"
+    call() { printf 'apikey: %s\n' "$(<secrets/admin-api-key)" | curl --fail --silent --show-error --header @- "$@"; }
+    created="$(call -X POST --header 'friendlyName: gokapi-thumbs' --header 'basicPermissions: false' "${api}/auth/create")"
+    key="$(jq -er '.Id' <<<"${created}")"
+    key_id="$(jq -er '.PublicId' <<<"${created}")"
+    for permission in PERM_VIEW PERM_DOWNLOAD; do
+      call -X PUT --header "targetKey: ${key_id}" --header "permission: ${permission}" --header 'permissionModifier: GRANT' "${api}/auth/modify" >/dev/null
+    done
+    install -d -m 0700 secrets
+    (umask 077 && printf '%s' "${key}" >secrets/thumbs-api-key)
+    echo "Saved key ${key_id} (gokapi-thumbs, VIEW and DOWNLOAD) to secrets/thumbs-api-key."
+
+# Run the thumbnail service's tests (needs Pillow on the host).
+thumbs-test:
+    cd thumbs && python3 -m unittest
+
+# Build the thumbnail service image (localhost/gokapi-thumbs, tag from the Quadlet).
+thumbs-build: thumbs-test
+    podman build -t "$(sed -n 's/^Image=//p' deploy/gokapi-thumbs.container)" thumbs
+
+# Install and start the thumbnail service Quadlet; needs secrets/thumbs-api-key (just thumbs-key).
+thumbs-install: thumbs-build
+    @test -s secrets/thumbs-api-key || { echo "secrets/thumbs-api-key is missing; run just thumbs-key" >&2; exit 1; }
+    chmod 0600 secrets/thumbs-api-key
+    install -d -m 0700 thumbs-cache "${HOME}/.config/containers/systemd"
+    install -m 0644 deploy/gokapi-thumbs.container "${HOME}/.config/containers/systemd/gokapi-thumbs.container"
+    systemctl --user daemon-reload
+    systemctl --user restart gokapi-thumbs.service
+
+# Create or refresh the files-thumbs tailnet route to the thumbnail service.
+thumbs-route:
+    cd ../dev-router && just specific files-thumbs 53845
+
+# Show the thumbnail service's status.
+thumbs-status:
+    systemctl --user --no-pager --full status gokapi-thumbs.service
+
+# Follow the thumbnail service's logs.
+thumbs-logs:
+    journalctl --user-unit gokapi-thumbs.service --follow --lines=100
