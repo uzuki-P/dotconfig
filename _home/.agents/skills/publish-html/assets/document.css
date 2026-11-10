@@ -467,8 +467,8 @@ details > :is(pre, .code-block, .table-wrap) { border: 0; border-radius: 0 0 var
 
 /* Task lists from Markdown checkboxes. */
 .contains-task-list { padding-inline-start: 0; list-style: none; }
-.task-list-item { display: flex; gap: 0.55rem; align-items: baseline; }
-.task-list-item-checkbox { flex: none; accent-color: var(--pink); }
+.task-list-item { position: relative; padding-inline-start: 1.6rem; }
+.task-list-item-checkbox { position: absolute; inset-inline-start: 0; top: 0.35em; margin: 0; accent-color: var(--pink); }
 
 dl { display: grid; gap: 0.25rem; margin: 0; max-width: var(--measure); }
 dt { font-weight: 650; }

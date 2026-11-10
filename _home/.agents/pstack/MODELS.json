@@ -62,7 +62,7 @@
         },
         "why investigators": {
           "providerInstanceId": "claudeAgent",
-          "model": "claude-opus-5-5",
+          "model": "claude-sonnet-5-5",
           "options": {
             "effort": "medium"
           }
@@ -161,7 +161,7 @@
         ],
         "swarm workers": {
           "providerInstanceId": "claudeAgent",
-          "model": "claude-opus-5-5",
+          "model": "claude-sonnet-5-5",
           "options": {
             "effort": "medium"
           }
@@ -220,7 +220,7 @@
           }
         },
         "why investigators": {
-          "model": "opus",
+          "model": "sonnet",
           "options": {
             "effort": "medium"
           }
@@ -312,7 +312,7 @@
           }
         ],
         "swarm workers": {
-          "model": "opus",
+          "model": "sonnet",
           "options": {
             "effort": "medium"
           }
